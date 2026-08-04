@@ -16,7 +16,8 @@
     "dist:mac": "npm run build && electron-builder --mac",
     "dist:win": "npm run build && electron-builder --win",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "storybook:coverage": "node scripts/check-storybook-coverage.mjs"
   },
   "dependencies": {
     "@fontsource-variable/onest": "^5.3.0",
