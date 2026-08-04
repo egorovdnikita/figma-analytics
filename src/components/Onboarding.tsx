@@ -7,7 +7,7 @@ import { AppIcon } from '@/components/AppIcon'
 function Brand() {
   return (
     <div className="mb-8">
-      <span className="text-[22px] font-bold tracking-tight text-ink">Box UI</span>
+      <span className="text-[24px] font-bold tracking-tight text-ink">Box UI</span>
     </div>
   )
 }
@@ -42,7 +42,7 @@ export function SetupScreen() {
   return (
     <Layout>
       <Brand />
-      <h1 className="text-[26px] font-bold lowercase leading-tight text-ink">
+      <h1 className="text-[28px] font-bold lowercase leading-tight text-ink">
         подключите свой OAuth-клиент
       </h1>
       <p className="mt-2 text-[14px] leading-relaxed text-muted">
@@ -72,7 +72,7 @@ export function SetupScreen() {
 
       <div className="mt-6 flex items-center gap-2">
         <Button variant="primary" size="lg" onClick={submit} disabled={busy}>
-          {busy ? <Spinner /> : <AppIcon name="KeyRound" size={17} />}
+          {busy ? <Spinner /> : <AppIcon name="KeyRound" size={16} />}
           Сохранить и продолжить
         </Button>
         <Button
@@ -103,7 +103,7 @@ export function SignInScreen() {
       <h1 className="text-[28px] font-bold lowercase leading-tight text-ink">
         ваш цифровой мозг начинается с календаря
       </h1>
-      <p className="mt-3 text-[15px] leading-relaxed text-muted">
+      <p className="mt-3 text-[14px] leading-relaxed text-muted">
         Подключите аккаунт Google — Box UI покажет все ваши календари, события и участников, и
         позволит их менять прямо отсюда.
       </p>
@@ -115,7 +115,7 @@ export function SignInScreen() {
           'Участники, повторения, напоминания и цвета',
         ].map((item) => (
           <li key={item} className="flex items-start gap-2.5 text-[14px] text-ink">
-            <AppIcon name="ShieldCheck" size={17} className="mt-0.5 shrink-0 text-[var(--grass)]" />
+            <AppIcon name="ShieldCheck" size={16} className="mt-0.5 shrink-0 text-[var(--grass)]" />
             {item}
           </li>
         ))}
@@ -137,7 +137,7 @@ export function SignInScreen() {
       >
         {busy ? <Spinner /> : null}
         Войти через Google
-        <AppIcon name="ArrowRight" size={17} />
+        <AppIcon name="ArrowRight" size={16} />
       </Button>
 
       <p className="mt-4 text-[12px] leading-relaxed text-faint">

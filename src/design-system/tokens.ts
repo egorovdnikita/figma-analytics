@@ -29,6 +29,7 @@ export const colorTokens: ColorToken[] = [
   { name: 'lilac', cssVar: '--lilac', light: '#a78bfa', dark: '#a78bfa', description: 'Вторичный акцент: фокус-кольцо, ссылки (colors/brand/secondary, violet/400)' },
   { name: 'lilac-soft', cssVar: '--lilac-soft', light: '#f5f3ff', dark: '#211e31', description: 'Мягкий фон вторичного акцента (violet/50)' },
   { name: 'danger', cssVar: '--danger', light: '#d0554f', dark: '#cc5c6f', description: 'Деструктивные действия, ошибки (не из Figma-токенов — сохранён свой приглушённый оттенок)' },
+  { name: 'overlay', cssVar: '--overlay', light: 'rgb(0 0 0 / 0.48)', dark: 'rgb(0 0 0 / 0.8)', description: 'Подложка под модальными окнами (background/base/overlay)' },
 ]
 
 export interface RadiusToken {
@@ -66,20 +67,17 @@ export interface TypeScaleToken {
   usage: string
 }
 
+// Значения сверены с Figma: Box UI | Primitives → Typography (font-size/*) и
+// Box UI | Tokens → Typography (caption/body/heading/display). Используются только шаги,
+// присутствующие в примитивной шкале — 11/13/15/17/19/22/26 в приложении больше не встречаются.
 export const typeScale: TypeScaleToken[] = [
-  { size: 10, usage: 'Служебные пометки' },
-  { size: 11, usage: 'Подписи под аватаром, метаданные' },
-  { size: 12, usage: 'Чипы, заголовки групп в сайдбаре' },
-  { size: 13, usage: 'Второстепенный текст, пункты меню' },
-  { size: 14, usage: 'Навигация, компактные списки' },
-  { size: 15, usage: 'Кнопки крупного размера, текст в модальных окнах' },
-  { size: 16, usage: 'Базовый текст полей и селектов' },
-  { size: 17, usage: 'Название приложения, подзаголовки' },
-  { size: 19, usage: 'Заголовки модальных окон' },
-  { size: 22, usage: 'Заголовок экрана онбординга' },
-  { size: 24, usage: 'Крупные акцентные числа' },
-  { size: 26, usage: 'Заголовок диапазона дат в шапке' },
-  { size: 28, usage: 'Самый крупный заголовок' },
+  { size: 10, usage: 'Служебные пометки ("весь день")' },
+  { size: 12, usage: 'Подписи, чипы, вторичный текст, компактные кнопки (caption/l)' },
+  { size: 14, usage: 'Базовый текст: поля, списки, обычные кнопки (body/m)' },
+  { size: 16, usage: 'Крупные кнопки, номера дней в сетке недели (body/l)' },
+  { size: 20, usage: 'Заголовки модальных окон (heading/H5)' },
+  { size: 24, usage: 'Крупные акцентные числа, бренд-логотип (heading/H4)' },
+  { size: 28, usage: 'Заголовок диапазона дат в шапке, заголовки онбординга' },
 ]
 
 export const fontFamily =

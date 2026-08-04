@@ -22,7 +22,7 @@ export function Topbar() {
   return (
     <header className="shrink-0 px-4 pt-3">
       <div className="drag-region flex h-11 items-center justify-between gap-4">
-        <h1 className="truncate text-[26px] font-bold lowercase leading-none tracking-tight text-ink">
+        <h1 className="truncate text-[28px] font-bold lowercase leading-none tracking-tight text-ink">
           {title}
         </h1>
         <div className="no-drag flex items-center gap-1">
@@ -30,7 +30,7 @@ export function Topbar() {
             {loading ? 'синхронизация…' : syncedAt ? `обновлено в ${format(syncedAt, 'HH:mm')}` : ''}
           </span>
           <IconButton label="Обновить" onClick={() => void refresh()}>
-            {loading ? <Spinner /> : <AppIcon name="RefreshCw" size={17} />}
+            {loading ? <Spinner /> : <AppIcon name="RefreshCw" size={16} />}
           </IconButton>
         </div>
       </div>
@@ -59,7 +59,7 @@ export function Topbar() {
         <label className="relative flex min-w-0 flex-1 items-center">
           <AppIcon
             name="Search"
-            size={17}
+            size={16}
             className="pointer-events-none absolute left-3.5 text-faint"
           />
           <input

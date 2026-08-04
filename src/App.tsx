@@ -70,7 +70,7 @@ function Shell() {
       {notice ? (
         <div
           className={cn(
-            'animate-pop fixed bottom-5 left-1/2 z-[60] -translate-x-1/2 rounded-full px-5 py-2.5 text-[13px] font-medium shadow-pop',
+            'animate-pop fixed bottom-5 left-1/2 z-[60] -translate-x-1/2 rounded-full px-5 py-2.5 text-[14px] font-medium shadow-pop',
             notice.kind === 'error'
               ? 'bg-[var(--danger)] text-white'
               : notice.kind === 'success'

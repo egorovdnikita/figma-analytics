@@ -54,7 +54,7 @@ export function MonthView({
         {weekdayLabels.map((label) => (
           <div
             key={label}
-            className="truncate px-3 py-2 text-[11px] lowercase text-muted [&:not(:first-child)]:border-l [&:not(:first-child)]:border-line"
+            className="truncate px-3 py-2 text-[12px] lowercase text-muted [&:not(:first-child)]:border-l [&:not(:first-child)]:border-line"
           >
             {label}
           </div>
@@ -101,13 +101,13 @@ export function MonthView({
                       {format(day, 'd')}
                     </span>
                     {format(day, 'd') === '1' ? (
-                      <span className="text-[11px] lowercase text-muted">
+                      <span className="text-[12px] lowercase text-muted">
                         {format(day, 'LLL', { locale })}
                       </span>
                     ) : null}
                   </div>
 
-                  <div className="min-h-0 flex-1 space-y-[3px] overflow-hidden">
+                  <div className="min-h-0 flex-1 space-y-1 overflow-hidden">
                     {dayEvents.slice(0, limit).map((event) => {
                       const color = eventColor(event, calendars)
                       const dark = resolvedTheme === 'dark'
@@ -123,7 +123,7 @@ export function MonthView({
                               : undefined
                           }
                           className={cn(
-                            'flex w-full items-center gap-1.5 truncate rounded-md px-1.5 py-[3px] text-left text-[12px]',
+                            'flex w-full items-center gap-1.5 truncate rounded-md px-1.5 py-1 text-left text-[12px]',
                             allDay ? 'font-medium' : 'hover:bg-[var(--sunken)]',
                           )}
                         >
@@ -147,7 +147,7 @@ export function MonthView({
                       <button
                         type="button"
                         onClick={() => setExpandedDay(expanded ? null : key)}
-                        className="w-full rounded-md px-1.5 py-[3px] text-left text-[12px] text-[var(--lilac)] hover:bg-[var(--sunken)]"
+                        className="w-full rounded-md px-1.5 py-1 text-left text-[12px] text-[var(--lilac)] hover:bg-[var(--sunken)]"
                       >
                         ещё {hiddenCount}
                       </button>
@@ -156,7 +156,7 @@ export function MonthView({
                       <button
                         type="button"
                         onClick={() => setExpandedDay(null)}
-                        className="w-full rounded-md px-1.5 py-[3px] text-left text-[12px] text-muted hover:bg-[var(--sunken)]"
+                        className="w-full rounded-md px-1.5 py-1 text-left text-[12px] text-muted hover:bg-[var(--sunken)]"
                       >
                         свернуть
                       </button>

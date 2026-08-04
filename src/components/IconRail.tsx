@@ -30,7 +30,7 @@ export function IconRail() {
       <RailItem
         active={false}
         onClick={() => void updateSettings({ theme: resolvedTheme === 'dark' ? 'light' : 'dark' })}
-        icon={<AppIcon name={resolvedTheme === 'dark' ? 'Sun' : 'Moon'} size={19} />}
+        icon={<AppIcon name={resolvedTheme === 'dark' ? 'Sun' : 'Moon'} size={20} />}
         label={resolvedTheme === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
       />
       <button
@@ -39,7 +39,7 @@ export function IconRail() {
         aria-label="Профиль"
         className="no-drag mt-1 flex h-11 w-11 items-center justify-center rounded-full transition-opacity hover:opacity-85"
       >
-        <Avatar src={profile?.picture} name={profile?.name} size={30} />
+        <Avatar src={profile?.picture} name={profile?.name} size={32} />
       </button>
     </aside>
   )

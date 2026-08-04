@@ -40,7 +40,7 @@ export function ProfileView() {
         <button
           type="button"
           onClick={() => setScreen('calendar')}
-          className="flex items-center gap-2 py-1 text-[13px] text-muted transition-colors hover:text-ink"
+          className="flex items-center gap-2 py-1 text-[12px] text-muted transition-colors hover:text-ink"
         >
           <AppIcon name="ArrowLeft" size={16} />
           к календарю
@@ -122,7 +122,7 @@ export function ProfileView() {
               />
             </Row>
             <Row label="Сейчас применена">
-              <span className="text-[13px] text-muted">
+              <span className="text-[12px] text-muted">
                 {resolvedTheme === 'dark' ? 'тёмная' : 'светлая'}
               </span>
             </Row>
@@ -310,7 +310,7 @@ export function ProfileView() {
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="rounded-card bg-surface p-6">
-      <h3 className="mb-4 text-[15px] font-bold lowercase text-ink">{title}</h3>
+      <h3 className="mb-4 text-[14px] font-bold lowercase text-ink">{title}</h3>
       {children}
     </section>
   )
@@ -328,7 +328,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div className={cn('rounded-control bg-[var(--sunken)] px-3.5 py-2.5')}>
-      <div className="text-[11px] text-muted">{label}</div>
+      <div className="text-[12px] text-muted">{label}</div>
       <div className="truncate text-[14px] text-ink">{value}</div>
     </div>
   )

@@ -30,7 +30,7 @@ export function MiniCalendar({
   return (
     <div className="px-1">
       <div className="mb-1.5 flex items-center justify-between pl-2">
-        <span className="text-[13px] font-semibold lowercase text-ink">
+        <span className="text-[14px] font-semibold lowercase text-ink">
           {format(month, 'LLLL yyyy', { locale })}
         </span>
         <div className="flex items-center">
@@ -39,14 +39,14 @@ export function MiniCalendar({
             className="h-7 w-7"
             onClick={() => setMonth(addMonths(month, -1))}
           >
-            <AppIcon name="ChevronLeft" size={15} />
+            <AppIcon name="ChevronLeft" size={14} />
           </IconButton>
           <IconButton
             label="Следующий месяц"
             className="h-7 w-7"
             onClick={() => setMonth(addMonths(month, 1))}
           >
-            <AppIcon name="ChevronRight" size={15} />
+            <AppIcon name="ChevronRight" size={14} />
           </IconButton>
         </div>
       </div>

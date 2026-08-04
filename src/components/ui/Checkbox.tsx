@@ -38,7 +38,7 @@ export function Checkbox({
           </svg>
         ) : null}
       </span>
-      <span className={cn('truncate text-[13px]', checked ? 'text-ink' : 'text-muted')}>{label}</span>
+      <span className={cn('truncate text-[14px]', checked ? 'text-ink' : 'text-muted')}>{label}</span>
     </button>
   )
 }

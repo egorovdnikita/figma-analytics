@@ -106,12 +106,12 @@ export function TimeGridView({
             key={day.toISOString()}
             className="flex flex-col items-center gap-0.5 border-l border-line py-2.5"
           >
-            <span className="text-[11px] lowercase text-muted">
+            <span className="text-[12px] lowercase text-muted">
               {format(day, 'EEEEEE', { locale })}
             </span>
             <span
               className={cn(
-                'flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[17px] font-semibold',
+                'flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[16px] font-semibold',
                 isToday(day) ? 'bg-[var(--grass)] text-white' : 'text-ink',
               )}
             >
@@ -128,7 +128,7 @@ export function TimeGridView({
             весь день
           </div>
           {days.map((day) => (
-            <div key={day.toISOString()} className="min-h-[38px] space-y-1 border-l border-line p-1">
+            <div key={day.toISOString()} className="min-h-9 space-y-1 border-l border-line p-1">
               {allDay
                 .filter((event) => eventSpansDay(event, day))
                 .map((event) => (
@@ -151,7 +151,7 @@ export function TimeGridView({
           <div className="relative">
             {hours.map((hour) => (
               <div key={hour} className="relative" style={{ height: HOUR_HEIGHT }}>
-                <span className="absolute -top-2 right-2 text-[11px] tabular-nums text-faint">
+                <span className="absolute -top-2 right-2 text-[12px] tabular-nums text-faint">
                   {hour === startHour
                     ? ''
                     : formatTimeShort(new Date(2020, 0, 1, hour), settings.timeFormat)}
@@ -270,7 +270,7 @@ function TimedEvent({
         {event.summary || 'Без названия'}
       </span>
       {!compact ? (
-        <span className="truncate text-[11px] opacity-80">
+        <span className="truncate text-[12px] opacity-80">
           {formatTimeShort(eventStart(event), timeFormat)}
           {event.location ? ` · ${event.location}` : ''}
         </span>

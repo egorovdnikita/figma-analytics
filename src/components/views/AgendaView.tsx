@@ -45,11 +45,11 @@ export function AgendaView({
   if (groups.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 rounded-card bg-surface text-center">
-        <AppIcon name="CalendarOff" size={26} className="text-faint" />
-        <p className="text-[15px] font-semibold text-ink">
+        <AppIcon name="CalendarOff" size={24} className="text-faint" />
+        <p className="text-[16px] font-semibold text-ink">
           {query ? 'Ничего не нашлось' : 'На этот период событий нет'}
         </p>
-        <p className="max-w-[320px] text-[13px] text-muted">
+        <p className="max-w-[320px] text-[12px] text-muted">
           {query
             ? 'Измените запрос или расширьте период.'
             : 'Нажмите «Создать событие» или выделите время в сетке недели.'}
@@ -65,7 +65,7 @@ export function AgendaView({
           <div className="sticky top-0 z-10 flex items-baseline gap-2 bg-surface px-5 py-2.5">
             <span
               className={cn(
-                'text-[15px] font-bold',
+                'text-[16px] font-bold',
                 isToday(day) ? 'text-[var(--lilac)]' : 'text-ink',
               )}
             >
@@ -112,7 +112,7 @@ function AgendaRow({
       className="flex w-full items-center gap-3 px-5 py-2 text-left transition-colors hover:bg-[var(--sunken)]"
     >
       <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: color }} />
-      <span className="w-[168px] shrink-0 text-[13px] tabular-nums text-muted">
+      <span className="w-[168px] shrink-0 text-[12px] tabular-nums text-muted">
         {formatEventRange(event, timeFormat)}
       </span>
       <span className="min-w-0 flex-1 truncate">
@@ -120,7 +120,7 @@ function AgendaRow({
           {event.summary || 'Без названия'}
         </span>
         {event.location ? (
-          <span className="ml-2 text-[13px] text-muted">· {event.location}</span>
+          <span className="ml-2 text-[12px] text-muted">· {event.location}</span>
         ) : null}
       </span>
       {!isAllDay(event) ? (

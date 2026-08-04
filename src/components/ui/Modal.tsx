@@ -34,7 +34,7 @@ export function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
       <div
-        className="animate-fade absolute inset-0 bg-[rgb(10_10_11_/_0.44)]"
+        className="animate-fade absolute inset-0 bg-[var(--overlay)]"
         onClick={onClose}
         aria-hidden
       />
@@ -45,7 +45,7 @@ export function Modal({
         style={{ maxWidth: width }}
       >
         <header className="flex items-start justify-between gap-4 px-6 pb-2 pt-5">
-          <h2 className="text-[19px] font-bold leading-tight text-ink">{title}</h2>
+          <h2 className="text-[20px] font-bold leading-tight text-ink">{title}</h2>
           <IconButton label="Закрыть" onClick={onClose} className="-mr-2 -mt-1 h-9 w-9">
             <AppIcon name="X" size={18} />
           </IconButton>

@@ -542,12 +542,12 @@ function EventDetails({
     <div className="space-y-4 pb-4 pt-1">
       <div className="flex items-center gap-2">
         <span className="h-3 w-3 rounded-full" style={{ background: color }} />
-        <span className="text-[13px] text-muted">
+        <span className="text-[12px] text-muted">
           {calendar?.summaryOverride ?? calendar?.summary ?? event.calendarId}
         </span>
       </div>
 
-      <Row icon={<AppIcon name="CalendarClock" size={17} />}>
+      <Row icon={<AppIcon name="CalendarClock" size={16} />}>
         <div>
           <div className="text-[14px] text-ink">{formatEventRange(event, timeFormat)}</div>
           <div className="text-[12px] text-muted">
@@ -558,14 +558,14 @@ function EventDetails({
         </div>
       </Row>
 
-      {recurrence ? <Row icon={<AppIcon name="Repeat" size={17} />}>{recurrence}</Row> : null}
+      {recurrence ? <Row icon={<AppIcon name="Repeat" size={16} />}>{recurrence}</Row> : null}
 
       {event.location ? (
-        <Row icon={<AppIcon name="MapPin" size={17} />}>{event.location}</Row>
+        <Row icon={<AppIcon name="MapPin" size={16} />}>{event.location}</Row>
       ) : null}
 
       {event.hangoutLink ? (
-        <Row icon={<AppIcon name="Video" size={17} />}>
+        <Row icon={<AppIcon name="Video" size={16} />}>
           <button
             type="button"
             className="text-[var(--lilac)] hover:underline"
@@ -577,7 +577,7 @@ function EventDetails({
       ) : null}
 
       {event.description ? (
-        <Row icon={<AppIcon name="AlignLeft" size={17} />}>
+        <Row icon={<AppIcon name="AlignLeft" size={16} />}>
           <div
             className="whitespace-pre-wrap text-[14px] leading-relaxed text-ink"
             // Google возвращает описание с базовым HTML; показываем как текст.
@@ -588,11 +588,11 @@ function EventDetails({
       ) : null}
 
       {event.attendees?.length ? (
-        <Row icon={<AppIcon name="Users" size={17} />}>
+        <Row icon={<AppIcon name="Users" size={16} />}>
           <div className="space-y-1.5">
-            <div className="text-[13px] text-muted">{event.attendees.length} участников</div>
+            <div className="text-[12px] text-muted">{event.attendees.length} участников</div>
             {event.attendees.slice(0, 8).map((attendee) => (
-              <div key={attendee.email} className="flex items-center gap-2 text-[13px] text-ink">
+              <div key={attendee.email} className="flex items-center gap-2 text-[14px] text-ink">
                 <span
                   className="h-1.5 w-1.5 rounded-full"
                   style={{
@@ -613,7 +613,7 @@ function EventDetails({
       ) : null}
 
       {event.reminders?.overrides?.length ? (
-        <Row icon={<AppIcon name="Bell" size={17} />}>
+        <Row icon={<AppIcon name="Bell" size={16} />}>
           {event.reminders.overrides
             .map((reminder) => `за ${reminder.minutes} мин`)
             .join(', ')}
@@ -622,7 +622,7 @@ function EventDetails({
 
       {self ? (
         <div className="rounded-control bg-[var(--sunken)] p-3">
-          <div className="mb-2 text-[13px] text-muted">Ваш ответ</div>
+          <div className="mb-2 text-[12px] text-muted">Ваш ответ</div>
           <div className="flex gap-2">
             {(
               [

@@ -20,6 +20,8 @@
   --lilac: #a78bfa;
   --lilac-soft: #f5f3ff;
   --danger: #d0554f;
+  /* background/base/overlay (Mode=Light) */
+  --overlay: rgb(0 0 0 / 0.48);
   --shadow-card: 0 1px 2px rgb(22 23 26 / 0.04);
   --font-body: 'Inter Variable', 'Golos Text', -apple-system, 'Segoe UI', system-ui, sans-serif;
   color-scheme: light;
@@ -43,6 +45,8 @@
   --lilac: #a78bfa;
   --lilac-soft: #211e31;
   --danger: #cc5c6f;
+  /* background/base/overlay (Mode=Dark) */
+  --overlay: rgb(0 0 0 / 0.8);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3);
   color-scheme: dark;
 }
