@@ -10,7 +10,7 @@ export function Sidebar({ onCreate }: { onCreate: () => void }) {
 
   return (
     <aside className="flex h-full w-[248px] shrink-0 flex-col gap-3 p-3 pr-0">
-      <div className="no-drag">
+      <div className="no-drag pr-2">
         <Button variant="primary" size="lg" className="w-full" onClick={onCreate}>
           Создать событие
         </Button>

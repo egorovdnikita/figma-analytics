@@ -66,7 +66,7 @@ function RailItem({
         'no-drag flex h-11 w-11 items-center justify-center rounded-control transition-colors',
         active
           ? 'bg-surface text-ink'
-          : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
+          : 'text-faint hover:bg-[var(--sunken)] hover:text-ink',
       )}
     >
       {icon}
