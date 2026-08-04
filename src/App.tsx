@@ -27,26 +27,32 @@ function Shell() {
   else if (!authenticated) content = <SignInScreen />
   else
     content = (
-      <div className="flex h-full">
-        <IconRail />
-        {screen === 'calendar' ? (
-          <Sidebar onCreate={() => setCreateSignal((value) => value + 1)} />
-        ) : null}
-        <div className="min-h-0 min-w-0 flex-1">
-          {screen === 'profile' ? (
-            <ProfileView />
-          ) : screen === 'translator' ? (
-            <PlaceholderScreen icon={Languages} title="Переводчик" />
-          ) : screen === 'tasks' ? (
-            <PlaceholderScreen icon={ListTodo} title="Задачи" />
-          ) : screen === 'chat' ? (
-            <PlaceholderScreen icon={MessageSquare} title="Чат" />
-          ) : (
-            <CalendarScreen
-              createSignal={createSignal}
-              onCreateHandled={() => setCreateSignal(0)}
-            />
-          )}
+      <div className="flex h-full flex-col">
+        {/* Отдельная полоса только под системные кнопки. Пока пустая — сюда позже
+            встанут вкладки/разделы/папки. */}
+        <div className="drag-region h-9 shrink-0" />
+
+        <div className="flex min-h-0 flex-1">
+          <IconRail />
+          {screen === 'calendar' ? (
+            <Sidebar onCreate={() => setCreateSignal((value) => value + 1)} />
+          ) : null}
+          <div className="min-h-0 min-w-0 flex-1">
+            {screen === 'profile' ? (
+              <ProfileView />
+            ) : screen === 'translator' ? (
+              <PlaceholderScreen icon={Languages} title="Переводчик" />
+            ) : screen === 'tasks' ? (
+              <PlaceholderScreen icon={ListTodo} title="Задачи" />
+            ) : screen === 'chat' ? (
+              <PlaceholderScreen icon={MessageSquare} title="Чат" />
+            ) : (
+              <CalendarScreen
+                createSignal={createSignal}
+                onCreateHandled={() => setCreateSignal(0)}
+              />
+            )}
+          </div>
         </div>
       </div>
     )
