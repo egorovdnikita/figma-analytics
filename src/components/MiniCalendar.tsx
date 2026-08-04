@@ -71,7 +71,7 @@ export function MiniCalendar({
                 outside && 'text-faint',
                 !outside && !selected && 'text-ink hover:bg-[var(--sunken)]',
                 isToday && !selected && 'font-bold text-[var(--lilac)]',
-                selected && 'bg-[var(--grass)] font-semibold text-[var(--grass-ink)]',
+                selected && 'bg-[var(--grass)] font-semibold text-white',
               )}
             >
               {format(day, 'd')}

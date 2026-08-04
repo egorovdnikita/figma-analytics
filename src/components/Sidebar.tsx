@@ -30,7 +30,7 @@ export function Sidebar({ onCreate }: { onCreate: () => void }) {
         </Button>
       </div>
 
-      <nav className="px-1">
+      <nav className="mx-1 rounded-card bg-surface p-1.5">
         <NavItem
           active={screen === 'calendar'}
           onClick={() => setScreen('calendar')}

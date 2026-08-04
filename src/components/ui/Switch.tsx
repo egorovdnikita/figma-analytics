@@ -18,7 +18,7 @@ export function Switch({
       onClick={() => onChange(!checked)}
       className={cn(
         'relative h-6 w-11 shrink-0 rounded-full transition-colors',
-        checked ? 'bg-[var(--grass)]' : 'bg-[var(--line)]',
+        checked ? 'bg-[var(--grass)]' : 'bg-[var(--faint)]',
       )}
     >
       <span

@@ -112,7 +112,7 @@ export function TimeGridView({
             <span
               className={cn(
                 'flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[17px] font-semibold',
-                isToday(day) ? 'bg-[var(--grass)] text-[var(--grass-ink)]' : 'text-ink',
+                isToday(day) ? 'bg-[var(--grass)] text-white' : 'text-ink',
               )}
             >
               {format(day, 'd')}

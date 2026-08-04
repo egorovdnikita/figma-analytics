@@ -21,12 +21,12 @@ export const colorTokens: ColorToken[] = [
   { name: 'ink', cssVar: '--ink', light: '#16171a', dark: '#f1f1ef', description: 'Основной текст' },
   { name: 'muted', cssVar: '--muted', light: '#8a8a85', dark: '#8d8d88', description: 'Вторичный текст, лейблы' },
   { name: 'faint', cssVar: '--faint', light: '#b6b6af', dark: '#5e5e5a', description: 'Плейсхолдеры, приглушённые иконки' },
-  { name: 'grass', cssVar: '--grass', light: '#7cc49b', dark: '#6db78d', description: 'Основной акцент: primary-кнопки, активные состояния' },
-  { name: 'grass-ink', cssVar: '--grass-ink', light: '#123425', dark: '#0b1a12', description: 'Текст поверх grass' },
-  { name: 'grass-soft', cssVar: '--grass-soft', light: '#e4f2e7', dark: '#1b2a21', description: 'Мягкий фон акцента: активный пункт меню, чипы' },
+  { name: 'grass', cssVar: '--grass', light: '#8b5cf6', dark: '#8b5cf6', description: 'Основной акцент (цвет иконки приложения): primary-кнопки, активные состояния' },
+  { name: 'grass-ink', cssVar: '--grass-ink', light: '#4c1d95', dark: '#ede9fe', description: 'Текст поверх grass-soft' },
+  { name: 'grass-soft', cssVar: '--grass-soft', light: '#ede9fe', dark: '#2e1065', description: 'Мягкий фон акцента: активный пункт меню, чипы' },
   { name: 'lilac', cssVar: '--lilac', light: '#8a72dd', dark: '#a78bfa', description: 'Вторичный акцент: фокус-кольцо, ссылки' },
   { name: 'lilac-soft', cssVar: '--lilac-soft', light: '#eeeafc', dark: '#211e31', description: 'Мягкий фон вторичного акцента' },
-  { name: 'danger', cssVar: '--danger', light: '#d0554f', dark: '#e0736d', description: 'Деструктивные действия, ошибки' },
+  { name: 'danger', cssVar: '--danger', light: '#d0554f', dark: '#cc5c6f', description: 'Деструктивные действия, ошибки' },
 ]
 
 export interface RadiusToken {

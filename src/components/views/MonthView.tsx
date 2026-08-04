@@ -92,7 +92,7 @@ export function MonthView({
                       className={cn(
                         'flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[12px] font-semibold',
                         isToday(day)
-                          ? 'bg-[var(--grass)] text-[var(--grass-ink)]'
+                          ? 'bg-[var(--grass)] text-white'
                           : outside
                             ? 'text-faint'
                             : 'text-ink',
