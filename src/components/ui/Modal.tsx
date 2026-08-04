@@ -1,6 +1,20 @@
 import { useEffect, type ReactNode } from 'react'
-import { AppIcon } from '@/components/AppIcon'
 import { IconButton } from './Button'
+
+/** Solar не даёт крестик без обёртки (circle/square) — рисуем сами. */
+function CloseGlyph() {
+  return (
+    <svg viewBox="0 0 18 18" className="h-[18px] w-[18px]" aria-hidden>
+      <path
+        d="M4 4l10 10M14 4 4 14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
 
 export function Modal({
   open,
@@ -47,7 +61,7 @@ export function Modal({
         <header className="flex items-start justify-between gap-4 px-6 pb-2 pt-5">
           <h2 className="text-[20px] font-bold leading-tight text-ink">{title}</h2>
           <IconButton label="Закрыть" onClick={onClose} className="-mr-2 -mt-1 h-9 w-9">
-            <AppIcon name="X" size={18} />
+            <CloseGlyph />
           </IconButton>
         </header>
         <div className="scroll-thin flex-1 overflow-y-auto px-6 pb-2">{children}</div>

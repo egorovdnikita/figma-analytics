@@ -29,3 +29,12 @@ export const Disabled: Story = {
     </div>
   ),
 }
+
+export const ДатаИВремя: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 8, width: 280 }}>
+      <Input type="date" defaultValue="2026-08-05" />
+      <Input type="time" defaultValue="14:30" style={{ width: 150 }} />
+    </div>
+  ),
+}

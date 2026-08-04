@@ -55,6 +55,22 @@
   border-color: var(--line);
 }
 
+/*
+ * Тактильный "нажим" у всех кнопок (события, чипы-кнопки, IconButton, Segmented,
+ * навигация и т.д.) — <input>/<select>/<textarea> под это не попадают, т.к. не
+ * являются <button>, так что поля ввода, поиск и дропдауны не затронуты.
+ * !important нужен, чтобы transition-property не перетирался утилитой
+ * transition-colors, которая уже висит на большинстве кнопок.
+ */
+button:not(:disabled) {
+  transition-property: color, background-color, border-color, opacity, box-shadow, transform !important;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+button:not(:disabled):active {
+  transform: scale(0.96);
+}
+
 html,
 body,
 #root {

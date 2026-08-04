@@ -9,17 +9,36 @@ import { AppIcon } from '@/components/AppIcon'
 import { cn } from '@/lib/cn'
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
-  ({ className, ...props }, ref) => (
-    <input
-      ref={ref}
-      className={cn(
-        'h-11 w-full rounded-control border border-line bg-surface px-4 text-sm text-ink',
-        'placeholder:text-faint focus:border-[var(--lilac)] focus:outline-none',
-        className,
-      )}
-      {...props}
-    />
-  ),
+  ({ className, type, ...props }, ref) => {
+    const pickerIcon = type === 'date' ? 'CalendarDays' : type === 'time' ? 'Clock' : null
+
+    const input = (
+      <input
+        ref={ref}
+        type={type}
+        className={cn(
+          'h-11 w-full rounded-control border border-line bg-surface px-4 text-sm text-ink',
+          'placeholder:text-faint focus:border-[var(--lilac)] focus:outline-none',
+          pickerIcon && 'pr-10 [&::-webkit-calendar-picker-indicator]:opacity-0',
+          className,
+        )}
+        {...props}
+      />
+    )
+
+    if (!pickerIcon) return input
+
+    return (
+      <div className="relative">
+        {input}
+        <AppIcon
+          name={pickerIcon}
+          size={16}
+          className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-faint"
+        />
+      </div>
+    )
+  },
 )
 Input.displayName = 'Input'
 

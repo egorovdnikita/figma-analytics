@@ -19,6 +19,7 @@ const ICON_MAP = {
   CalendarOff: 'calendar-minimalistic',
   Check: 'check-circle',
   ChevronDown: 'alt-arrow-down',
+  Clock: 'clock-circle',
   ChevronLeft: 'alt-arrow-left',
   ChevronRight: 'alt-arrow-right',
   ExternalLink: 'square-arrow-right-up',
@@ -60,6 +61,7 @@ const ARROW_ICON_NAMES: ReadonlySet<IconName> = new Set<IconName>([
   'ChevronLeft',
   'ChevronRight',
   'ExternalLink',
+  'Search',
 ])
 
 interface IconStyles {
