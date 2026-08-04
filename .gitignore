@@ -6,3 +6,6 @@ release
 .env.local
 .DS_Store
 *.log
+
+*storybook.log
+storybook-static

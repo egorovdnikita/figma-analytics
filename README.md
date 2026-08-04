@@ -145,10 +145,36 @@ electron/          main-процесс
   store.ts         настройки, ключи, зашифрованная сессия
   preload.ts       contextBridge
 src/
-  state/store.tsx  глобальное состояние
-  components/      сайдбар, шапка, виды календаря, диалог события, профиль
-  lib/             даты и раскладка событий, цвета, IPC-клиент, повторения
+  state/store.tsx     глобальное состояние
+  components/         сайдбар, шапка, виды календаря, диалог события, профиль
+    ui/               компоненты дизайн-системы (Button, Input, Modal, ...) + Storybook-истории
+  design-system/       токены и обзорная страница для Storybook
+  lib/                даты и раскладка событий, цвета, IPC-клиент, повторения
 ```
+
+---
+
+## Дизайн-система
+
+Токены и компоненты интерфейса документированы в Storybook.
+
+```bash
+npm run storybook        # локально, http://localhost:6006
+npm run build-storybook  # статическая сборка в storybook-static/
+```
+
+После включения GitHub Pages (Settings → Pages → Source: **GitHub Actions**) актуальная версия
+доступна на **https://egorovdnikita.github.io/box-ui/** — деплоится автоматически при пуше
+в `main` через [`.github/workflows/storybook.yml`](.github/workflows/storybook.yml).
+
+- Токены (цвет, скругления, тени, типографика): `src/index.css`, `tailwind.config.ts`,
+  описаны для документации в [`src/design-system/tokens.ts`](src/design-system/tokens.ts).
+- Компоненты: [`src/components/ui`](src/components/ui) — по файлу на компонент,
+  рядом лежит `*.stories.tsx`.
+- Подробности и принципы — на странице **Введение** в самом Storybook.
+
+Figma не используется: источник истины — код (CSS-переменные + Tailwind), Storybook только
+документирует то, что уже есть в приложении.
 
 ---
 

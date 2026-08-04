@@ -21,12 +21,7 @@ export function Sidebar({ onCreate }: { onCreate: () => void }) {
 
   return (
     <aside className="flex h-full w-[248px] shrink-0 flex-col gap-3 p-3 pr-0">
-      <div className="drag-region flex h-11 items-center gap-2 pl-2 pt-1">
-        <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-[var(--grass)]">
-          <span className="h-2 w-2 rounded-full bg-[var(--lilac)]" />
-        </span>
-        <span className="text-[17px] font-bold tracking-tight text-ink">Box UI</span>
-      </div>
+      <div className="drag-region h-11" />
 
       <div className="no-drag px-1">
         <Button variant="primary" size="lg" className="w-full justify-start" onClick={onCreate}>

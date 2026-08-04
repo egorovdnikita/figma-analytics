@@ -1,0 +1,34 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+
+<Meta title="Введение/Box UI Design System" />
+
+# Box UI Design System
+
+Дизайн-система десктопного приложения Box UI: токены и переиспользуемые React-компоненты
+из `src/components/ui`. Использует Tailwind CSS поверх семантических CSS-переменных —
+никаких сырых hex-значений в компонентах.
+
+## Стек
+
+- **React + TypeScript** — компоненты в `src/components/ui/*.tsx`
+- **Tailwind CSS** — утилиты, смэппинг токенов в `tailwind.config.ts`
+- **CSS custom properties** — источник истины для цвета, тема переключается классом `.dark`
+- **Storybook** — эта документация и песочница для компонентов
+
+## Принципы
+
+1. **Семантические токены, не сырые значения.** Компонент никогда не содержит hex-код —
+   только `var(--grass)`, `var(--ink)` и т. д. Смотрите вкладку **Токены → Обзор**.
+2. **Тема — это класс, не отдельная тема компонентов.** Один и тот же JSX рендерится
+   в двух темах за счёт CSS-переменных; переключите тему тумблером в тулбаре сверху.
+3. **Скругления по смыслу.** `rounded-control` (14px) — для полей ввода,
+   `rounded-card` (20px) — для карточек/модалок, `rounded-full` — для кнопок, чипов, аватаров.
+4. **Минимум вариантов на компонент.** У `Button` пять вариантов (`primary`, `soft`, `outline`,
+   `ghost`, `danger`) и три размера — этого достаточно для всего интерфейса приложения,
+   новые варианты добавляются только когда реально нужны в продукте.
+
+## Где смотреть код
+
+Исходники компонентов: [`src/components/ui`](https://github.com/egorovdnikita/box-ui/tree/main/src/components/ui).
+Токены: [`src/index.css`](https://github.com/egorovdnikita/box-ui/blob/main/src/index.css) и
+[`src/design-system/tokens.ts`](https://github.com/egorovdnikita/box-ui/blob/main/src/design-system/tokens.ts).
