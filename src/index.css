@@ -102,6 +102,10 @@ body {
 .scroll-thin {
   scrollbar-width: thin;
   scrollbar-color: var(--faint) transparent;
+  /* Резервируем место под скроллбар всегда — иначе после появления скролла
+     колонки сетки (MonthView/TimeGridView) сдвигаются относительно шапки,
+     у которой такого резерва нет. */
+  scrollbar-gutter: stable;
 }
 .scroll-thin::-webkit-scrollbar {
   width: 10px;
@@ -111,7 +115,7 @@ body {
   background: color-mix(in srgb, var(--faint) 55%, transparent);
   border: 3px solid transparent;
   background-clip: content-box;
-  border-radius: 999px;
+  border-radius: 4px;
 }
 .scroll-thin::-webkit-scrollbar-thumb:hover {
   background: color-mix(in srgb, var(--muted) 70%, transparent);

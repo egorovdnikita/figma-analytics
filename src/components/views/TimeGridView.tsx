@@ -99,7 +99,7 @@ export function TimeGridView({
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-card bg-surface">
       {/* шапка с днями */}
-      <div className="grid border-b border-line" style={gridTemplate}>
+      <div className="grid border-b border-line pr-[10px]" style={gridTemplate}>
         <div />
         {days.map((day) => (
           <div
@@ -123,7 +123,7 @@ export function TimeGridView({
 
       {/* события на весь день */}
       {allDay.length > 0 ? (
-        <div className="grid border-b border-line" style={gridTemplate}>
+        <div className="grid border-b border-line pr-[10px]" style={gridTemplate}>
           <div className="py-2 pr-2 text-right text-[10px] uppercase tracking-wide text-faint">
             весь день
           </div>

@@ -50,7 +50,7 @@ export function MonthView({
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-card bg-surface">
-      <div className="grid grid-cols-7 border-b border-line">
+      <div className="grid grid-cols-7 border-b border-line pr-[10px]">
         {weekdayLabels.map((label) => (
           <div
             key={label}
