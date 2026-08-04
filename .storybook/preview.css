@@ -1,0 +1,9 @@
+/* src/index.css задаёт body { overflow: hidden } и фиксированную высоту 100% —
+   это нужно самому приложению (там свой внутренний скролл), но ломает скролл
+   длинных страниц (Токены/Палитра, доки) внутри превью Storybook. Сбрасываем. */
+html,
+body {
+  height: auto !important;
+  min-height: 100%;
+  overflow: auto !important;
+}
