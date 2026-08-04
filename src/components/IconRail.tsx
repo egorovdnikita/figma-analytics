@@ -1,13 +1,13 @@
-import { CalendarDays, Languages, ListTodo, MessageSquare, Moon, Sun } from 'lucide-react'
 import { useApp, type Screen } from '@/state/store'
 import { Avatar } from '@/components/ui'
+import { AppIcon, type IconName } from '@/components/AppIcon'
 import { cn } from '@/lib/cn'
 
-const SECTIONS: { screen: Screen; label: string; icon: typeof CalendarDays }[] = [
-  { screen: 'calendar', label: 'Календарь', icon: CalendarDays },
-  { screen: 'translator', label: 'Переводчик', icon: Languages },
-  { screen: 'tasks', label: 'Задачи', icon: ListTodo },
-  { screen: 'chat', label: 'Чат', icon: MessageSquare },
+const SECTIONS: { screen: Screen; label: string; icon: IconName }[] = [
+  { screen: 'calendar', label: 'Календарь', icon: 'CalendarDays' },
+  { screen: 'translator', label: 'Переводчик', icon: 'Languages' },
+  { screen: 'tasks', label: 'Задачи', icon: 'ListTodo' },
+  { screen: 'chat', label: 'Чат', icon: 'MessageSquare' },
 ]
 
 export function IconRail() {
@@ -20,7 +20,7 @@ export function IconRail() {
           key={section.screen}
           active={screen === section.screen}
           onClick={() => setScreen(section.screen)}
-          icon={<section.icon size={20} />}
+          icon={<AppIcon name={section.icon} size={20} />}
           label={section.label}
         />
       ))}
@@ -30,7 +30,7 @@ export function IconRail() {
       <RailItem
         active={false}
         onClick={() => void updateSettings({ theme: resolvedTheme === 'dark' ? 'light' : 'dark' })}
-        icon={resolvedTheme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+        icon={<AppIcon name={resolvedTheme === 'dark' ? 'Sun' : 'Moon'} size={19} />}
         label={resolvedTheme === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
       />
       <button

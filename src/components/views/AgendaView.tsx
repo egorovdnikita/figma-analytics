@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { format, isToday } from 'date-fns'
-import { CalendarOff } from 'lucide-react'
 import { useApp } from '@/state/store'
+import { AppIcon } from '@/components/AppIcon'
 import {
   durationLabel,
   eventSpansDay,
@@ -45,7 +45,7 @@ export function AgendaView({
   if (groups.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 rounded-card bg-surface text-center">
-        <CalendarOff size={26} className="text-faint" />
+        <AppIcon name="CalendarOff" size={26} className="text-faint" />
         <p className="text-[15px] font-semibold text-ink">
           {query ? 'Ничего не нашлось' : 'На этот период событий нет'}
         </p>

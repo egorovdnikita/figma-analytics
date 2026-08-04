@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { ArrowLeft, ExternalLink, LogOut, ShieldOff } from 'lucide-react'
 import { useApp } from '@/state/store'
 import { ipc } from '@/lib/ipc'
 import { locale } from '@/lib/date'
 import { cn } from '@/lib/cn'
 import { Avatar, Button, Chip, Field, Modal, Segmented, Select, Switch } from '@/components/ui'
+import { AppIcon, ICON_STYLES } from '@/components/AppIcon'
+import { FONT_OPTIONS } from '@/lib/fonts'
 import type { ViewMode } from '@/types'
 
 const SCOPE_LABELS: Record<string, string> = {
@@ -41,7 +42,7 @@ export function ProfileView() {
           onClick={() => setScreen('calendar')}
           className="flex items-center gap-2 py-1 text-[13px] text-muted transition-colors hover:text-ink"
         >
-          <ArrowLeft size={16} />
+          <AppIcon name="ArrowLeft" size={16} />
           к календарю
         </button>
 
@@ -91,15 +92,15 @@ export function ProfileView() {
                 variant="outline"
                 onClick={() => void ipc.openExternal('https://myaccount.google.com/permissions')}
               >
-                <ExternalLink size={16} />
+                <AppIcon name="ExternalLink" size={16} />
                 Управление доступом в Google
               </Button>
               <Button variant="soft" onClick={() => void signOut()}>
-                <LogOut size={16} />
+                <AppIcon name="LogOut" size={16} />
                 Выйти
               </Button>
               <Button variant="danger" onClick={() => setConfirmRevoke(true)}>
-                <ShieldOff size={16} />
+                <AppIcon name="ShieldOff" size={16} />
                 Отозвать доступ
               </Button>
             </div>
@@ -124,6 +125,22 @@ export function ProfileView() {
               <span className="text-[13px] text-muted">
                 {resolvedTheme === 'dark' ? 'тёмная' : 'светлая'}
               </span>
+            </Row>
+            <Row label="Стиль иконок">
+              <Segmented
+                className="bg-[var(--sunken)]"
+                value={settings.iconStyle}
+                onChange={(value) => void updateSettings({ iconStyle: value })}
+                options={ICON_STYLES}
+              />
+            </Row>
+            <Row label="Шрифт">
+              <Segmented
+                className="bg-[var(--sunken)]"
+                value={settings.fontFamily}
+                onChange={(value) => void updateSettings({ fontFamily: value })}
+                options={FONT_OPTIONS}
+              />
             </Row>
           </div>
         </Card>

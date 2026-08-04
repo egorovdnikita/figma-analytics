@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Plus } from 'lucide-react'
+import { AppIcon } from '@/components/AppIcon'
 import { Button, BUTTON_SIZES, BUTTON_VARIANTS } from './Button'
 
 const meta = {
@@ -51,7 +51,7 @@ export const СИконкой: Story = {
   args: {
     children: (
       <>
-        <Plus size={18} />
+        <AppIcon name="Plus" size={18} />
         Создать событие
       </>
     ),

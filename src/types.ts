@@ -60,6 +60,8 @@ export interface CalendarEvent {
 }
 
 export type ViewMode = 'day' | 'week' | 'month' | 'agenda'
+export type IconStyle = 'bold' | 'bold-duotone' | 'broken' | 'line-duotone' | 'linear' | 'outline'
+export type FontVariant = 'inter' | 'inter-display' | 'inter-tight' | 'inter-variable'
 
 export interface AppSettings {
   theme: 'light' | 'dark' | 'system'
@@ -71,6 +73,8 @@ export interface AppSettings {
   hiddenCalendarIds: string[]
   dayStartHour: number
   dayEndHour: number
+  iconStyle: IconStyle
+  fontFamily: FontVariant
 }
 
 export interface Profile {

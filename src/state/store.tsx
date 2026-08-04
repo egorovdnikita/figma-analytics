@@ -34,6 +34,8 @@ const defaultSettings: AppSettings = {
   hiddenCalendarIds: [],
   dayStartHour: 0,
   dayEndHour: 24,
+  iconStyle: 'linear',
+  fontFamily: 'inter-variable',
 }
 
 interface AppContextValue {

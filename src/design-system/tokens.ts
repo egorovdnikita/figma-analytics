@@ -12,21 +12,23 @@ export interface ColorToken {
   description: string
 }
 
+// Значения синхронизированы с Figma: Box UI | Tokens (Mode: Light/Dark) для
+// canvas/surface/ink/muted/faint, Box UI | Primitives → violet для grass/lilac.
 export const colorTokens: ColorToken[] = [
-  { name: 'canvas', cssVar: '--canvas', light: '#f0f0ee', dark: '#0b0b0c', description: 'Фон окна приложения, под карточками' },
-  { name: 'surface', cssVar: '--surface', light: '#ffffff', dark: '#171718', description: 'Фон карточек, модальных окон, полей ввода' },
-  { name: 'raised', cssVar: '--raised', light: '#ffffff', dark: '#1e1e20', description: 'Приподнятые поверхности поверх surface' },
-  { name: 'sunken', cssVar: '--sunken', light: '#f6f6f3', dark: '#121213', description: 'Утопленные зоны: hover/pressed, вложенные блоки' },
-  { name: 'line', cssVar: '--line', light: '#e7e7e2', dark: '#272729', description: 'Границы, разделители' },
-  { name: 'ink', cssVar: '--ink', light: '#16171a', dark: '#f1f1ef', description: 'Основной текст' },
-  { name: 'muted', cssVar: '--muted', light: '#8a8a85', dark: '#8d8d88', description: 'Вторичный текст, лейблы' },
-  { name: 'faint', cssVar: '--faint', light: '#b6b6af', dark: '#5e5e5a', description: 'Плейсхолдеры, приглушённые иконки' },
-  { name: 'grass', cssVar: '--grass', light: '#8b5cf6', dark: '#8b5cf6', description: 'Основной акцент (цвет иконки приложения): primary-кнопки, активные состояния' },
-  { name: 'grass-ink', cssVar: '--grass-ink', light: '#4c1d95', dark: '#ede9fe', description: 'Текст поверх grass-soft' },
-  { name: 'grass-soft', cssVar: '--grass-soft', light: '#ede9fe', dark: '#2e1065', description: 'Мягкий фон акцента: активный пункт меню, чипы' },
-  { name: 'lilac', cssVar: '--lilac', light: '#8a72dd', dark: '#a78bfa', description: 'Вторичный акцент: фокус-кольцо, ссылки' },
-  { name: 'lilac-soft', cssVar: '--lilac-soft', light: '#eeeafc', dark: '#211e31', description: 'Мягкий фон вторичного акцента' },
-  { name: 'danger', cssVar: '--danger', light: '#d0554f', dark: '#cc5c6f', description: 'Деструктивные действия, ошибки' },
+  { name: 'canvas', cssVar: '--canvas', light: '#f5f5f5', dark: '#0a0a0a', description: 'Фон окна приложения, под карточками (background/base/primary)' },
+  { name: 'surface', cssVar: '--surface', light: '#ffffff', dark: '#171717', description: 'Фон карточек, модальных окон, полей ввода (background/base/secondary)' },
+  { name: 'raised', cssVar: '--raised', light: '#ffffff', dark: '#1e1e20', description: 'Приподнятые поверхности поверх surface (не из Figma-токенов, местный)' },
+  { name: 'sunken', cssVar: '--sunken', light: '#f6f6f3', dark: '#121213', description: 'Утопленные зоны: hover/pressed, вложенные блоки (не из Figma-токенов, местный)' },
+  { name: 'line', cssVar: '--line', light: '#e7e7e2', dark: '#272729', description: 'Границы, разделители (не из Figma-токенов, местный)' },
+  { name: 'ink', cssVar: '--ink', light: '#171717', dark: '#fafafa', description: 'Основной текст (content/base/primary)' },
+  { name: 'muted', cssVar: '--muted', light: '#737373', dark: '#a3a3a3', description: 'Вторичный текст, лейблы (content/base/secondary)' },
+  { name: 'faint', cssVar: '--faint', light: '#a3a3a3', dark: '#737373', description: 'Плейсхолдеры, приглушённые иконки (content/base/tertiary)' },
+  { name: 'grass', cssVar: '--grass', light: '#8b5cf6', dark: '#8b5cf6', description: 'Основной акцент (цвет иконки приложения): primary-кнопки, активные состояния (colors/brand/primary, mode=Violet)' },
+  { name: 'grass-ink', cssVar: '--grass-ink', light: '#4c1d95', dark: '#ede9fe', description: 'Текст поверх grass-soft (violet/900 · violet/100)' },
+  { name: 'grass-soft', cssVar: '--grass-soft', light: '#ede9fe', dark: '#2e1065', description: 'Мягкий фон акцента: активный пункт меню, чипы (violet/100 · violet/950)' },
+  { name: 'lilac', cssVar: '--lilac', light: '#a78bfa', dark: '#a78bfa', description: 'Вторичный акцент: фокус-кольцо, ссылки (colors/brand/secondary, violet/400)' },
+  { name: 'lilac-soft', cssVar: '--lilac-soft', light: '#f5f3ff', dark: '#211e31', description: 'Мягкий фон вторичного акцента (violet/50)' },
+  { name: 'danger', cssVar: '--danger', light: '#d0554f', dark: '#cc5c6f', description: 'Деструктивные действия, ошибки (не из Figma-токенов — сохранён свой приглушённый оттенок)' },
 ]
 
 export interface RadiusToken {
@@ -81,4 +83,4 @@ export const typeScale: TypeScaleToken[] = [
 ]
 
 export const fontFamily =
-  "Inter, 'Golos Text', -apple-system, 'Segoe UI', system-ui, sans-serif"
+  "'Inter Variable', 'Golos Text', -apple-system, 'Segoe UI', system-ui, sans-serif"

@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Languages, ListTodo, MessageSquare } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { AppProvider, useApp } from '@/state/store'
 import { IconRail } from '@/components/IconRail'
 import { Sidebar } from '@/components/Sidebar'
@@ -7,12 +6,18 @@ import { CalendarScreen } from '@/components/CalendarScreen'
 import { ProfileView } from '@/components/ProfileView'
 import { PlaceholderScreen } from '@/components/PlaceholderScreen'
 import { SetupScreen, SignInScreen } from '@/components/Onboarding'
+import { IconStyleProvider } from '@/components/AppIcon'
 import { Spinner } from '@/components/ui'
 import { cn } from '@/lib/cn'
+import { FONT_STACKS } from '@/lib/fonts'
 
 function Shell() {
-  const { booted, hasCredentials, authenticated, screen, notice } = useApp()
+  const { booted, hasCredentials, authenticated, screen, notice, settings } = useApp()
   const [createSignal, setCreateSignal] = useState(0)
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--font-body', FONT_STACKS[settings.fontFamily])
+  }, [settings.fontFamily])
 
   if (!booted) {
     return (
@@ -27,34 +32,36 @@ function Shell() {
   else if (!authenticated) content = <SignInScreen />
   else
     content = (
-      <div className="flex h-full flex-col">
-        {/* Отдельная полоса только под системные кнопки. Пока пустая — сюда позже
-            встанут вкладки/разделы/папки. */}
-        <div className="drag-region h-9 shrink-0" />
+      <IconStyleProvider style={settings.iconStyle}>
+        <div className="flex h-full flex-col">
+          {/* Отдельная полоса только под системные кнопки. Пока пустая — сюда позже
+              встанут вкладки/разделы/папки. */}
+          <div className="drag-region h-9 shrink-0" />
 
-        <div className="flex min-h-0 flex-1">
-          <IconRail />
-          {screen === 'calendar' ? (
-            <Sidebar onCreate={() => setCreateSignal((value) => value + 1)} />
-          ) : null}
-          <div className="min-h-0 min-w-0 flex-1">
-            {screen === 'profile' ? (
-              <ProfileView />
-            ) : screen === 'translator' ? (
-              <PlaceholderScreen icon={Languages} title="Переводчик" />
-            ) : screen === 'tasks' ? (
-              <PlaceholderScreen icon={ListTodo} title="Задачи" />
-            ) : screen === 'chat' ? (
-              <PlaceholderScreen icon={MessageSquare} title="Чат" />
-            ) : (
-              <CalendarScreen
-                createSignal={createSignal}
-                onCreateHandled={() => setCreateSignal(0)}
-              />
-            )}
+          <div className="flex min-h-0 flex-1">
+            <IconRail />
+            {screen === 'calendar' ? (
+              <Sidebar onCreate={() => setCreateSignal((value) => value + 1)} />
+            ) : null}
+            <div className="min-h-0 min-w-0 flex-1">
+              {screen === 'profile' ? (
+                <ProfileView />
+              ) : screen === 'translator' ? (
+                <PlaceholderScreen icon="Languages" title="Переводчик" />
+              ) : screen === 'tasks' ? (
+                <PlaceholderScreen icon="ListTodo" title="Задачи" />
+              ) : screen === 'chat' ? (
+                <PlaceholderScreen icon="MessageSquare" title="Чат" />
+              ) : (
+                <CalendarScreen
+                  createSignal={createSignal}
+                  onCreateHandled={() => setCreateSignal(0)}
+                />
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </IconStyleProvider>
     )
 
   return (

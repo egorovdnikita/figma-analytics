@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { addMonths, format, isSameDay, isSameMonth, startOfMonth } from 'date-fns'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { eachDay, locale, rangeFor } from '@/lib/date'
 import { cn } from '@/lib/cn'
 import { IconButton } from '@/components/ui'
+import { AppIcon } from '@/components/AppIcon'
 
 const WEEKDAYS_MON = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс']
 const WEEKDAYS_SUN = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб']
@@ -39,14 +39,14 @@ export function MiniCalendar({
             className="h-7 w-7"
             onClick={() => setMonth(addMonths(month, -1))}
           >
-            <ChevronLeft size={15} />
+            <AppIcon name="ChevronLeft" size={15} />
           </IconButton>
           <IconButton
             label="Следующий месяц"
             className="h-7 w-7"
             onClick={() => setMonth(addMonths(month, 1))}
           >
-            <ChevronRight size={15} />
+            <AppIcon name="ChevronRight" size={15} />
           </IconButton>
         </div>
       </div>

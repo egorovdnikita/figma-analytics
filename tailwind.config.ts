@@ -27,7 +27,7 @@ export default {
         chip: '10px',
       },
       fontFamily: {
-        sans: ['Inter', 'Golos Text', '-apple-system', 'Segoe UI', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-body)', 'Golos Text', '-apple-system', 'Segoe UI', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         pop: '0 18px 48px -16px rgb(0 0 0 / 0.28), 0 2px 8px -2px rgb(0 0 0 / 0.12)',

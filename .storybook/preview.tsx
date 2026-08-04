@@ -38,7 +38,13 @@ const preview: Preview = {
     backgrounds: { disable: true },
     options: {
       storySort: {
-        order: ['Введение', 'Токены', 'Компоненты'],
+        order: [
+          'Введение',
+          'Токены',
+          ['Обзор', 'Палитра', 'Семантика (Figma)'],
+          'Иконки',
+          'Компоненты',
+        ],
       },
     },
   },

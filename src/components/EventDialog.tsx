@@ -1,18 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { addDays, format, parse } from 'date-fns'
-import {
-  AlignLeft,
-  Bell,
-  CalendarClock,
-  Check,
-  ExternalLink,
-  MapPin,
-  Repeat,
-  Trash2,
-  Users,
-  Video,
-} from 'lucide-react'
 import { useApp } from '@/state/store'
+import { AppIcon } from '@/components/AppIcon'
 import { ipc } from '@/lib/ipc'
 import {
   eventEnd,
@@ -487,7 +476,7 @@ function ColorSwatch({
       )}
       style={{ background: color }}
     >
-      {active ? <Check size={14} color="#fff" /> : null}
+      {active ? <AppIcon name="Check" size={14} color="#fff" /> : null}
     </button>
   )
 }
@@ -513,14 +502,14 @@ function ViewFooter({
           onClick={() => void ipc.openExternal(event.htmlLink!)}
           className="mr-auto"
         >
-          <ExternalLink size={16} />
+          <AppIcon name="ExternalLink" size={16} />
           В Google Календаре
         </Button>
       ) : null}
       {!readOnly ? (
         <>
           <Button variant="danger" onClick={onDelete} disabled={busy}>
-            <Trash2 size={16} />
+            <AppIcon name="Trash2" size={16} />
             Удалить
           </Button>
           <Button variant="primary" onClick={onEdit}>
@@ -558,7 +547,7 @@ function EventDetails({
         </span>
       </div>
 
-      <Row icon={<CalendarClock size={17} />}>
+      <Row icon={<AppIcon name="CalendarClock" size={17} />}>
         <div>
           <div className="text-[14px] text-ink">{formatEventRange(event, timeFormat)}</div>
           <div className="text-[12px] text-muted">
@@ -569,12 +558,14 @@ function EventDetails({
         </div>
       </Row>
 
-      {recurrence ? <Row icon={<Repeat size={17} />}>{recurrence}</Row> : null}
+      {recurrence ? <Row icon={<AppIcon name="Repeat" size={17} />}>{recurrence}</Row> : null}
 
-      {event.location ? <Row icon={<MapPin size={17} />}>{event.location}</Row> : null}
+      {event.location ? (
+        <Row icon={<AppIcon name="MapPin" size={17} />}>{event.location}</Row>
+      ) : null}
 
       {event.hangoutLink ? (
-        <Row icon={<Video size={17} />}>
+        <Row icon={<AppIcon name="Video" size={17} />}>
           <button
             type="button"
             className="text-[var(--lilac)] hover:underline"
@@ -586,7 +577,7 @@ function EventDetails({
       ) : null}
 
       {event.description ? (
-        <Row icon={<AlignLeft size={17} />}>
+        <Row icon={<AppIcon name="AlignLeft" size={17} />}>
           <div
             className="whitespace-pre-wrap text-[14px] leading-relaxed text-ink"
             // Google возвращает описание с базовым HTML; показываем как текст.
@@ -597,7 +588,7 @@ function EventDetails({
       ) : null}
 
       {event.attendees?.length ? (
-        <Row icon={<Users size={17} />}>
+        <Row icon={<AppIcon name="Users" size={17} />}>
           <div className="space-y-1.5">
             <div className="text-[13px] text-muted">{event.attendees.length} участников</div>
             {event.attendees.slice(0, 8).map((attendee) => (
@@ -622,7 +613,7 @@ function EventDetails({
       ) : null}
 
       {event.reminders?.overrides?.length ? (
-        <Row icon={<Bell size={17} />}>
+        <Row icon={<AppIcon name="Bell" size={17} />}>
           {event.reminders.overrides
             .map((reminder) => `за ${reminder.minutes} мин`)
             .join(', ')}

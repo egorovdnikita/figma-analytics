@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { RefreshCw } from 'lucide-react'
+import { AppIcon } from '@/components/AppIcon'
 import { IconButton } from './Button'
 
 const meta = {
@@ -15,7 +15,7 @@ const meta = {
   },
   args: {
     label: 'Обновить',
-    children: <RefreshCw size={17} />,
+    children: <AppIcon name="RefreshCw" size={17} />,
   },
 } satisfies Meta<typeof IconButton>
 

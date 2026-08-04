@@ -1,6 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import '@fontsource-variable/inter'
+import '@fontsource-variable/inter-tight'
+import '@fontsource/inter'
 import App from './App'
 import './index.css'
 

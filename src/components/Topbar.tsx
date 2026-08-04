@@ -1,9 +1,9 @@
-import { ChevronLeft, ChevronRight, RefreshCw, Search, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { useApp } from '@/state/store'
 import { rangeTitle, shiftAnchor } from '@/lib/date'
 import { cn } from '@/lib/cn'
 import { Button, IconButton, Segmented, Spinner } from '@/components/ui'
+import { AppIcon } from '@/components/AppIcon'
 import type { ViewMode } from '@/types'
 
 const VIEWS: { value: ViewMode; label: string }[] = [
@@ -30,7 +30,7 @@ export function Topbar() {
             {loading ? 'синхронизация…' : syncedAt ? `обновлено в ${format(syncedAt, 'HH:mm')}` : ''}
           </span>
           <IconButton label="Обновить" onClick={() => void refresh()}>
-            {loading ? <Spinner /> : <RefreshCw size={17} />}
+            {loading ? <Spinner /> : <AppIcon name="RefreshCw" size={17} />}
           </IconButton>
         </div>
       </div>
@@ -45,19 +45,23 @@ export function Topbar() {
             className="h-9 w-9"
             onClick={() => setAnchor(shiftAnchor(view, anchor, -1))}
           >
-            <ChevronLeft size={18} />
+            <AppIcon name="ChevronLeft" size={18} />
           </IconButton>
           <IconButton
             label="Вперёд"
             className="h-9 w-9"
             onClick={() => setAnchor(shiftAnchor(view, anchor, 1))}
           >
-            <ChevronRight size={18} />
+            <AppIcon name="ChevronRight" size={18} />
           </IconButton>
         </div>
 
         <label className="relative flex min-w-0 flex-1 items-center">
-          <Search size={17} className="pointer-events-none absolute left-3.5 text-faint" />
+          <AppIcon
+            name="Search"
+            size={17}
+            className="pointer-events-none absolute left-3.5 text-faint"
+          />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -74,7 +78,7 @@ export function Topbar() {
               aria-label="Очистить поиск"
               className="absolute right-3 text-faint hover:text-ink"
             >
-              <X size={16} />
+              <AppIcon name="X" size={16} />
             </button>
           ) : null}
         </label>

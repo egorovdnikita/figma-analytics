@@ -16,6 +16,9 @@ export interface Credentials {
   clientSecret: string
 }
 
+export type IconStyle = 'bold' | 'bold-duotone' | 'broken' | 'line-duotone' | 'linear' | 'outline'
+export type FontVariant = 'inter' | 'inter-display' | 'inter-tight' | 'inter-variable'
+
 export interface AppSettings {
   theme: 'light' | 'dark' | 'system'
   defaultView: 'day' | 'week' | 'month' | 'agenda'
@@ -26,6 +29,8 @@ export interface AppSettings {
   hiddenCalendarIds: string[]
   dayStartHour: number
   dayEndHour: number
+  iconStyle: IconStyle
+  fontFamily: FontVariant
 }
 
 export const defaultSettings: AppSettings = {
@@ -38,6 +43,8 @@ export const defaultSettings: AppSettings = {
   hiddenCalendarIds: [],
   dayStartHour: 0,
   dayEndHour: 24,
+  iconStyle: 'linear',
+  fontFamily: 'inter-variable',
 }
 
 function filePath(name: string) {

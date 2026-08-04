@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { ArrowRight, ExternalLink, KeyRound, ShieldCheck } from 'lucide-react'
 import { useApp } from '@/state/store'
 import { ipc } from '@/lib/ipc'
 import { Button, Field, Input, Spinner } from '@/components/ui'
+import { AppIcon } from '@/components/AppIcon'
 
 function Brand() {
   return (
@@ -72,7 +72,7 @@ export function SetupScreen() {
 
       <div className="mt-6 flex items-center gap-2">
         <Button variant="primary" size="lg" onClick={submit} disabled={busy}>
-          {busy ? <Spinner /> : <KeyRound size={17} />}
+          {busy ? <Spinner /> : <AppIcon name="KeyRound" size={17} />}
           Сохранить и продолжить
         </Button>
         <Button
@@ -81,7 +81,7 @@ export function SetupScreen() {
             void ipc.openExternal('https://console.cloud.google.com/apis/credentials')
           }
         >
-          <ExternalLink size={16} />
+          <AppIcon name="ExternalLink" size={16} />
           Google Cloud Console
         </Button>
       </div>
@@ -115,7 +115,7 @@ export function SignInScreen() {
           'Участники, повторения, напоминания и цвета',
         ].map((item) => (
           <li key={item} className="flex items-start gap-2.5 text-[14px] text-ink">
-            <ShieldCheck size={17} className="mt-0.5 shrink-0 text-[var(--grass)]" />
+            <AppIcon name="ShieldCheck" size={17} className="mt-0.5 shrink-0 text-[var(--grass)]" />
             {item}
           </li>
         ))}
@@ -137,7 +137,7 @@ export function SignInScreen() {
       >
         {busy ? <Spinner /> : null}
         Войти через Google
-        <ArrowRight size={17} />
+        <AppIcon name="ArrowRight" size={17} />
       </Button>
 
       <p className="mt-4 text-[12px] leading-relaxed text-faint">

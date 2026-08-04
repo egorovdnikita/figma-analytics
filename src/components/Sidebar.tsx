@@ -1,6 +1,6 @@
-import { Plus } from 'lucide-react'
 import { useApp } from '@/state/store'
 import { Button, Checkbox } from '@/components/ui'
+import { AppIcon } from '@/components/AppIcon'
 import { MiniCalendar } from '@/components/MiniCalendar'
 
 export function Sidebar({ onCreate }: { onCreate: () => void }) {
@@ -13,7 +13,7 @@ export function Sidebar({ onCreate }: { onCreate: () => void }) {
     <aside className="flex h-full w-[248px] shrink-0 flex-col gap-3 p-3 pr-0">
       <div className="no-drag px-1">
         <Button variant="primary" size="lg" className="w-full justify-start" onClick={onCreate}>
-          <Plus size={18} />
+          <AppIcon name="Plus" size={18} />
           Создать событие
         </Button>
       </div>

@@ -5,7 +5,7 @@ import {
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
 } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { AppIcon } from '@/components/AppIcon'
 import { cn } from '@/lib/cn'
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
@@ -52,7 +52,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
       >
         {children}
       </select>
-      <ChevronDown
+      <AppIcon
+        name="ChevronDown"
         size={16}
         className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-faint"
       />
