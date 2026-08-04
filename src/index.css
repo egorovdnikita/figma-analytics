@@ -102,9 +102,12 @@ body {
 .scroll-thin {
   scrollbar-width: thin;
   scrollbar-color: var(--faint) transparent;
-  /* Резервируем место под скроллбар всегда — иначе после появления скролла
-     колонки сетки (MonthView/TimeGridView) сдвигаются относительно шапки,
-     у которой такого резерва нет. */
+}
+/* Только для сеток MonthView/TimeGridView: резервируем место под скроллбар
+   всегда, иначе колонки сетки сдвигаются относительно шапки, у которой
+   такого резерва нет. На остальных .scroll-thin (сайдбар, модалки, профиль)
+   это не нужно и лишь сдвигает контент внутри них. */
+.scroll-thin-stable {
   scrollbar-gutter: stable;
 }
 .scroll-thin::-webkit-scrollbar {

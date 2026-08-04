@@ -146,7 +146,7 @@ export function TimeGridView({
       ) : null}
 
       {/* сетка времени */}
-      <div ref={scrollRef} className="scroll-thin relative flex-1 overflow-y-auto">
+      <div ref={scrollRef} className="scroll-thin scroll-thin-stable relative flex-1 overflow-y-auto">
         <div className="grid" style={gridTemplate}>
           <div className="relative">
             {hours.map((hour) => (

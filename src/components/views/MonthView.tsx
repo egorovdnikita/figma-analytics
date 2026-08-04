@@ -62,7 +62,7 @@ export function MonthView({
       </div>
 
       <div
-        className="scroll-thin grid flex-1 overflow-y-auto"
+        className="scroll-thin scroll-thin-stable grid flex-1 overflow-y-auto"
         style={{ gridTemplateRows: `repeat(${weeks}, minmax(112px, 1fr))` }}
       >
         {Array.from({ length: weeks }, (_, weekIndex) => (
