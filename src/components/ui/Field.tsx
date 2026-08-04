@@ -5,6 +5,7 @@ import {
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
 } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/cn'
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
@@ -39,17 +40,23 @@ Textarea.displayName = 'Textarea'
 
 export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(
   ({ className, children, ...props }, ref) => (
-    <select
-      ref={ref}
-      className={cn(
-        'h-11 w-full appearance-none rounded-control border border-line bg-surface px-4 text-sm text-ink',
-        'focus:border-[var(--lilac)] focus:outline-none',
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </select>
+    <div className="relative">
+      <select
+        ref={ref}
+        className={cn(
+          'h-11 w-full appearance-none rounded-control border border-line bg-surface pl-4 pr-10 text-sm text-ink',
+          'focus:border-[var(--lilac)] focus:outline-none',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </select>
+      <ChevronDown
+        size={16}
+        className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-faint"
+      />
+    </div>
   ),
 )
 Select.displayName = 'Select'

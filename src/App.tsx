@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AppProvider, useApp } from '@/state/store'
 import { Sidebar } from '@/components/Sidebar'
+import { AppHeader } from '@/components/AppHeader'
 import { CalendarScreen } from '@/components/CalendarScreen'
 import { ProfileView } from '@/components/ProfileView'
 import { SetupScreen, SignInScreen } from '@/components/Onboarding'
@@ -26,15 +27,18 @@ function Shell() {
     content = (
       <div className="flex h-full">
         <Sidebar onCreate={() => setCreateSignal((value) => value + 1)} />
-        <div className="min-w-0 flex-1">
-          {screen === 'profile' ? (
-            <ProfileView />
-          ) : (
-            <CalendarScreen
-              createSignal={createSignal}
-              onCreateHandled={() => setCreateSignal(0)}
-            />
-          )}
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <AppHeader />
+          <div className="min-h-0 min-w-0 flex-1">
+            {screen === 'profile' ? (
+              <ProfileView />
+            ) : (
+              <CalendarScreen
+                createSignal={createSignal}
+                onCreateHandled={() => setCreateSignal(0)}
+              />
+            )}
+          </div>
         </div>
       </div>
     )
@@ -49,7 +53,7 @@ function Shell() {
             notice.kind === 'error'
               ? 'bg-[var(--danger)] text-white'
               : notice.kind === 'success'
-                ? 'bg-[var(--grass)] text-[var(--grass-ink)]'
+                ? 'bg-[var(--grass)] text-white'
                 : 'bg-[var(--ink)] text-[var(--canvas)]',
           )}
           role="status"

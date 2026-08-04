@@ -326,7 +326,7 @@ export function EventDialog({
                     type="time"
                     value={form.startTime}
                     onChange={(e) => patch({ startTime: e.target.value })}
-                    className="w-[112px]"
+                    className="w-[132px] px-3"
                   />
                 ) : null}
               </div>
@@ -343,7 +343,7 @@ export function EventDialog({
                     type="time"
                     value={form.endTime}
                     onChange={(e) => patch({ endTime: e.target.value })}
-                    className="w-[112px]"
+                    className="w-[132px] px-3"
                   />
                 ) : null}
               </div>
