@@ -14,8 +14,8 @@ export function IconRail() {
   const { screen, setScreen, resolvedTheme, updateSettings, profile } = useApp()
 
   return (
-    <aside className="relative flex h-full w-16 shrink-0 flex-col items-center gap-1 border-r border-line bg-surface pt-14 pb-3">
-      <div className="drag-region absolute inset-x-0 top-0 h-14 border-b border-line" />
+    <aside className="relative flex h-full w-16 shrink-0 flex-col items-center gap-1 border-r border-line pt-14 pb-3">
+      <div className="drag-region absolute inset-x-0 top-0 h-14" />
 
       {SECTIONS.map((section) => (
         <RailItem
@@ -67,7 +67,7 @@ function RailItem({
       className={cn(
         'no-drag flex h-11 w-11 items-center justify-center rounded-control transition-colors',
         active
-          ? 'bg-[var(--grass-soft)] text-[var(--grass)]'
+          ? 'bg-surface text-[var(--grass)] shadow-sm'
           : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
       )}
     >

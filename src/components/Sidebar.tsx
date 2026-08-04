@@ -10,9 +10,7 @@ export function Sidebar({ onCreate }: { onCreate: () => void }) {
   const shared = calendars.filter((c) => !own.includes(c))
 
   return (
-    <aside className="relative flex h-full w-[248px] shrink-0 flex-col gap-3 p-3 pr-0">
-      <div className="drag-region -ml-3 -mt-3 h-14 border-b border-line bg-surface" />
-
+    <aside className="flex h-full w-[248px] shrink-0 flex-col gap-3 p-3 pr-0">
       <div className="no-drag px-1">
         <Button variant="primary" size="lg" className="w-full justify-start" onClick={onCreate}>
           <Plus size={18} />
