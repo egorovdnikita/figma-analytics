@@ -5,7 +5,7 @@ export type ButtonVariant = 'primary' | 'ghost' | 'outline' | 'soft' | 'danger'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
 const buttonBase =
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium transition-colors disabled:pointer-events-none disabled:opacity-45'
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-control font-medium transition-colors disabled:pointer-events-none disabled:opacity-45'
 
 export const buttonVariants: Record<ButtonVariant, string> = {
   primary: 'bg-[var(--grass)] text-[var(--grass-ink)] hover:brightness-[0.96]',
@@ -49,7 +49,7 @@ export const IconButton = forwardRef<
     aria-label={label}
     title={label}
     className={cn(
-      'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors',
+      'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-control transition-colors',
       active ? 'bg-[var(--sunken)] text-ink' : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
       className,
     )}

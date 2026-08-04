@@ -6,10 +6,7 @@ import { Button, Field, Input, Spinner } from '@/components/ui'
 
 function Brand() {
   return (
-    <div className="mb-8 flex items-center gap-2.5">
-      <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[var(--grass)]">
-        <span className="h-2.5 w-2.5 rounded-full bg-[var(--lilac)]" />
-      </span>
+    <div className="mb-8">
       <span className="text-[22px] font-bold tracking-tight text-ink">Box UI</span>
     </div>
   )

@@ -1,6 +1,6 @@
 import type { Preview, Decorator } from '@storybook/react-vite'
 import React, { useEffect } from 'react'
-import '@fontsource-variable/onest'
+import '@fontsource-variable/inter'
 import '../src/index.css'
 
 const withTheme: Decorator = (Story, context) => {

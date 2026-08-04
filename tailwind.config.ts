@@ -24,9 +24,10 @@ export default {
       borderRadius: {
         card: '20px',
         control: '14px',
+        chip: '12px',
       },
       fontFamily: {
-        sans: ['Onest', 'Inter', 'Golos Text', '-apple-system', 'Segoe UI', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'Golos Text', '-apple-system', 'Segoe UI', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         pop: '0 18px 48px -16px rgb(0 0 0 / 0.28), 0 2px 8px -2px rgb(0 0 0 / 0.12)',

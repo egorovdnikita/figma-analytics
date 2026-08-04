@@ -131,7 +131,7 @@ export function TypeScaleTokens() {
   return (
     <Section title="Типографика">
       <div style={{ font: '400 12px/1.5 var(--ds-font)', color: 'var(--muted)', marginBottom: 12 }}>
-        Шрифт: Onest Variable · вес text-[Npx] задаётся произвольным значением Tailwind
+        Шрифт: Inter Variable · вес text-[Npx] задаётся произвольным значением Tailwind
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {typeScale.map((row) => (
