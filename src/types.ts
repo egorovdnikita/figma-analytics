@@ -108,6 +108,78 @@ export interface SessionInfo {
   hasRefreshToken: boolean
 }
 
+/* ---------- Figma ---------- */
+
+export interface FigmaUser {
+  id: string
+  email: string
+  handle: string
+  img_url: string
+}
+
+export interface FigmaTeamRef {
+  id: string
+  label: string
+}
+
+export interface FigmaProject {
+  id: string
+  name: string
+}
+
+export interface FigmaFileSummary {
+  key: string
+  name: string
+  thumbnail_url?: string
+  last_modified: string
+}
+
+export interface FigmaFileMeta {
+  name: string
+  lastModified: string
+  thumbnailUrl?: string
+  version: string
+  role: string
+  editorType?: string
+}
+
+export interface FigmaVersion {
+  id: string
+  created_at: string
+  label: string | null
+  description: string | null
+  user: { id: string; handle: string; img_url: string }
+}
+
+export interface FigmaComment {
+  id: string
+  parent_id: string
+  user: { id: string; handle: string; img_url: string }
+  created_at: string
+  resolved_at: string | null
+  message: string
+  order_id: string | null
+}
+
+export interface FigmaPage<T> {
+  items: T[]
+  hasMore: boolean
+  total: number
+}
+
+export interface FigmaCommentsPage extends FigmaPage<FigmaComment> {
+  open: number
+  resolved: number
+}
+
+export interface FigmaOverviewEntry {
+  fileKey: string
+  meta: Partial<FigmaFileMeta>
+  versions: FigmaVersion[]
+  comments: FigmaComment[]
+  fetchedAt: number
+}
+
 /** Черновик события в форме — плоская структура, удобная для инпутов. */
 export interface EventDraft {
   id?: string

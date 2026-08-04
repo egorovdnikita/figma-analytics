@@ -147,3 +147,81 @@ export function storageInfo() {
     encrypted: safeStorage.isEncryptionAvailable(),
   }
 }
+
+/* ---------- Figma: токен (шифруется через safeStorage) ---------- */
+
+const FIGMA_TOKEN_FILE = 'figma-token.bin'
+
+export function getFigmaToken(): string | null {
+  try {
+    const raw = fs.readFileSync(filePath(FIGMA_TOKEN_FILE))
+    return safeStorage.isEncryptionAvailable() ? safeStorage.decryptString(raw) : raw.toString('utf8')
+  } catch {
+    return null
+  }
+}
+
+export function saveFigmaToken(token: string) {
+  fs.mkdirSync(app.getPath('userData'), { recursive: true })
+  const trimmed = token.trim()
+  const buf = safeStorage.isEncryptionAvailable()
+    ? safeStorage.encryptString(trimmed)
+    : Buffer.from(trimmed, 'utf8')
+  fs.writeFileSync(filePath(FIGMA_TOKEN_FILE), buf)
+}
+
+export function clearFigmaToken() {
+  try {
+    fs.rmSync(filePath(FIGMA_TOKEN_FILE))
+  } catch {
+    /* уже удалено */
+  }
+}
+
+/* ---------- Figma: отслеживаемые команды (Figma API не даёт список команд токена) ---------- */
+
+export interface FigmaTeamRef {
+  id: string
+  label: string
+}
+
+export function getFigmaTeams(): FigmaTeamRef[] {
+  return readJson<{ teams: FigmaTeamRef[] }>('figma-settings.json', { teams: [] }).teams
+}
+
+export function saveFigmaTeams(teams: FigmaTeamRef[]) {
+  writeJson('figma-settings.json', { teams })
+  return teams
+}
+
+/* ---------- Figma: дисковый кэш (проекты/файлы/версии/комментарии) ----------
+ * Цель — не бить лишний раз по API и не терять историю при перезапуске: при
+ * большом пространстве (десятки проектов, тысячи версий/комментариев) кэш
+ * читается с диска мгновенно, а сеть используется только для добора свежего
+ * "хвоста" поверх уже сохранённого.
+ */
+
+export interface FigmaFileCache {
+  meta: unknown
+  versions: unknown[]
+  versionsCursor: string | null
+  comments: unknown[]
+  fetchedAt: number
+}
+
+interface FigmaCacheShape {
+  projectsByTeam: Record<string, unknown[]>
+  filesByProject: Record<string, unknown[]>
+  files: Record<string, FigmaFileCache>
+}
+
+const FIGMA_CACHE_FILE = 'figma-cache.json'
+const emptyFigmaCache: FigmaCacheShape = { projectsByTeam: {}, filesByProject: {}, files: {} }
+
+export function readFigmaCache(): FigmaCacheShape {
+  return readJson<FigmaCacheShape>(FIGMA_CACHE_FILE, emptyFigmaCache)
+}
+
+export function writeFigmaCache(cache: FigmaCacheShape) {
+  writeJson(FIGMA_CACHE_FILE, cache)
+}

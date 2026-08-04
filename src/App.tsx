@@ -4,6 +4,7 @@ import { IconRail } from '@/components/IconRail'
 import { Sidebar } from '@/components/Sidebar'
 import { CalendarScreen } from '@/components/CalendarScreen'
 import { ProfileView } from '@/components/ProfileView'
+import { FigmaScreen } from '@/components/figma/FigmaScreen'
 import { PlaceholderScreen } from '@/components/PlaceholderScreen'
 import { SetupScreen, SignInScreen } from '@/components/Onboarding'
 import { IconStyleProvider } from '@/components/AppIcon'
@@ -46,6 +47,8 @@ function Shell() {
             <div className="min-h-0 min-w-0 flex-1">
               {screen === 'profile' ? (
                 <ProfileView />
+              ) : screen === 'figma' ? (
+                <FigmaScreen />
               ) : screen === 'translator' ? (
                 <PlaceholderScreen icon="TextFieldFocus" title="Переводчик" />
               ) : screen === 'tasks' ? (

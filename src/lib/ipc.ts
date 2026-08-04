@@ -3,6 +3,15 @@ import type {
   AppSettings,
   Calendar,
   CalendarEvent,
+  FigmaCommentsPage,
+  FigmaFileMeta,
+  FigmaFileSummary,
+  FigmaOverviewEntry,
+  FigmaPage,
+  FigmaProject,
+  FigmaTeamRef,
+  FigmaUser,
+  FigmaVersion,
   Profile,
   SessionInfo,
 } from '@/types'
@@ -47,6 +56,20 @@ interface RawApi {
   app: {
     info(): Promise<Envelope<AppInfo>>
     openExternal(url: string): Promise<Envelope<boolean>>
+  }
+  figma: {
+    status(): Promise<Envelope<{ connected: boolean; user: FigmaUser | null }>>
+    setToken(token: string): Promise<Envelope<FigmaUser>>
+    clearToken(): Promise<Envelope<boolean>>
+    teamsList(): Promise<Envelope<FigmaTeamRef[]>>
+    teamsAdd(id: string, label: string): Promise<Envelope<FigmaTeamRef[]>>
+    teamsRemove(id: string): Promise<Envelope<FigmaTeamRef[]>>
+    projects(teamId: string): Promise<Envelope<FigmaProject[]>>
+    files(projectId: string): Promise<Envelope<FigmaFileSummary[]>>
+    file(fileKey: string): Promise<Envelope<FigmaFileMeta>>
+    versions(fileKey: string, offset: number, limit: number): Promise<Envelope<FigmaPage<FigmaVersion>>>
+    comments(fileKey: string, offset: number, limit: number): Promise<Envelope<FigmaCommentsPage>>
+    overview(): Promise<Envelope<FigmaOverviewEntry[]>>
   }
 }
 
@@ -106,4 +129,19 @@ export const ipc = {
 
   appInfo: () => unwrap(raw().app.info()),
   openExternal: (url: string) => unwrap(raw().app.openExternal(url)),
+
+  figmaStatus: () => unwrap(raw().figma.status()),
+  figmaSetToken: (token: string) => unwrap(raw().figma.setToken(token)),
+  figmaClearToken: () => unwrap(raw().figma.clearToken()),
+  figmaTeamsList: () => unwrap(raw().figma.teamsList()),
+  figmaTeamsAdd: (id: string, label: string) => unwrap(raw().figma.teamsAdd(id, label)),
+  figmaTeamsRemove: (id: string) => unwrap(raw().figma.teamsRemove(id)),
+  figmaProjects: (teamId: string) => unwrap(raw().figma.projects(teamId)),
+  figmaFiles: (projectId: string) => unwrap(raw().figma.files(projectId)),
+  figmaFile: (fileKey: string) => unwrap(raw().figma.file(fileKey)),
+  figmaVersions: (fileKey: string, offset: number, limit: number) =>
+    unwrap(raw().figma.versions(fileKey, offset, limit)),
+  figmaComments: (fileKey: string, offset: number, limit: number) =>
+    unwrap(raw().figma.comments(fileKey, offset, limit)),
+  figmaOverview: () => unwrap(raw().figma.overview()),
 }

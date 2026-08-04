@@ -45,6 +45,23 @@ const api = {
     info: () => invoke<any>('app:info'),
     openExternal: (url: string) => invoke<boolean>('app:openExternal', url),
   },
+  figma: {
+    status: () => invoke<{ connected: boolean; user: any | null }>('figma:status'),
+    setToken: (token: string) => invoke<any>('figma:setToken', token),
+    clearToken: () => invoke<boolean>('figma:clearToken'),
+    teamsList: () => invoke<{ id: string; label: string }[]>('figma:teams:list'),
+    teamsAdd: (id: string, label: string) =>
+      invoke<{ id: string; label: string }[]>('figma:teams:add', id, label),
+    teamsRemove: (id: string) => invoke<{ id: string; label: string }[]>('figma:teams:remove', id),
+    projects: (teamId: string) => invoke<any[]>('figma:projects', teamId),
+    files: (projectId: string) => invoke<any[]>('figma:files', projectId),
+    file: (fileKey: string) => invoke<any>('figma:file', fileKey),
+    versions: (fileKey: string, offset: number, limit: number) =>
+      invoke<any>('figma:versions', fileKey, offset, limit),
+    comments: (fileKey: string, offset: number, limit: number) =>
+      invoke<any>('figma:comments', fileKey, offset, limit),
+    overview: () => invoke<any[]>('figma:overview'),
+  },
 }
 
 contextBridge.exposeInMainWorld('boxui', api)

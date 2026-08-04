@@ -1,12 +1,17 @@
 import { app, BrowserWindow, ipcMain, nativeTheme, shell } from 'electron'
 import * as auth from './auth'
 import * as google from './google'
+import * as figma from './figma'
+import * as figmaCache from './figmaCache'
 import {
   AppSettings,
   clearCredentials,
+  clearFigmaToken,
   getCredentials,
+  getFigmaToken,
   getSettings,
   saveCredentials,
+  saveFigmaToken,
   saveSettings,
   storageInfo,
 } from './store'
@@ -98,6 +103,49 @@ export function registerIpc(getWindow: () => BrowserWindow | null) {
     }
     return next
   })
+
+  /* Figma */
+  handle('figma:status', async () => {
+    const token = getFigmaToken()
+    if (!token) return { connected: false, user: null }
+    try {
+      const user = await figma.verifyToken()
+      return { connected: true, user }
+    } catch {
+      return { connected: false, user: null }
+    }
+  })
+  handle('figma:setToken', async (token: string) => {
+    const trimmed = token.trim()
+    if (!trimmed) throw { code: 'FIGMA_TOKEN_EMPTY', message: 'Введите personal access token' }
+    saveFigmaToken(trimmed) // сохраняем до проверки, verifyToken читает токен из store
+    try {
+      const user = await figma.verifyToken()
+      return user
+    } catch (error) {
+      clearFigmaToken()
+      throw error
+    }
+  })
+  handle('figma:clearToken', () => {
+    clearFigmaToken()
+    return true
+  })
+
+  handle('figma:teams:list', () => figmaCache.listTeams())
+  handle('figma:teams:add', (id: string, label: string) => figmaCache.addTeam(id, label))
+  handle('figma:teams:remove', (id: string) => figmaCache.removeTeam(id))
+
+  handle('figma:projects', (teamId: string) => figmaCache.listProjects(teamId))
+  handle('figma:files', (projectId: string) => figmaCache.listFiles(projectId))
+  handle('figma:file', (fileKey: string) => figmaCache.getFileMeta(fileKey))
+  handle('figma:versions', (fileKey: string, offset: number, limit: number) =>
+    figmaCache.getVersions(fileKey, offset, limit),
+  )
+  handle('figma:comments', (fileKey: string, offset: number, limit: number) =>
+    figmaCache.getComments(fileKey, offset, limit),
+  )
+  handle('figma:overview', () => figmaCache.overviewSnapshot())
 
   /* системное */
   handle('app:info', () => ({

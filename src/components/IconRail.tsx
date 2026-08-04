@@ -1,6 +1,7 @@
 import { useApp, type Screen } from '@/state/store'
 import { Avatar } from '@/components/ui'
 import { AppIcon, type IconName } from '@/components/AppIcon'
+import { FigmaIcon } from '@/components/FigmaIcon'
 import { cn } from '@/lib/cn'
 
 const SECTIONS: { screen: Screen; label: string; icon: IconName }[] = [
@@ -24,6 +25,12 @@ export function IconRail() {
           label={section.label}
         />
       ))}
+      <RailItem
+        active={screen === 'figma'}
+        onClick={() => setScreen('figma')}
+        icon={<FigmaIcon active={screen === 'figma'} size={20} />}
+        label="Figma"
+      />
 
       <div className="flex-1" />
 
