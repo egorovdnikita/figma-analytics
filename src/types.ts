@@ -74,6 +74,7 @@ export interface AppSettings {
   dayStartHour: number
   dayEndHour: number
   iconStyle: IconStyle
+  iconStyleArrows: IconStyle
   fontFamily: FontVariant
 }
 

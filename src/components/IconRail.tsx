@@ -5,8 +5,8 @@ import { cn } from '@/lib/cn'
 
 const SECTIONS: { screen: Screen; label: string; icon: IconName }[] = [
   { screen: 'calendar', label: 'Календарь', icon: 'CalendarDays' },
-  { screen: 'translator', label: 'Переводчик', icon: 'Languages' },
-  { screen: 'tasks', label: 'Задачи', icon: 'ListTodo' },
+  { screen: 'translator', label: 'Переводчик', icon: 'TextFieldFocus' },
+  { screen: 'tasks', label: 'Задачи', icon: 'Check' },
   { screen: 'chat', label: 'Чат', icon: 'MessageSquare' },
 ]
 
@@ -65,7 +65,7 @@ function RailItem({
       className={cn(
         'no-drag flex h-11 w-11 items-center justify-center rounded-control transition-colors',
         active
-          ? 'bg-surface text-[var(--grass)]'
+          ? 'bg-surface text-ink'
           : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
       )}
     >

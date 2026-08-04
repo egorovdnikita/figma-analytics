@@ -23,8 +23,6 @@ const ICON_MAP = {
   ChevronRight: 'alt-arrow-right',
   ExternalLink: 'square-arrow-right-up',
   KeyRound: 'key',
-  Languages: 'translation',
-  ListTodo: 'checklist',
   LogOut: 'logout',
   MapPin: 'map-point',
   MessageSquare: 'chat-square',
@@ -36,6 +34,7 @@ const ICON_MAP = {
   ShieldCheck: 'shield-check',
   ShieldOff: 'shield-cross',
   Sun: 'sun',
+  TextFieldFocus: 'text-field-focus',
   Trash2: 'trash-bin-trash',
   Users: 'users-group-rounded',
   Video: 'videocamera',
@@ -53,20 +52,40 @@ export const ICON_STYLES: { value: IconStyle; label: string }[] = [
   { value: 'line-duotone', label: 'Line Duotone' },
 ]
 
-const IconStyleContext = createContext<IconStyle>('linear')
+/** Иконки со стрелками — настраиваются отдельным стилем от остальных (см. ProfileView). */
+const ARROW_ICON_NAMES: ReadonlySet<IconName> = new Set<IconName>([
+  'ArrowLeft',
+  'ArrowRight',
+  'ChevronDown',
+  'ChevronLeft',
+  'ChevronRight',
+  'ExternalLink',
+])
 
-export function IconStyleProvider({
-  style,
-  children,
-}: {
-  style: IconStyle
-  children: ReactNode
-}) {
-  return <IconStyleContext.Provider value={style}>{children}</IconStyleContext.Provider>
+interface IconStyles {
+  general: IconStyle
+  arrows: IconStyle
 }
 
-export function useIconStyle() {
-  return useContext(IconStyleContext)
+const IconStyleContext = createContext<IconStyles>({ general: 'linear', arrows: 'linear' })
+
+export function IconStyleProvider({
+  general,
+  arrows,
+  children,
+}: {
+  general: IconStyle
+  arrows: IconStyle
+  children: ReactNode
+}) {
+  return (
+    <IconStyleContext.Provider value={{ general, arrows }}>{children}</IconStyleContext.Provider>
+  )
+}
+
+export function useIconStyle(name: IconName) {
+  const styles = useContext(IconStyleContext)
+  return ARROW_ICON_NAMES.has(name) ? styles.arrows : styles.general
 }
 
 export function AppIcon({
@@ -80,7 +99,7 @@ export function AppIcon({
   className?: string
   color?: string
 }) {
-  const style = useIconStyle()
+  const style = useIconStyle(name)
   return (
     <Icon
       icon={`solar:${ICON_MAP[name]}-${style}`}

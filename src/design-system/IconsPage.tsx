@@ -3,7 +3,7 @@ import type { IconStyle } from '@/types'
 
 export function IconsPage({ style }: { style: IconStyle }) {
   return (
-    <IconStyleProvider style={style}>
+    <IconStyleProvider general={style} arrows={style}>
       <div
         style={{
           display: 'grid',

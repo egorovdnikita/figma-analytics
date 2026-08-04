@@ -36,7 +36,7 @@ export function ProfileView() {
 
   return (
     <div className="scroll-thin h-full overflow-y-auto pb-8">
-      <div className="mx-auto max-w-[860px] space-y-3 px-4 pt-6">
+      <div className="mx-auto max-w-[860px] space-y-3 px-4 pt-3">
         <button
           type="button"
           onClick={() => setScreen('calendar')}
@@ -131,6 +131,14 @@ export function ProfileView() {
                 className="bg-[var(--sunken)]"
                 value={settings.iconStyle}
                 onChange={(value) => void updateSettings({ iconStyle: value })}
+                options={ICON_STYLES}
+              />
+            </Row>
+            <Row label="Стиль иконок со стрелками">
+              <Segmented
+                className="bg-[var(--sunken)]"
+                value={settings.iconStyleArrows}
+                onChange={(value) => void updateSettings({ iconStyleArrows: value })}
                 options={ICON_STYLES}
               />
             </Row>

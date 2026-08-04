@@ -30,6 +30,7 @@ export interface AppSettings {
   dayStartHour: number
   dayEndHour: number
   iconStyle: IconStyle
+  iconStyleArrows: IconStyle
   fontFamily: FontVariant
 }
 
@@ -44,6 +45,7 @@ export const defaultSettings: AppSettings = {
   dayStartHour: 0,
   dayEndHour: 24,
   iconStyle: 'linear',
+  iconStyleArrows: 'linear',
   fontFamily: 'inter-variable',
 }
 

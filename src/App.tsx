@@ -32,7 +32,7 @@ function Shell() {
   else if (!authenticated) content = <SignInScreen />
   else
     content = (
-      <IconStyleProvider style={settings.iconStyle}>
+      <IconStyleProvider general={settings.iconStyle} arrows={settings.iconStyleArrows}>
         <div className="flex h-full flex-col">
           {/* Отдельная полоса только под системные кнопки. Пока пустая — сюда позже
               встанут вкладки/разделы/папки. */}
@@ -47,9 +47,9 @@ function Shell() {
               {screen === 'profile' ? (
                 <ProfileView />
               ) : screen === 'translator' ? (
-                <PlaceholderScreen icon="Languages" title="Переводчик" />
+                <PlaceholderScreen icon="TextFieldFocus" title="Переводчик" />
               ) : screen === 'tasks' ? (
-                <PlaceholderScreen icon="ListTodo" title="Задачи" />
+                <PlaceholderScreen icon="Check" title="Задачи" />
               ) : screen === 'chat' ? (
                 <PlaceholderScreen icon="MessageSquare" title="Чат" />
               ) : (

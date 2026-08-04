@@ -35,6 +35,7 @@ const defaultSettings: AppSettings = {
   dayStartHour: 0,
   dayEndHour: 24,
   iconStyle: 'linear',
+  iconStyleArrows: 'linear',
   fontFamily: 'inter-variable',
 }
 
