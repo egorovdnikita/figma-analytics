@@ -1,20 +1,19 @@
-import { CalendarDays, Plus, Settings2 } from 'lucide-react'
-import { useApp } from '@/state/store'
+import { CalendarDays, Languages, ListTodo, MessageSquare, Plus } from 'lucide-react'
+import { useApp, type Screen } from '@/state/store'
 import { cn } from '@/lib/cn'
-import { Avatar, Button, Checkbox } from '@/components/ui'
+import { Button, Checkbox } from '@/components/ui'
 import { MiniCalendar } from '@/components/MiniCalendar'
+import { ScrollFadeTop } from '@/components/ScrollFade'
+
+const SECTIONS: { screen: Screen; label: string; icon: typeof CalendarDays }[] = [
+  { screen: 'calendar', label: 'Календарь', icon: CalendarDays },
+  { screen: 'translator', label: 'Переводчик', icon: Languages },
+  { screen: 'tasks', label: 'Задачи', icon: ListTodo },
+  { screen: 'chat', label: 'Чат', icon: MessageSquare },
+]
 
 export function Sidebar({ onCreate }: { onCreate: () => void }) {
-  const {
-    calendars,
-    settings,
-    toggleCalendar,
-    anchor,
-    setAnchor,
-    profile,
-    screen,
-    setScreen,
-  } = useApp()
+  const { calendars, settings, toggleCalendar, anchor, setAnchor, screen, setScreen } = useApp()
 
   const own = calendars.filter((c) => c.accessRole === 'owner' || c.primary)
   const shared = calendars.filter((c) => !own.includes(c))
@@ -30,59 +29,45 @@ export function Sidebar({ onCreate }: { onCreate: () => void }) {
         </Button>
       </div>
 
-      <nav className="mx-1 rounded-card bg-surface p-1.5">
-        <NavItem
-          active={screen === 'calendar'}
-          onClick={() => setScreen('calendar')}
-          icon={<CalendarDays size={17} />}
-          label="Календарь"
-        />
-        <NavItem
-          active={screen === 'profile'}
-          onClick={() => setScreen('profile')}
-          icon={<Settings2 size={17} />}
-          label="Профиль и настройки"
-        />
+      <nav className="mx-1 flex items-center justify-between rounded-card bg-surface p-1.5">
+        {SECTIONS.map((section) => (
+          <NavItem
+            key={section.screen}
+            active={screen === section.screen}
+            onClick={() => setScreen(section.screen)}
+            icon={<section.icon size={19} />}
+            label={section.label}
+          />
+        ))}
       </nav>
 
-      <div className="scroll-thin flex-1 overflow-y-auto pr-2">
-        <div className="rounded-card bg-surface p-3">
-          <MiniCalendar
-            anchor={anchor}
-            onPick={setAnchor}
-            firstDayOfWeek={settings.firstDayOfWeek}
-          />
-        </div>
+      <div className="relative min-h-0 flex-1">
+        <div className="scroll-thin h-full overflow-y-auto pr-2">
+          <div className="rounded-card bg-surface p-3">
+            <MiniCalendar
+              anchor={anchor}
+              onPick={setAnchor}
+              firstDayOfWeek={settings.firstDayOfWeek}
+            />
+          </div>
 
-        <CalendarGroup
-          title="мои календари"
-          items={own}
-          hidden={settings.hiddenCalendarIds}
-          onToggle={toggleCalendar}
-        />
-        {shared.length > 0 ? (
           <CalendarGroup
-            title="другие календари"
-            items={shared}
+            title="мои календари"
+            items={own}
             hidden={settings.hiddenCalendarIds}
             onToggle={toggleCalendar}
           />
-        ) : null}
+          {shared.length > 0 ? (
+            <CalendarGroup
+              title="другие календари"
+              items={shared}
+              hidden={settings.hiddenCalendarIds}
+              onToggle={toggleCalendar}
+            />
+          ) : null}
+        </div>
+        <ScrollFadeTop />
       </div>
-
-      <button
-        type="button"
-        onClick={() => setScreen('profile')}
-        className="no-drag mr-2 flex items-center gap-2.5 rounded-card bg-surface p-2.5 text-left transition-colors hover:bg-[var(--sunken)]"
-      >
-        <Avatar src={profile?.picture} name={profile?.name} size={34} />
-        <span className="min-w-0">
-          <span className="block truncate text-[13px] font-semibold text-ink">
-            {profile?.name ?? 'Аккаунт'}
-          </span>
-          <span className="block truncate text-[11px] text-muted">{profile?.email ?? ''}</span>
-        </span>
-      </button>
     </aside>
   )
 }
@@ -102,13 +87,14 @@ function NavItem({
     <button
       type="button"
       onClick={onClick}
+      aria-label={label}
+      title={label}
       className={cn(
-        'flex w-full items-center gap-2.5 rounded-control px-3 py-2.5 text-[14px] transition-colors',
+        'flex h-10 w-10 items-center justify-center rounded-control transition-colors',
         active ? 'text-[var(--grass)]' : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
       )}
     >
       {icon}
-      {label}
     </button>
   )
 }

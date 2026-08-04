@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { Languages, ListTodo, MessageSquare } from 'lucide-react'
 import { AppProvider, useApp } from '@/state/store'
 import { Sidebar } from '@/components/Sidebar'
 import { AppHeader } from '@/components/AppHeader'
 import { CalendarScreen } from '@/components/CalendarScreen'
 import { ProfileView } from '@/components/ProfileView'
+import { PlaceholderScreen } from '@/components/PlaceholderScreen'
 import { SetupScreen, SignInScreen } from '@/components/Onboarding'
 import { Spinner } from '@/components/ui'
 import { cn } from '@/lib/cn'
@@ -32,6 +34,12 @@ function Shell() {
           <div className="min-h-0 min-w-0 flex-1">
             {screen === 'profile' ? (
               <ProfileView />
+            ) : screen === 'translator' ? (
+              <PlaceholderScreen icon={Languages} title="Переводчик" />
+            ) : screen === 'tasks' ? (
+              <PlaceholderScreen icon={ListTodo} title="Задачи" />
+            ) : screen === 'chat' ? (
+              <PlaceholderScreen icon={MessageSquare} title="Чат" />
             ) : (
               <CalendarScreen
                 createSignal={createSignal}

@@ -12,6 +12,7 @@ import {
 } from '@/lib/date'
 import { eventColor } from '@/lib/colors'
 import { cn } from '@/lib/cn'
+import { ScrollFadeTop } from '@/components/ScrollFade'
 import type { CalendarEvent } from '@/types'
 
 export function AgendaView({
@@ -59,6 +60,7 @@ export function AgendaView({
   }
 
   return (
+    <div className="relative h-full">
     <div className="scroll-thin h-full overflow-y-auto rounded-card bg-surface">
       {groups.map(({ day, items }) => (
         <section key={day.toISOString()} className="border-b border-line last:border-b-0">
@@ -89,6 +91,8 @@ export function AgendaView({
           </div>
         </section>
       ))}
+    </div>
+      <ScrollFadeTop from="var(--surface)" />
     </div>
   )
 }

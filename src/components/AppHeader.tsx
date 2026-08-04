@@ -7,11 +7,11 @@ export function AppHeader() {
   const { loading, refresh, resolvedTheme, updateSettings, profile, setScreen, syncedAt } = useApp()
 
   return (
-    <header className="drag-region flex h-11 shrink-0 items-center justify-end gap-1 px-4 pt-3">
-      <div className="no-drag flex items-center gap-1">
-        <span className="mr-1 hidden text-[12px] text-faint md:inline">
-          {loading ? 'синхронизация…' : syncedAt ? `обновлено в ${format(syncedAt, 'HH:mm')}` : ''}
-        </span>
+    <header className="drag-region flex h-11 shrink-0 items-center justify-end gap-2 px-4 pt-3">
+      <span className="no-drag hidden text-[12px] text-faint md:inline">
+        {loading ? 'синхронизация…' : syncedAt ? `обновлено в ${format(syncedAt, 'HH:mm')}` : ''}
+      </span>
+      <div className="no-drag flex items-center gap-0.5 rounded-full bg-surface p-1">
         <IconButton label="Обновить" onClick={() => void refresh()}>
           {loading ? <Spinner /> : <RefreshCw size={17} />}
         </IconButton>
@@ -26,10 +26,10 @@ export function AppHeader() {
         <button
           type="button"
           onClick={() => setScreen('profile')}
-          className="ml-1 rounded-full transition-opacity hover:opacity-85"
           aria-label="Профиль"
+          className="flex h-10 w-10 items-center justify-center rounded-full transition-opacity hover:opacity-85"
         >
-          <Avatar src={profile?.picture} name={profile?.name} size={36} />
+          <Avatar src={profile?.picture} name={profile?.name} size={32} />
         </button>
       </div>
     </header>

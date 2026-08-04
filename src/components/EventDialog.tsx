@@ -313,20 +313,21 @@ export function EventDialog({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-3">
             <Field label="Начало">
               <div className="flex gap-2">
                 <Input
                   type="date"
                   value={form.startDate}
                   onChange={(e) => patch({ startDate: e.target.value })}
+                  className="min-w-0 flex-1"
                 />
                 {!form.allDay ? (
                   <Input
                     type="time"
                     value={form.startTime}
                     onChange={(e) => patch({ startTime: e.target.value })}
-                    className="w-[132px] px-3"
+                    className="w-[150px] shrink-0 px-2"
                   />
                 ) : null}
               </div>
@@ -337,13 +338,14 @@ export function EventDialog({
                   type="date"
                   value={form.endDate}
                   onChange={(e) => patch({ endDate: e.target.value })}
+                  className="min-w-0 flex-1"
                 />
                 {!form.allDay ? (
                   <Input
                     type="time"
                     value={form.endTime}
                     onChange={(e) => patch({ endTime: e.target.value })}
-                    className="w-[132px] px-3"
+                    className="w-[150px] shrink-0 px-2"
                   />
                 ) : null}
               </div>
