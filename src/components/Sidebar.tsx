@@ -104,9 +104,7 @@ function NavItem({
       onClick={onClick}
       className={cn(
         'flex w-full items-center gap-2.5 rounded-control px-3 py-2.5 text-[14px] transition-colors',
-        active
-          ? 'bg-[var(--grass-soft)] font-semibold text-ink'
-          : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
+        active ? 'text-[var(--grass)]' : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
       )}
     >
       {icon}

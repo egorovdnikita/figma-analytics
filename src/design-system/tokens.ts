@@ -37,9 +37,9 @@ export interface RadiusToken {
 }
 
 export const radiusTokens: RadiusToken[] = [
-  { name: 'chip', value: '12px', className: 'rounded-chip', description: 'Чипы, внутренний сегмент в Segmented' },
-  { name: 'control', value: '14px', className: 'rounded-control', description: 'Инпуты, кнопки, IconButton, пункты навигации' },
-  { name: 'card', value: '20px', className: 'rounded-card', description: 'Карточки, модальные окна, панели' },
+  { name: 'chip', value: '10px', className: 'rounded-chip', description: 'Чипы, теги' },
+  { name: 'control', value: '16px', className: 'rounded-control', description: 'Инпуты, кнопки, IconButton, пункты навигации, трек Segmented' },
+  { name: 'card', value: '24px', className: 'rounded-card', description: 'Карточки, модальные окна, панели' },
   { name: 'full', value: '9999px', className: 'rounded-full', description: 'Аватары, точки-индикаторы, переключатель Switch' },
 ]
 

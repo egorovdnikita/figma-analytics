@@ -22,9 +22,9 @@ export default {
         danger: 'var(--danger)',
       },
       borderRadius: {
-        card: '20px',
-        control: '14px',
-        chip: '12px',
+        card: '24px',
+        control: '16px',
+        chip: '10px',
       },
       fontFamily: {
         sans: ['Inter', 'Golos Text', '-apple-system', 'Segoe UI', 'system-ui', 'sans-serif'],

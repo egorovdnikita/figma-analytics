@@ -8,11 +8,11 @@ const buttonBase =
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-control font-medium transition-colors disabled:pointer-events-none disabled:opacity-45'
 
 export const buttonVariants: Record<ButtonVariant, string> = {
-  primary: 'bg-[var(--grass)] text-[var(--grass-ink)] hover:brightness-[0.96]',
+  primary: 'bg-[var(--grass)] text-white hover:brightness-[0.96]',
   soft: 'bg-[var(--sunken)] text-ink hover:bg-[var(--line)]',
   outline: 'border border-line bg-transparent text-ink hover:bg-[var(--sunken)]',
   ghost: 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
-  danger: 'bg-transparent text-[var(--danger)] hover:bg-[color-mix(in_srgb,var(--danger)_12%,transparent)]',
+  danger: 'bg-[var(--danger)] text-white hover:brightness-[0.96]',
 }
 
 export const buttonSizes: Record<ButtonSize, string> = {
