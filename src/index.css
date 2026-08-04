@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --canvas: #f0f0ee;
+  --surface: #ffffff;
+  --raised: #ffffff;
+  --sunken: #f6f6f3;
+  --line: #e7e7e2;
+  --ink: #16171a;
+  --muted: #8a8a85;
+  --faint: #b6b6af;
+  --grass: #7cc49b;
+  --grass-ink: #123425;
+  --grass-soft: #e4f2e7;
+  --lilac: #8a72dd;
+  --lilac-soft: #eeeafc;
+  --danger: #d0554f;
+  --shadow-card: 0 1px 2px rgb(22 23 26 / 0.04);
+  color-scheme: light;
+}
+
+.dark {
+  --canvas: #0b0b0c;
+  --surface: #171718;
+  --raised: #1e1e20;
+  --sunken: #121213;
+  --line: #272729;
+  --ink: #f1f1ef;
+  --muted: #8d8d88;
+  --faint: #5e5e5a;
+  --grass: #6db78d;
+  --grass-ink: #0b1a12;
+  --grass-soft: #1b2a21;
+  --lilac: #a78bfa;
+  --lilac-soft: #211e31;
+  --danger: #e0736d;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3);
+  color-scheme: dark;
+}
+
+* {
+  border-color: var(--line);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: Onest, Inter, 'Golos Text', -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-feature-settings: 'ss01', 'cv05', 'tnum' 0;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+}
+
+::selection {
+  background: var(--grass-soft);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--lilac);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Тонкие скроллбары в стиле интерфейса */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--faint) transparent;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--faint) 55%, transparent);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+.scroll-thin::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--muted) 70%, transparent);
+  background-clip: content-box;
+}
+
+.drag-region {
+  -webkit-app-region: drag;
+}
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes boxui-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-pop {
+  animation: boxui-pop 0.16s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes boxui-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fade {
+  animation: boxui-fade 0.14s ease-out;
+}

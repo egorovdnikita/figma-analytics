@@ -1,0 +1,55 @@
+appId: com.boxui.desktop
+productName: Box UI
+copyright: © 2026 Nikita Egorov
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - package.json
+asar: true
+afterPack: build/afterPack.cjs
+
+mac:
+  category: public.app-category.productivity
+  icon: build/icon.png
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+  darkModeSupport: true
+  # Без Apple Developer ID сборка не подписывается настоящим сертификатом.
+  # afterPack.cjs ad-hoc подписывает .app, чтобы arm64-сборка не считалась «повреждённой» —
+  # см. README, раздел «Первый запуск».
+  identity: null
+  gatekeeperAssess: false
+
+dmg:
+  title: Box UI ${version}
+  contents:
+    - x: 140
+      y: 190
+      type: file
+    - x: 400
+      y: 190
+      type: link
+      path: /Applications
+
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: Box UI
+
+linux:
+  icon: build/icon.png
+  category: Office
+  target:
+    - AppImage
