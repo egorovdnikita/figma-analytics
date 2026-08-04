@@ -7,11 +7,11 @@ export function AppHeader() {
   const { loading, refresh, resolvedTheme, updateSettings, profile, setScreen, syncedAt } = useApp()
 
   return (
-    <header className="drag-region flex h-11 shrink-0 items-center justify-end gap-2 px-4 pt-3">
+    <header className="drag-region flex h-14 shrink-0 items-center justify-end gap-2 border-b border-line bg-surface px-4">
       <span className="no-drag hidden text-[12px] text-faint md:inline">
         {loading ? 'синхронизация…' : syncedAt ? `обновлено в ${format(syncedAt, 'HH:mm')}` : ''}
       </span>
-      <div className="no-drag flex items-center gap-0.5 rounded-full bg-surface p-1">
+      <div className="no-drag flex items-center gap-0.5">
         <IconButton label="Обновить" onClick={() => void refresh()}>
           {loading ? <Spinner /> : <RefreshCw size={17} />}
         </IconButton>

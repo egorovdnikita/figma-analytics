@@ -4,7 +4,6 @@ import { useApp } from '@/state/store'
 import { eventSpansDay, eventStart, formatTimeShort, isAllDay, locale } from '@/lib/date'
 import { eventColor, readableInk, tint } from '@/lib/colors'
 import { cn } from '@/lib/cn'
-import { ScrollFadeTop } from '@/components/ScrollFade'
 import type { CalendarEvent } from '@/types'
 
 const WEEKDAYS_MON = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота', 'воскресенье']
@@ -62,9 +61,8 @@ export function MonthView({
         ))}
       </div>
 
-      <div className="relative min-h-0 flex-1">
       <div
-        className="scroll-thin grid h-full overflow-y-auto"
+        className="scroll-thin grid flex-1 overflow-y-auto"
         style={{ gridTemplateRows: `repeat(${weeks}, minmax(112px, 1fr))` }}
       >
         {Array.from({ length: weeks }, (_, weekIndex) => (
@@ -169,8 +167,6 @@ export function MonthView({
             })}
           </div>
         ))}
-      </div>
-      <ScrollFadeTop from="var(--surface)" />
       </div>
     </div>
   )

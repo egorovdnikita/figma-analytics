@@ -6,7 +6,6 @@ import { ipc } from '@/lib/ipc'
 import { locale } from '@/lib/date'
 import { cn } from '@/lib/cn'
 import { Avatar, Button, Chip, Field, Modal, Segmented, Select, Switch } from '@/components/ui'
-import { ScrollFadeTop } from '@/components/ScrollFade'
 import type { ViewMode } from '@/types'
 
 const SCOPE_LABELS: Record<string, string> = {
@@ -35,9 +34,8 @@ export function ProfileView() {
   const [confirmRevoke, setConfirmRevoke] = useState(false)
 
   return (
-    <div className="relative h-full">
-      <div className="scroll-thin h-full overflow-y-auto pb-8">
-        <div className="mx-auto max-w-[860px] space-y-3 px-4 pt-3">
+    <div className="scroll-thin h-full overflow-y-auto pb-8">
+      <div className="mx-auto max-w-[860px] space-y-3 px-4 pt-3">
         <button
           type="button"
           onClick={() => setScreen('calendar')}
@@ -280,8 +278,6 @@ export function ProfileView() {
           останутся в Google без изменений — приложение просто потеряет к ним доступ.
         </p>
       </Modal>
-      </div>
-      <ScrollFadeTop />
     </div>
   )
 }

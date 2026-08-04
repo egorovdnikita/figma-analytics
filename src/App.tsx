@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Languages, ListTodo, MessageSquare } from 'lucide-react'
 import { AppProvider, useApp } from '@/state/store'
+import { IconRail } from '@/components/IconRail'
 import { Sidebar } from '@/components/Sidebar'
 import { AppHeader } from '@/components/AppHeader'
 import { CalendarScreen } from '@/components/CalendarScreen'
@@ -28,6 +29,7 @@ function Shell() {
   else
     content = (
       <div className="flex h-full">
+        <IconRail />
         <Sidebar onCreate={() => setCreateSignal((value) => value + 1)} />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <AppHeader />

@@ -12,7 +12,6 @@ import {
 } from '@/lib/date'
 import { eventColor, readableInk, tint } from '@/lib/colors'
 import { cn } from '@/lib/cn'
-import { ScrollFadeTop } from '@/components/ScrollFade'
 import type { CalendarEvent } from '@/types'
 
 const HOUR_HEIGHT = 52
@@ -147,8 +146,7 @@ export function TimeGridView({
       ) : null}
 
       {/* сетка времени */}
-      <div className="relative min-h-0 flex-1">
-      <div ref={scrollRef} className="scroll-thin relative h-full overflow-y-auto">
+      <div ref={scrollRef} className="scroll-thin relative flex-1 overflow-y-auto">
         <div className="grid" style={gridTemplate}>
           <div className="relative">
             {hours.map((hour) => (
@@ -226,8 +224,6 @@ export function TimeGridView({
             )
           })}
         </div>
-      </div>
-      <ScrollFadeTop from="var(--surface)" />
       </div>
     </div>
   )
