@@ -3,7 +3,6 @@ import { Languages, ListTodo, MessageSquare } from 'lucide-react'
 import { AppProvider, useApp } from '@/state/store'
 import { IconRail } from '@/components/IconRail'
 import { Sidebar } from '@/components/Sidebar'
-import { AppHeader } from '@/components/AppHeader'
 import { CalendarScreen } from '@/components/CalendarScreen'
 import { ProfileView } from '@/components/ProfileView'
 import { PlaceholderScreen } from '@/components/PlaceholderScreen'
@@ -30,25 +29,24 @@ function Shell() {
     content = (
       <div className="flex h-full">
         <IconRail />
-        <Sidebar onCreate={() => setCreateSignal((value) => value + 1)} />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <AppHeader />
-          <div className="min-h-0 min-w-0 flex-1">
-            {screen === 'profile' ? (
-              <ProfileView />
-            ) : screen === 'translator' ? (
-              <PlaceholderScreen icon={Languages} title="Переводчик" />
-            ) : screen === 'tasks' ? (
-              <PlaceholderScreen icon={ListTodo} title="Задачи" />
-            ) : screen === 'chat' ? (
-              <PlaceholderScreen icon={MessageSquare} title="Чат" />
-            ) : (
-              <CalendarScreen
-                createSignal={createSignal}
-                onCreateHandled={() => setCreateSignal(0)}
-              />
-            )}
-          </div>
+        {screen === 'calendar' ? (
+          <Sidebar onCreate={() => setCreateSignal((value) => value + 1)} />
+        ) : null}
+        <div className="min-h-0 min-w-0 flex-1">
+          {screen === 'profile' ? (
+            <ProfileView />
+          ) : screen === 'translator' ? (
+            <PlaceholderScreen icon={Languages} title="Переводчик" />
+          ) : screen === 'tasks' ? (
+            <PlaceholderScreen icon={ListTodo} title="Задачи" />
+          ) : screen === 'chat' ? (
+            <PlaceholderScreen icon={MessageSquare} title="Чат" />
+          ) : (
+            <CalendarScreen
+              createSignal={createSignal}
+              onCreateHandled={() => setCreateSignal(0)}
+            />
+          )}
         </div>
       </div>
     )

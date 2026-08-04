@@ -1,5 +1,6 @@
-import { CalendarDays, Languages, ListTodo, MessageSquare } from 'lucide-react'
+import { CalendarDays, Languages, ListTodo, MessageSquare, Moon, Sun } from 'lucide-react'
 import { useApp, type Screen } from '@/state/store'
+import { Avatar } from '@/components/ui'
 import { cn } from '@/lib/cn'
 
 const SECTIONS: { screen: Screen; label: string; icon: typeof CalendarDays }[] = [
@@ -10,11 +11,12 @@ const SECTIONS: { screen: Screen; label: string; icon: typeof CalendarDays }[] =
 ]
 
 export function IconRail() {
-  const { screen, setScreen } = useApp()
+  const { screen, setScreen, resolvedTheme, updateSettings, profile } = useApp()
 
   return (
-    <aside className="relative flex h-full w-16 shrink-0 flex-col items-center gap-1 border-r border-line bg-surface pt-14">
+    <aside className="relative flex h-full w-16 shrink-0 flex-col items-center gap-1 border-r border-line bg-surface pt-14 pb-3">
       <div className="drag-region absolute inset-x-0 top-0 h-14 border-b border-line" />
+
       {SECTIONS.map((section) => (
         <RailItem
           key={section.screen}
@@ -24,6 +26,23 @@ export function IconRail() {
           label={section.label}
         />
       ))}
+
+      <div className="flex-1" />
+
+      <RailItem
+        active={false}
+        onClick={() => void updateSettings({ theme: resolvedTheme === 'dark' ? 'light' : 'dark' })}
+        icon={resolvedTheme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+        label={resolvedTheme === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
+      />
+      <button
+        type="button"
+        onClick={() => setScreen('profile')}
+        aria-label="Профиль"
+        className="no-drag mt-1 flex h-11 w-11 items-center justify-center rounded-full transition-opacity hover:opacity-85"
+      >
+        <Avatar src={profile?.picture} name={profile?.name} size={30} />
+      </button>
     </aside>
   )
 }
@@ -47,7 +66,9 @@ function RailItem({
       title={label}
       className={cn(
         'no-drag flex h-11 w-11 items-center justify-center rounded-control transition-colors',
-        active ? 'text-[var(--grass)]' : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
+        active
+          ? 'bg-[var(--grass-soft)] text-[var(--grass)]'
+          : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
       )}
     >
       {icon}

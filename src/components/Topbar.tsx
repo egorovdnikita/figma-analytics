@@ -1,8 +1,9 @@
-import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, RefreshCw, Search, X } from 'lucide-react'
+import { format } from 'date-fns'
 import { useApp } from '@/state/store'
 import { rangeTitle, shiftAnchor } from '@/lib/date'
 import { cn } from '@/lib/cn'
-import { Button, IconButton, Segmented } from '@/components/ui'
+import { Button, IconButton, Segmented, Spinner } from '@/components/ui'
 import type { ViewMode } from '@/types'
 
 const VIEWS: { value: ViewMode; label: string }[] = [
@@ -13,15 +14,26 @@ const VIEWS: { value: ViewMode; label: string }[] = [
 ]
 
 export function Topbar() {
-  const { view, setView, anchor, setAnchor, settings, query, setQuery } = useApp()
+  const { view, setView, anchor, setAnchor, settings, query, setQuery, loading, refresh, syncedAt } =
+    useApp()
 
   const title = rangeTitle(view, anchor, settings.firstDayOfWeek)
 
   return (
     <header className="shrink-0 px-4 pt-3">
-      <h1 className="truncate text-[26px] font-bold lowercase leading-none tracking-tight text-ink">
-        {title}
-      </h1>
+      <div className="drag-region flex h-11 items-center justify-between gap-4">
+        <h1 className="truncate text-[26px] font-bold lowercase leading-none tracking-tight text-ink">
+          {title}
+        </h1>
+        <div className="no-drag flex items-center gap-1">
+          <span className="mr-1 hidden text-[12px] text-faint md:inline">
+            {loading ? 'синхронизация…' : syncedAt ? `обновлено в ${format(syncedAt, 'HH:mm')}` : ''}
+          </span>
+          <IconButton label="Обновить" onClick={() => void refresh()}>
+            {loading ? <Spinner /> : <RefreshCw size={17} />}
+          </IconButton>
+        </div>
+      </div>
 
       <div className="mt-3 flex items-center gap-2 rounded-card bg-surface p-2">
         <Button variant="outline" size="sm" className="ml-1" onClick={() => setAnchor(new Date())}>
