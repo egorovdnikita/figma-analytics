@@ -201,6 +201,24 @@ export interface FigmaPrefs {
   syncDepthPages: number
   /** Параллельных файлов при синхронизации. */
   syncConcurrency: number
+  /** Плотность интерфейса раздела. */
+  density: 'compact' | 'comfortable'
+  /** Раздел, открывающийся первым. */
+  defaultSection: string
+  /** Показывать таблицу значений вместо графика по умолчанию. */
+  tablesByDefault: boolean
+  /** Пороги, по которым формулируются авто-инсайты. */
+  insightThresholds: {
+    staleDays: number
+    unansweredDays: number
+    concentrationPercent: number
+    dropPercent: number
+    nightSharePercent: number
+  }
+  /** Сохранённые наборы фильтров. */
+  filterPresets: { id: string; name: string; filters: unknown }[]
+  /** Закреплённые файлы — быстрый доступ в сайдбаре. */
+  pinnedFiles: { key: string; name: string }[]
 }
 
 export const defaultFigmaPrefs: FigmaPrefs = {
@@ -212,6 +230,18 @@ export const defaultFigmaPrefs: FigmaPrefs = {
   timelineBuckets: { day: 30, week: 12, month: 12, year: 5 },
   syncDepthPages: 400,
   syncConcurrency: 4,
+  density: 'comfortable',
+  defaultSection: 'dashboard',
+  tablesByDefault: false,
+  insightThresholds: {
+    staleDays: 45,
+    unansweredDays: 7,
+    concentrationPercent: 55,
+    dropPercent: 25,
+    nightSharePercent: 25,
+  },
+  filterPresets: [],
+  pinnedFiles: [],
 }
 
 interface FigmaSettings {
@@ -234,6 +264,12 @@ function readFigmaSettings(): FigmaSettings {
       ...defaultFigmaPrefs,
       ...(stored.prefs ?? {}),
       timelineBuckets: { ...defaultFigmaPrefs.timelineBuckets, ...(stored.prefs?.timelineBuckets ?? {}) },
+      insightThresholds: {
+        ...defaultFigmaPrefs.insightThresholds,
+        ...(stored.prefs?.insightThresholds ?? {}),
+      },
+      filterPresets: stored.prefs?.filterPresets ?? [],
+      pinnedFiles: stored.prefs?.pinnedFiles ?? [],
     },
   }
 }
@@ -248,6 +284,7 @@ export function saveFigmaPrefs(patch: Partial<FigmaPrefs>): FigmaPrefs {
     ...settings.prefs,
     ...patch,
     timelineBuckets: { ...settings.prefs.timelineBuckets, ...(patch.timelineBuckets ?? {}) },
+    insightThresholds: { ...settings.prefs.insightThresholds, ...(patch.insightThresholds ?? {}) },
   }
   writeJson(FIGMA_SETTINGS_FILE, { ...settings, prefs })
   return prefs

@@ -669,12 +669,20 @@ export function buildThreads(events: FigmaEvent[]): ThreadStats[] {
         replies: threadReplies.length,
         reactions: reactions.get(id) ?? 0,
         participants,
-        responseMs: firstReplyAt ? new Date(firstReplyAt).getTime() - new Date(root.ts).getTime() : null,
-        resolveMs: resolvedAt ? new Date(resolvedAt).getTime() - new Date(root.ts).getTime() : null,
+        // Отрицательная длительность означала бы, что ответ старше вопроса —
+        // такие пары в метрики не берём, иначе средние и медианы уезжают в минус.
+        responseMs: nonNegativeGap(root.ts, firstReplyAt),
+        resolveMs: nonNegativeGap(root.ts, resolvedAt),
         ageDays: Math.floor((now - new Date(root.ts).getTime()) / 86400000),
       }
     })
     .sort((a, b) => b.openedAt.localeCompare(a.openedAt))
+}
+
+function nonNegativeGap(from: string, to: string | null): number | null {
+  if (!to) return null
+  const gap = new Date(to).getTime() - new Date(from).getTime()
+  return Number.isFinite(gap) && gap >= 0 ? gap : null
 }
 
 export function percentile(values: number[], p: number): number | null {
@@ -793,4 +801,511 @@ export function calendarDays(events: FigmaEvent[], days = 371) {
   }
   const max = Math.max(1, ...cells.map((cell) => cell.count))
   return { cells, max }
+}
+
+/* ---------- аномалии и прогноз ---------- */
+
+export interface Anomaly {
+  label: string
+  value: number
+  expected: number
+  z: number
+  direction: 'up' | 'down'
+}
+
+/** Периоды, выбивающиеся из собственного ряда. Считаем z-оценку по среднему и
+ * стандартному отклонению: |z| >= threshold — всплеск или провал, а не шум. */
+export function anomalies(values: { label: string; value: number }[], threshold = 1.8): Anomaly[] {
+  if (values.length < 4) return []
+  const numbers = values.map((item) => item.value)
+  const avg = numbers.reduce((sum, value) => sum + value, 0) / numbers.length
+  const variance = numbers.reduce((sum, value) => sum + (value - avg) ** 2, 0) / numbers.length
+  const sd = Math.sqrt(variance)
+  if (sd === 0) return []
+
+  return values
+    .map((item) => ({
+      label: item.label,
+      value: item.value,
+      expected: avg,
+      z: (item.value - avg) / sd,
+      direction: item.value >= avg ? ('up' as const) : ('down' as const),
+    }))
+    .filter((item) => Math.abs(item.z) >= threshold)
+    .sort((a, b) => Math.abs(b.z) - Math.abs(a.z))
+}
+
+export interface ForecastPoint {
+  label: string
+  value: number | null
+  predicted: number | null
+  low: number | null
+  high: number | null
+}
+
+/** Продолжение линейного тренда на N периодов вперёд с коридором в одно
+ * стандартное отклонение остатков. Это экстраполяция наблюдаемого, а не модель
+ * — на скачкообразных рядах она честно даёт широкий коридор. */
+export function forecast(values: { label: string; value: number }[], periods = 4): ForecastPoint[] {
+  const n = values.length
+  if (n < 3) return values.map((item) => ({ label: item.label, value: item.value, predicted: null, low: null, high: null }))
+
+  const meanX = (n - 1) / 2
+  const meanY = values.reduce((sum, item) => sum + item.value, 0) / n
+  let num = 0
+  let den = 0
+  values.forEach((item, index) => {
+    num += (index - meanX) * (item.value - meanY)
+    den += (index - meanX) ** 2
+  })
+  const slope = den === 0 ? 0 : num / den
+  const intercept = meanY - slope * meanX
+  const at = (index: number) => intercept + slope * index
+
+  const residuals = values.map((item, index) => item.value - at(index))
+  const sd = Math.sqrt(residuals.reduce((sum, value) => sum + value ** 2, 0) / n)
+
+  const history: ForecastPoint[] = values.map((item) => ({
+    label: item.label,
+    value: item.value,
+    predicted: null,
+    low: null,
+    high: null,
+  }))
+  // Стыкуем прогноз с последней фактической точкой, чтобы линия не разрывалась.
+  history[n - 1].predicted = values[n - 1].value
+  history[n - 1].low = values[n - 1].value
+  history[n - 1].high = values[n - 1].value
+
+  const future: ForecastPoint[] = []
+  for (let step = 1; step <= periods; step += 1) {
+    const predicted = Math.max(0, at(n - 1 + step))
+    future.push({
+      label: `+${step}`,
+      value: null,
+      predicted,
+      low: Math.max(0, predicted - sd),
+      high: predicted + sd,
+    })
+  }
+
+  return [...history, ...future]
+}
+
+/* ---------- здоровье пространства ---------- */
+
+export interface HealthFactor {
+  key: string
+  label: string
+  score: number
+  weight: number
+  detail: string
+}
+
+export interface HealthReport {
+  score: number
+  factors: HealthFactor[]
+}
+
+/** Композитный индекс: не «оценка команды», а сводка нескольких наблюдаемых
+ * признаков. Каждый фактор виден отдельно, чтобы число не выглядело вердиктом. */
+export function healthScore(input: {
+  currentEvents: FigmaEvent[]
+  previousEvents: FigmaEvent[]
+  allEvents: FigmaEvent[]
+  threads: ThreadStats[]
+  people: PersonStats[]
+  staleFiles: number
+  totalFiles: number
+}): HealthReport {
+  const { currentEvents, previousEvents, threads, people, staleFiles, totalFiles } = input
+
+  const momentum = (() => {
+    if (previousEvents.length === 0) return currentEvents.length > 0 ? 70 : 40
+    const ratio = currentEvents.length / previousEvents.length
+    return Math.max(0, Math.min(100, 50 + (ratio - 1) * 60))
+  })()
+
+  const openThreads = threads.filter((thread) => !thread.resolvedAt).length
+  const closure = threads.length === 0 ? 70 : Math.max(0, Math.min(100, (1 - openThreads / threads.length) * 100))
+
+  const unanswered = threads.filter((thread) => thread.replies === 0 && !thread.resolvedAt).length
+  const responsiveness =
+    threads.length === 0 ? 70 : Math.max(0, Math.min(100, (1 - unanswered / threads.length) * 100))
+
+  const top1 = concentration(people, 1) ?? 0
+  const spread = Math.max(0, Math.min(100, 100 - Math.max(0, top1 - 30) * 1.6))
+
+  const freshness = totalFiles === 0 ? 70 : Math.max(0, Math.min(100, (1 - staleFiles / totalFiles) * 100))
+
+  const factors: HealthFactor[] = [
+    {
+      key: 'momentum',
+      label: 'Динамика',
+      score: momentum,
+      weight: 0.25,
+      detail: `${currentEvents.length} событий против ${previousEvents.length} в прошлом периоде`,
+    },
+    {
+      key: 'closure',
+      label: 'Закрытие обсуждений',
+      score: closure,
+      weight: 0.2,
+      detail: `${openThreads} открыто из ${threads.length}`,
+    },
+    {
+      key: 'responsiveness',
+      label: 'Отзывчивость',
+      score: responsiveness,
+      weight: 0.2,
+      detail: `${unanswered} обсуждений без единого ответа`,
+    },
+    {
+      key: 'spread',
+      label: 'Распределение нагрузки',
+      score: spread,
+      weight: 0.2,
+      detail: `на топ-1 участника приходится ${top1.toFixed(0)}% работы`,
+    },
+    {
+      key: 'freshness',
+      label: 'Свежесть файлов',
+      score: freshness,
+      weight: 0.15,
+      detail: `${staleFiles} файлов давно не менялись из ${totalFiles}`,
+    },
+  ]
+
+  const score = factors.reduce((sum, factor) => sum + factor.score * factor.weight, 0)
+  return { score, factors }
+}
+
+/* ---------- когорты удержания ---------- */
+
+/** Когорты по месяцу первого появления: сколько из пришедших тогда людей были
+ * активны спустя N месяцев. Показывает, задерживаются ли люди в пространстве. */
+export function retentionCohorts(events: FigmaEvent[], months = 12) {
+  const firstSeen = new Map<string, string>()
+  const activeMonths = new Map<string, Set<string>>()
+
+  for (const event of events) {
+    if (!event.handle) continue
+    const month = format(new Date(event.ts), 'yyyy-MM')
+    const existing = firstSeen.get(event.handle)
+    if (!existing || month < existing) firstSeen.set(event.handle, month)
+    const set = activeMonths.get(event.handle) ?? new Set<string>()
+    set.add(month)
+    activeMonths.set(event.handle, set)
+  }
+
+  const cohortKeys = [...new Set([...firstSeen.values()])].sort().slice(-months)
+
+  const rows = cohortKeys.map((cohort) => {
+    const members = [...firstSeen.entries()].filter(([, month]) => month === cohort).map(([handle]) => handle)
+    const cells: (number | null)[] = []
+    for (let offset = 0; offset < months; offset += 1) {
+      const [year, month] = cohort.split('-').map(Number)
+      const target = new Date(year, month - 1 + offset, 1)
+      const key = format(target, 'yyyy-MM')
+      if (target.getTime() > Date.now()) {
+        cells.push(null)
+        continue
+      }
+      const retained = members.filter((handle) => activeMonths.get(handle)?.has(key)).length
+      cells.push(members.length === 0 ? 0 : (retained / members.length) * 100)
+    }
+    return { cohort, size: members.length, cells }
+  })
+
+  return rows.reverse()
+}
+
+/* ---------- люди: отзывчивость и переработки ---------- */
+
+export function responseTimeByPerson(threads: ThreadStats[]) {
+  const map = new Map<string, number[]>()
+  for (const thread of threads) {
+    if (thread.responseMs === null) continue
+    // Ответ засчитываем тем, кто участвовал в ветке, кроме её автора.
+    for (const participant of thread.participants) {
+      if (participant === thread.author) continue
+      const list = map.get(participant) ?? []
+      list.push(thread.responseMs)
+      map.set(participant, list)
+    }
+  }
+  return [...map.entries()]
+    .map(([handle, values]) => ({
+      handle,
+      median: percentile(values, 50) ?? 0,
+      count: values.length,
+    }))
+    .filter((entry) => entry.count >= 2)
+    .sort((a, b) => a.median - b.median)
+}
+
+export interface BurnoutRow {
+  handle: string
+  img: string
+  nightShare: number
+  weekendShare: number
+  streak: number
+  perActiveDay: number
+  risk: number
+}
+
+/** Признаки переработок: доля ночной работы, работа в выходные, длинные серии
+ * без перерыва. Это индикатор для разговора, а не диагноз. */
+export function burnoutSignals(people: PersonStats[]): BurnoutRow[] {
+  return people
+    .filter((person) => person.total >= 10)
+    .map((person) => ({
+      handle: person.handle,
+      img: person.img,
+      nightShare: person.nightShare,
+      weekendShare: person.weekendShare,
+      streak: person.streak,
+      perActiveDay: person.perActiveDay,
+      risk: Math.min(
+        100,
+        person.nightShare * 1.2 + person.weekendShare * 1.0 + Math.max(0, person.streak - 10) * 2,
+      ),
+    }))
+    .sort((a, b) => b.risk - a.risk)
+}
+
+/* ---------- файлы: жизненный цикл ---------- */
+
+export type FileStage = 'active' | 'slowing' | 'frozen' | 'dead'
+
+export function fileLifecycle(
+  events: FigmaEvent[],
+  thresholds = { active: 14, slowing: 45, frozen: 120 },
+) {
+  const last = new Map<string, { name: string; ts: string; count: number }>()
+  for (const event of events) {
+    const existing = last.get(event.fileKey)
+    if (!existing) last.set(event.fileKey, { name: event.fileName, ts: event.ts, count: 1 })
+    else {
+      existing.count += 1
+      if (event.ts > existing.ts) existing.ts = event.ts
+    }
+  }
+
+  const now = Date.now()
+  const rows = [...last.entries()].map(([fileKey, entry]) => {
+    const days = Math.floor((now - new Date(entry.ts).getTime()) / 86400000)
+    const stage: FileStage =
+      days <= thresholds.active
+        ? 'active'
+        : days <= thresholds.slowing
+          ? 'slowing'
+          : days <= thresholds.frozen
+            ? 'frozen'
+            : 'dead'
+    return { fileKey, name: entry.name, lastTs: entry.ts, days, events: entry.count, stage }
+  })
+
+  const buckets: Record<FileStage, number> = { active: 0, slowing: 0, frozen: 0, dead: 0 }
+  for (const row of rows) buckets[row.stage] += 1
+
+  return { rows: rows.sort((a, b) => a.days - b.days), buckets }
+}
+
+export const FILE_STAGE_LABELS: Record<FileStage, string> = {
+  active: 'Активные',
+  slowing: 'Замедляются',
+  frozen: 'Заморожены',
+  dead: 'Мёртвые',
+}
+
+/* ---------- граф связей ---------- */
+
+export function collaborationGraph(events: FigmaEvent[], maxNodes = 12) {
+  const totals = new Map<string, number>()
+  for (const event of events) {
+    if (!event.handle) continue
+    totals.set(event.handle, (totals.get(event.handle) ?? 0) + 1)
+  }
+  const nodes = [...totals.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, maxNodes)
+    .map(([handle, value]) => ({ handle, value }))
+
+  const allowed = new Set(nodes.map((node) => node.handle))
+  const byFile = new Map<string, Set<string>>()
+  for (const event of events) {
+    if (!event.handle || !allowed.has(event.handle)) continue
+    const set = byFile.get(event.fileKey) ?? new Set<string>()
+    set.add(event.handle)
+    byFile.set(event.fileKey, set)
+  }
+
+  const edges = new Map<string, { source: string; target: string; weight: number }>()
+  for (const handles of byFile.values()) {
+    const list = [...handles].sort()
+    for (let i = 0; i < list.length; i += 1) {
+      for (let j = i + 1; j < list.length; j += 1) {
+        const key = `${list[i]}|${list[j]}`
+        const existing = edges.get(key) ?? { source: list[i], target: list[j], weight: 0 }
+        existing.weight += 1
+        edges.set(key, existing)
+      }
+    }
+  }
+
+  return { nodes, edges: [...edges.values()].sort((a, b) => b.weight - a.weight) }
+}
+
+/* ---------- авто-инсайты ---------- */
+
+export type InsightTone = 'good' | 'warning' | 'critical' | 'neutral'
+
+export interface Insight {
+  id: string
+  tone: InsightTone
+  title: string
+  detail: string
+  metric?: string
+}
+
+export interface InsightThresholds {
+  staleDays: number
+  unansweredDays: number
+  concentrationPercent: number
+  dropPercent: number
+  nightSharePercent: number
+}
+
+export const DEFAULT_INSIGHT_THRESHOLDS: InsightThresholds = {
+  staleDays: 45,
+  unansweredDays: 7,
+  concentrationPercent: 55,
+  dropPercent: 25,
+  nightSharePercent: 25,
+}
+
+/** Превращает срезы в человекочитаемые наблюдения. Каждое утверждение
+ * опирается на конкретное число, чтобы его можно было проверить. */
+export function generateInsights(input: {
+  currentEvents: FigmaEvent[]
+  previousEvents: FigmaEvent[]
+  allEvents: FigmaEvent[]
+  people: PersonStats[]
+  threads: ThreadStats[]
+  lifecycle: ReturnType<typeof fileLifecycle>
+  anomalyList: Anomaly[]
+  windowLabel: string
+  previousLabel: string
+  thresholds?: InsightThresholds
+}): Insight[] {
+  const t = input.thresholds ?? DEFAULT_INSIGHT_THRESHOLDS
+  const insights: Insight[] = []
+
+  const delta = deltaPercent(input.currentEvents.length, input.previousEvents.length)
+  if (delta !== null && Math.abs(delta) >= t.dropPercent) {
+    insights.push({
+      id: 'momentum',
+      tone: delta < 0 ? 'warning' : 'good',
+      title: delta < 0 ? `Активность упала на ${Math.abs(delta).toFixed(0)}%` : `Активность выросла на ${delta.toFixed(0)}%`,
+      detail: `${input.currentEvents.length} событий ${input.windowLabel} против ${input.previousEvents.length} ${input.previousLabel}.`,
+      metric: `${delta > 0 ? '+' : ''}${delta.toFixed(0)}%`,
+    })
+  }
+
+  const stuck = input.threads.filter(
+    (thread) => !thread.resolvedAt && thread.replies === 0 && thread.ageDays >= t.unansweredDays,
+  )
+  if (stuck.length > 0) {
+    insights.push({
+      id: 'unanswered',
+      tone: stuck.length > 5 ? 'critical' : 'warning',
+      title: `${stuck.length} обсуждений висят без ответа`,
+      detail: `Дольше всех — «${(stuck[0].message || 'без текста').slice(0, 60)}» в файле ${stuck[0].fileName}, ${stuck[0].ageDays} дн.`,
+      metric: String(stuck.length),
+    })
+  }
+
+  const top1 = concentration(input.people, 1)
+  if (top1 !== null && top1 >= t.concentrationPercent) {
+    insights.push({
+      id: 'concentration',
+      tone: 'warning',
+      title: `${top1.toFixed(0)}% работы делает один человек`,
+      detail: `${input.people[0]?.handle ?? '—'} отвечает за большую часть активности. Уход этого человека заметно ударит по пространству.`,
+      metric: `${top1.toFixed(0)}%`,
+    })
+  }
+
+  const dead = input.lifecycle.rows.filter((row) => row.days >= t.staleDays)
+  if (dead.length > 0) {
+    insights.push({
+      id: 'stale',
+      tone: 'neutral',
+      title: `${dead.length} файлов не менялись ${t.staleDays}+ дней`,
+      detail: `Самый заброшенный — «${dead[dead.length - 1].name}», ${dead[dead.length - 1].days} дн. без изменений.`,
+      metric: String(dead.length),
+    })
+  }
+
+  const overworked = input.people.filter(
+    (person) => person.total >= 10 && person.nightShare >= t.nightSharePercent,
+  )
+  if (overworked.length > 0) {
+    insights.push({
+      id: 'night',
+      tone: 'warning',
+      title: `${overworked.length} человек часто работают ночью`,
+      detail: `У ${overworked[0].handle} ${overworked[0].nightShare.toFixed(0)}% событий приходится на ночные часы.`,
+      metric: `${overworked[0].nightShare.toFixed(0)}%`,
+    })
+  }
+
+  for (const anomaly of input.anomalyList.slice(0, 2)) {
+    insights.push({
+      id: `anomaly-${anomaly.label}`,
+      tone: anomaly.direction === 'down' ? 'warning' : 'neutral',
+      title:
+        anomaly.direction === 'down'
+          ? `Провал активности: ${anomaly.label}`
+          : `Всплеск активности: ${anomaly.label}`,
+      detail: `${anomaly.value} событий против ожидаемых ~${anomaly.expected.toFixed(0)} — отклонение ${Math.abs(anomaly.z).toFixed(1)}σ.`,
+      metric: String(anomaly.value),
+    })
+  }
+
+  const resolvedFast = input.threads.filter(
+    (thread) => thread.resolveMs !== null && thread.resolveMs < 86400000,
+  ).length
+  if (input.threads.length > 0 && resolvedFast / input.threads.length > 0.5) {
+    insights.push({
+      id: 'fast-closure',
+      tone: 'good',
+      title: 'Обсуждения закрываются быстро',
+      detail: `${Math.round((resolvedFast / input.threads.length) * 100)}% веток закрываются в течение суток.`,
+      metric: `${Math.round((resolvedFast / input.threads.length) * 100)}%`,
+    })
+  }
+
+  const newPeople = newcomers(input.allEvents, new Date(Date.now() - 30 * 86400000))
+  if (newPeople.length > 0) {
+    insights.push({
+      id: 'newcomers',
+      tone: 'good',
+      title: `${newPeople.length} новых участников за 30 дней`,
+      detail: newPeople.slice(0, 4).join(', '),
+      metric: String(newPeople.length),
+    })
+  }
+
+  if (insights.length === 0) {
+    insights.push({
+      id: 'calm',
+      tone: 'good',
+      title: 'Аномалий не обнаружено',
+      detail: 'Активность, обсуждения и распределение нагрузки в пределах обычного для этого пространства.',
+    })
+  }
+
+  return insights
 }

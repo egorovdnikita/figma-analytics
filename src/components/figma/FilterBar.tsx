@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { format, subDays, subMonths, subYears, startOfYear } from 'date-fns'
-import type { FigmaEvent, FigmaEventKind, FigmaTeamRef } from '@/types'
+import type { FigmaEvent, FigmaEventKind, FigmaFilterPreset, FigmaTeamRef } from '@/types'
 import { Button, Checkbox, Input, Modal, Segmented, Select } from '@/components/ui'
 import { AppIcon } from '@/components/AppIcon'
 import { cn } from '@/lib/cn'
@@ -34,6 +34,11 @@ export function FilterBar({
   events,
   teams,
   windowLabel,
+  presets,
+  onSavePreset,
+  onDeletePreset,
+  matchedCount,
+  totalCount,
 }: {
   filters: FigmaFilters
   onChange: (next: FigmaFilters) => void
@@ -41,9 +46,15 @@ export function FilterBar({
   events: FigmaEvent[]
   teams: FigmaTeamRef[]
   windowLabel: string
+  presets: FigmaFilterPreset[]
+  onSavePreset: (name: string) => void
+  onDeletePreset: (id: string) => void
+  matchedCount: number
+  totalCount: number
 }) {
   const [open, setOpen] = useState(false)
   const [preset, setPreset] = useState('rolling')
+  const [presetName, setPresetName] = useState('')
 
   const projects = useMemo(() => {
     const map = new Map<string, string>()
@@ -114,6 +125,30 @@ export function FilterBar({
             : `сравнение ${windowLabel}`}
         </span>
 
+        <span className="text-[11px] text-faint [font-variant-numeric:tabular-nums]">
+          {matchedCount.toLocaleString('ru')} из {totalCount.toLocaleString('ru')} событий
+        </span>
+
+        {presets.length > 0 ? (
+          <div className="w-[170px]">
+            <Select
+              value=""
+              onChange={(event) => {
+                const found = presets.find((item) => item.id === event.target.value)
+                if (found) onChange(found.filters as FigmaFilters)
+              }}
+              className="h-8 text-[12px]"
+            >
+              <option value="">Сохранённые наборы…</option>
+              {presets.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        ) : null}
+
         <div className="ml-auto flex items-center gap-2">
           {filtersActive(filters) ? (
             <Button variant="ghost" size="sm" onClick={() => { setPreset('rolling'); onChange({ ...DEFAULT_FILTERS, granularity: filters.granularity }) }}>
@@ -173,6 +208,54 @@ export function FilterBar({
             <p className="mt-1.5 text-[11px] text-muted">
               Пусто — используется скользящее окно выбранной гранулярности.
             </p>
+          </section>
+
+          <section>
+            <h4 className="mb-2 text-[12px] font-semibold text-ink">Сохранённые наборы</h4>
+            <p className="mb-2 text-[11px] text-muted">
+              Текущая комбинация фильтров сохраняется под именем и остаётся доступной после перезапуска.
+            </p>
+            <div className="flex items-center gap-2">
+              <Input
+                value={presetName}
+                onChange={(event) => setPresetName(event.target.value)}
+                placeholder="Название набора"
+                className="h-9 text-[12px]"
+              />
+              <Button
+                variant="soft"
+                size="sm"
+                disabled={!presetName.trim()}
+                onClick={() => {
+                  onSavePreset(presetName.trim())
+                  setPresetName('')
+                }}
+              >
+                Сохранить
+              </Button>
+            </div>
+            {presets.length > 0 ? (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {presets.map((item) => (
+                  <span
+                    key={item.id}
+                    className="flex h-7 items-center gap-1.5 rounded-chip bg-[var(--sunken)] px-2.5 text-[12px] text-muted"
+                  >
+                    <button type="button" onClick={() => onChange(item.filters as FigmaFilters)} className="hover:text-ink">
+                      {item.name}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDeletePreset(item.id)}
+                      className="text-faint hover:text-ink"
+                      aria-label={`Удалить набор ${item.name}`}
+                    >
+                      <AppIcon name="X" size={11} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            ) : null}
           </section>
 
           <section>

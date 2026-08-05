@@ -227,6 +227,25 @@ export interface FigmaDirectoryPerson {
   hidden: boolean
 }
 
+export interface FigmaInsightThresholds {
+  staleDays: number
+  unansweredDays: number
+  concentrationPercent: number
+  dropPercent: number
+  nightSharePercent: number
+}
+
+export interface FigmaFilterPreset {
+  id: string
+  name: string
+  filters: unknown
+}
+
+export interface FigmaPinnedFile {
+  key: string
+  name: string
+}
+
 export interface FigmaPrefs {
   workdayStart: number
   workdayEnd: number
@@ -236,6 +255,12 @@ export interface FigmaPrefs {
   timelineBuckets: { day: number; week: number; month: number; year: number }
   syncDepthPages: number
   syncConcurrency: number
+  density: 'compact' | 'comfortable'
+  defaultSection: string
+  tablesByDefault: boolean
+  insightThresholds: FigmaInsightThresholds
+  filterPresets: FigmaFilterPreset[]
+  pinnedFiles: FigmaPinnedFile[]
 }
 
 export interface FigmaCacheStats {

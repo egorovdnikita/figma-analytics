@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { cn } from '@/lib/cn'
@@ -25,6 +34,20 @@ export function useMeasure<T extends HTMLElement>() {
   return { ref, width }
 }
 
+/* ---------- общие настройки отображения ---------- */
+
+const VizPrefsContext = createContext<{ tablesByDefault: boolean }>({ tablesByDefault: false })
+
+export function VizPrefsProvider({
+  tablesByDefault,
+  children,
+}: {
+  tablesByDefault: boolean
+  children: ReactNode
+}) {
+  return <VizPrefsContext.Provider value={{ tablesByDefault }}>{children}</VizPrefsContext.Provider>
+}
+
 /* ---------- каркас карточки ---------- */
 
 export function ChartCard({
@@ -47,7 +70,15 @@ export function ChartCard({
   children: ReactNode
   className?: string
 }) {
-  const [showTable, setShowTable] = useState(false)
+  const { tablesByDefault } = useContext(VizPrefsContext)
+  const [showTable, setShowTable] = useState(tablesByDefault && Boolean(table))
+
+  // Переключатель в настройках меняет режим уже открытых карточек, но ручной
+  // выбор внутри карточки остаётся за пользователем до следующей смены настройки.
+  useEffect(() => {
+    setShowTable(tablesByDefault && Boolean(table))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tablesByDefault])
 
   return (
     <section className={cn('viz rounded-card bg-surface p-4', className)}>
@@ -1157,5 +1188,514 @@ export function DualLine({
         { name: previousLabel, color: 'var(--viz-2)', points: points.map((p) => ({ label: p.label, value: p.lastYear })) },
       ]}
     />
+  )
+}
+
+/* ---------- кольцевой индикатор с разбором факторов ---------- */
+
+export function HealthRing({
+  score,
+  factors,
+  size = 150,
+}: {
+  score: number
+  factors: { key: string; label: string; score: number; detail: string }[]
+  size?: number
+}) {
+  const radius = size / 2
+  const thickness = 14
+  const inner = radius - thickness
+  const circumference = 2 * Math.PI * ((radius + inner) / 2)
+  const filled = (Math.max(0, Math.min(100, score)) / 100) * circumference
+
+  const tone = score >= 70 ? 'var(--viz-good)' : score >= 45 ? 'var(--viz-4)' : 'var(--viz-bad)'
+
+  return (
+    <div className="flex items-center gap-5">
+      <svg width={size} height={size} role="img" className="shrink-0 -rotate-90">
+        <circle
+          cx={radius}
+          cy={radius}
+          r={(radius + inner) / 2}
+          fill="none"
+          stroke="var(--viz-seq-1)"
+          strokeWidth={thickness}
+        />
+        <circle
+          cx={radius}
+          cy={radius}
+          r={(radius + inner) / 2}
+          fill="none"
+          stroke={tone}
+          strokeWidth={thickness}
+          strokeLinecap="round"
+          strokeDasharray={`${filled} ${circumference}`}
+        />
+        <text
+          x={radius}
+          y={radius - 2}
+          textAnchor="middle"
+          className="fill-[var(--ink)] text-[26px] font-bold"
+          transform={`rotate(90 ${radius} ${radius})`}
+        >
+          {Math.round(score)}
+        </text>
+        <text
+          x={radius}
+          y={radius + 16}
+          textAnchor="middle"
+          className="fill-[var(--viz-muted)] text-[10px]"
+          transform={`rotate(90 ${radius} ${radius})`}
+        >
+          из 100
+        </text>
+      </svg>
+
+      <ul className="min-w-0 flex-1 space-y-2">
+        {factors.map((factor) => (
+          <li key={factor.key}>
+            <div className="mb-1 flex items-baseline justify-between gap-2 text-[12px]">
+              <span className="truncate text-ink">{factor.label}</span>
+              <span className="shrink-0 text-muted [font-variant-numeric:tabular-nums]">
+                {Math.round(factor.score)}
+              </span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-[3px] bg-[var(--sunken)]">
+              <div
+                className="h-full rounded-[3px]"
+                style={{
+                  width: `${Math.max(2, Math.min(100, factor.score))}%`,
+                  background:
+                    factor.score >= 70 ? 'var(--viz-good)' : factor.score >= 45 ? 'var(--viz-4)' : 'var(--viz-bad)',
+                }}
+              />
+            </div>
+            <p className="mt-0.5 truncate text-[10.5px] text-faint" title={factor.detail}>
+              {factor.detail}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+/* ---------- гистограмма распределения ---------- */
+
+export function Histogram({
+  values,
+  bins = 12,
+  formatBin,
+  height = 170,
+  color = 'var(--viz-1)',
+}: {
+  values: number[]
+  bins?: number
+  formatBin?: (value: number) => string
+  height?: number
+  color?: string
+}) {
+  const { ref, width } = useMeasure<HTMLDivElement>()
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+
+  if (values.length === 0) {
+    return <p className="text-[12px] text-muted">Недостаточно данных</p>
+  }
+
+  const max = Math.max(...values)
+  const min = Math.min(...values)
+  const span = max - min || 1
+  const step = span / bins
+
+  const counts = new Array(bins).fill(0) as number[]
+  for (const value of values) {
+    const index = Math.min(bins - 1, Math.floor((value - min) / step))
+    counts[index] += 1
+  }
+  const peak = Math.max(1, ...counts)
+
+  const gutter = 30
+  const plotW = Math.max(0, width - gutter - 8)
+  const plotH = height - AXIS_BAND - PAD_TOP
+  const band = plotW / bins
+  const barW = Math.min(24, band * 0.78)
+
+  return (
+    <div ref={ref} className="relative">
+      {width > 0 ? (
+        <svg width={width} height={height} role="img">
+          {niceTicks(peak, 3).map((tick) => (
+            <g key={tick}>
+              <line
+                x1={gutter}
+                x2={gutter + plotW}
+                y1={PAD_TOP + plotH - (tick / peak) * plotH}
+                y2={PAD_TOP + plotH - (tick / peak) * plotH}
+                stroke="var(--viz-grid)"
+                strokeWidth={1}
+              />
+              <text
+                x={gutter - 6}
+                y={PAD_TOP + plotH - (tick / peak) * plotH + 3.5}
+                textAnchor="end"
+                className="fill-[var(--viz-muted)] text-[10px] [font-variant-numeric:tabular-nums]"
+              >
+                {tick}
+              </text>
+            </g>
+          ))}
+
+          {counts.map((count, index) => {
+            const h = (count / peak) * plotH
+            const x = gutter + index * band + (band - barW) / 2
+            return (
+              <g key={index}>
+                <rect x={gutter + index * band} y={PAD_TOP} width={band} height={plotH} fill="transparent" />
+                <path
+                  d={columnPath(x, PAD_TOP + plotH - h, barW, h)}
+                  fill={color}
+                  onMouseEnter={(event) => {
+                    const rect = (event.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect()
+                    const from = min + index * step
+                    const to = from + step
+                    setTooltip({
+                      x: x + barW / 2,
+                      y: event.clientY - rect.top,
+                      content: `${formatBin ? formatBin(from) : from.toFixed(0)} — ${formatBin ? formatBin(to) : to.toFixed(0)}: ${count}`,
+                    })
+                  }}
+                  onMouseLeave={() => setTooltip(null)}
+                />
+              </g>
+            )
+          })}
+
+          {[0, Math.floor(bins / 2), bins - 1].map((index) => (
+            <text
+              key={index}
+              x={gutter + index * band + band / 2}
+              y={height - 6}
+              textAnchor="middle"
+              className="fill-[var(--viz-muted)] text-[10px]"
+            >
+              {formatBin ? formatBin(min + index * step) : (min + index * step).toFixed(0)}
+            </text>
+          ))}
+        </svg>
+      ) : (
+        <div style={{ height }} />
+      )}
+      <Tooltip state={tooltip} width={width} />
+    </div>
+  )
+}
+
+/* ---------- прогноз с коридором ---------- */
+
+export function ForecastChart({
+  points,
+  height = 200,
+}: {
+  points: { label: string; value: number | null; predicted: number | null; low: number | null; high: number | null }[]
+  height?: number
+}) {
+  const { ref, width } = useMeasure<HTMLDivElement>()
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+
+  const all = points.flatMap((point) => [point.value, point.high, point.predicted].filter((v): v is number => v !== null))
+  const max = Math.max(1, ...all)
+  const ticks = niceTicks(max)
+  const top = ticks[ticks.length - 1] || 1
+
+  const gutter = 34
+  const plotW = Math.max(0, width - gutter - 8)
+  const plotH = height - AXIS_BAND - PAD_TOP
+  const stepX = points.length > 1 ? plotW / (points.length - 1) : 0
+  const xAt = (i: number) => gutter + i * stepX
+  const yAt = (value: number) => PAD_TOP + plotH - (value / top) * plotH
+
+  const bandPath = (() => {
+    const withBand = points.map((point, index) => ({ point, index })).filter((entry) => entry.point.high !== null)
+    if (withBand.length < 2) return ''
+    const upper = withBand.map((entry) => `${xAt(entry.index)},${yAt(entry.point.high as number)}`)
+    const lower = [...withBand].reverse().map((entry) => `${xAt(entry.index)},${yAt(entry.point.low as number)}`)
+    return `M${upper.join(' L')} L${lower.join(' L')} Z`
+  })()
+
+  const factPath = points
+    .map((point, index) => (point.value === null ? null : `${xAt(index)},${yAt(point.value)}`))
+    .filter(Boolean)
+    .map((coord, index) => `${index === 0 ? 'M' : 'L'}${coord}`)
+    .join(' ')
+
+  const predictedPath = points
+    .map((point, index) => (point.predicted === null ? null : `${xAt(index)},${yAt(point.predicted)}`))
+    .filter(Boolean)
+    .map((coord, index) => `${index === 0 ? 'M' : 'L'}${coord}`)
+    .join(' ')
+
+  return (
+    <div ref={ref} className="relative">
+      {width > 0 ? (
+        <svg
+          width={width}
+          height={height}
+          role="img"
+          onMouseMove={(event) => {
+            const rect = event.currentTarget.getBoundingClientRect()
+            const index = Math.max(0, Math.min(points.length - 1, Math.round((event.clientX - rect.left - gutter) / stepX)))
+            const point = points[index]
+            setTooltip({
+              x: xAt(index),
+              y: event.clientY - rect.top,
+              content:
+                point.value !== null
+                  ? `${point.label}: ${point.value}`
+                  : `${point.label}: прогноз ~${Math.round(point.predicted ?? 0)} (${Math.round(point.low ?? 0)}–${Math.round(point.high ?? 0)})`,
+            })
+          }}
+          onMouseLeave={() => setTooltip(null)}
+        >
+          {ticks.map((tick) => (
+            <g key={tick}>
+              <line x1={gutter} x2={gutter + plotW} y1={yAt(tick)} y2={yAt(tick)} stroke="var(--viz-grid)" strokeWidth={1} />
+              <text x={gutter - 6} y={yAt(tick) + 3.5} textAnchor="end" className="fill-[var(--viz-muted)] text-[10px] [font-variant-numeric:tabular-nums]">
+                {formatCompact(tick)}
+              </text>
+            </g>
+          ))}
+
+          {bandPath ? <path d={bandPath} fill="var(--viz-2)" opacity={0.12} /> : null}
+          {predictedPath ? (
+            <path d={predictedPath} fill="none" stroke="var(--viz-2)" strokeWidth={2} strokeLinecap="round" />
+          ) : null}
+          {factPath ? <path d={factPath} fill="none" stroke="var(--viz-1)" strokeWidth={2} strokeLinecap="round" /> : null}
+
+          {points.map((point, index) =>
+            index % Math.ceil(points.length / 7 || 1) === 0 ? (
+              <text key={index} x={xAt(index)} y={height - 6} textAnchor="middle" className="fill-[var(--viz-muted)] text-[10px]">
+                {point.label}
+              </text>
+            ) : null,
+          )}
+        </svg>
+      ) : (
+        <div style={{ height }} />
+      )}
+      <Tooltip state={tooltip} width={width} />
+    </div>
+  )
+}
+
+/* ---------- сетка когорт удержания ---------- */
+
+export function CohortGrid({
+  rows,
+  months = 12,
+}: {
+  rows: { cohort: string; size: number; cells: (number | null)[] }[]
+  months?: number
+}) {
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+  const { ref, width } = useMeasure<HTMLDivElement>()
+
+  const step = (value: number | null) => {
+    if (value === null) return 'transparent'
+    if (value === 0) return 'var(--viz-seq-0)'
+    if (value <= 20) return 'var(--viz-seq-1)'
+    if (value <= 40) return 'var(--viz-seq-2)'
+    if (value <= 60) return 'var(--viz-seq-3)'
+    if (value <= 75) return 'var(--viz-seq-4)'
+    if (value <= 90) return 'var(--viz-seq-5)'
+    return 'var(--viz-seq-6)'
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      <div className="scroll-thin overflow-x-auto">
+        <div className="min-w-[520px]">
+          <div className="mb-1 flex gap-1 pl-[104px] text-[10px] text-muted">
+            {Array.from({ length: months }, (_, index) => (
+              <span key={index} className="flex-1 text-center">
+                +{index}
+              </span>
+            ))}
+          </div>
+          <div className="space-y-1">
+            {rows.map((row) => (
+              <div key={row.cohort} className="flex items-center gap-1">
+                <span className="w-[64px] shrink-0 text-[10.5px] text-ink [font-variant-numeric:tabular-nums]">
+                  {row.cohort}
+                </span>
+                <span className="w-[36px] shrink-0 text-right text-[10.5px] text-muted [font-variant-numeric:tabular-nums]">
+                  {row.size}
+                </span>
+                {row.cells.slice(0, months).map((cell, index) => (
+                  <div
+                    key={index}
+                    className="h-6 flex-1 rounded-[3px]"
+                    style={{ background: step(cell) }}
+                    onMouseEnter={(event) => {
+                      if (cell === null) return
+                      const parent = event.currentTarget.closest('.relative') as HTMLElement | null
+                      const rect = event.currentTarget.getBoundingClientRect()
+                      const parentRect = parent?.getBoundingClientRect()
+                      setTooltip({
+                        x: rect.left - (parentRect?.left ?? 0),
+                        y: rect.top - (parentRect?.top ?? 0),
+                        content: `${row.cohort}, +${index} мес: ${cell.toFixed(0)}% из ${row.size}`,
+                      })
+                    }}
+                    onMouseLeave={() => setTooltip(null)}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <Tooltip state={tooltip} width={width} />
+    </div>
+  )
+}
+
+/* ---------- граф связей ---------- */
+
+export function NetworkGraph({
+  nodes,
+  edges,
+  height = 300,
+  onSelect,
+}: {
+  nodes: { handle: string; value: number }[]
+  edges: { source: string; target: string; weight: number }[]
+  height?: number
+  onSelect?: (handle: string) => void
+}) {
+  const { ref, width } = useMeasure<HTMLDivElement>()
+  const [hover, setHover] = useState<string | null>(null)
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+
+  if (nodes.length === 0) {
+    return <p className="text-[12px] text-muted">Недостаточно данных для графа</p>
+  }
+
+  // Раскладка по кругу: детерминированная и читаемая, в отличие от
+  // силовой — та на каждом рендере даёт новую картинку.
+  const cx = width / 2
+  const cy = height / 2
+  const radius = Math.min(width, height) / 2 - 46
+  const positions = new Map(
+    nodes.map((node, index) => {
+      const angle = (index / nodes.length) * Math.PI * 2 - Math.PI / 2
+      return [node.handle, { x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius }]
+    }),
+  )
+
+  const maxWeight = Math.max(1, ...edges.map((edge) => edge.weight))
+  const maxValue = Math.max(1, ...nodes.map((node) => node.value))
+
+  return (
+    <div ref={ref} className="relative">
+      {width > 0 ? (
+        <svg width={width} height={height} role="img">
+          {edges.map((edge) => {
+            const a = positions.get(edge.source)
+            const b = positions.get(edge.target)
+            if (!a || !b) return null
+            const active = hover === null || hover === edge.source || hover === edge.target
+            return (
+              <line
+                key={`${edge.source}|${edge.target}`}
+                x1={a.x}
+                y1={a.y}
+                x2={b.x}
+                y2={b.y}
+                stroke="var(--viz-1)"
+                strokeWidth={1 + (edge.weight / maxWeight) * 3}
+                opacity={active ? 0.35 : 0.07}
+              />
+            )
+          })}
+
+          {nodes.map((node) => {
+            const position = positions.get(node.handle)!
+            const r = 6 + (node.value / maxValue) * 12
+            const active = hover === null || hover === node.handle
+            return (
+              <g
+                key={node.handle}
+                opacity={active ? 1 : 0.3}
+                className={onSelect ? 'cursor-pointer' : undefined}
+                onMouseEnter={(event) => {
+                  const rect = (event.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect()
+                  setHover(node.handle)
+                  const links = edges.filter((edge) => edge.source === node.handle || edge.target === node.handle)
+                  setTooltip({
+                    x: position.x,
+                    y: event.clientY - rect.top,
+                    content: `${node.handle} · ${node.value} событий · связей: ${links.length}`,
+                  })
+                }}
+                onMouseLeave={() => {
+                  setHover(null)
+                  setTooltip(null)
+                }}
+                onClick={() => onSelect?.(node.handle)}
+              >
+                <circle cx={position.x} cy={position.y} r={r} fill="var(--viz-1)" stroke="var(--viz-surface)" strokeWidth={2} />
+                <text
+                  x={position.x}
+                  y={position.y + r + 12}
+                  textAnchor="middle"
+                  className="fill-[var(--ink)] text-[10px]"
+                >
+                  {node.handle.length > 12 ? `${node.handle.slice(0, 11)}…` : node.handle}
+                </text>
+              </g>
+            )
+          })}
+        </svg>
+      ) : (
+        <div style={{ height }} />
+      )}
+      <Tooltip state={tooltip} width={width} />
+    </div>
+  )
+}
+
+/* ---------- воронка стадий ---------- */
+
+export function StageFunnel({
+  stages,
+}: {
+  stages: { label: string; value: number; color: string }[]
+}) {
+  const total = stages.reduce((sum, stage) => sum + stage.value, 0)
+  return (
+    <div className="space-y-2">
+      {stages.map((stage) => (
+        <div key={stage.label}>
+          <div className="mb-1 flex items-baseline justify-between text-[12px]">
+            <span className="flex items-center gap-1.5 text-ink">
+              <span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: stage.color }} />
+              {stage.label}
+            </span>
+            <span className="text-muted [font-variant-numeric:tabular-nums]">
+              {stage.value} · {total > 0 ? Math.round((stage.value / total) * 100) : 0}%
+            </span>
+          </div>
+          <div className="h-3 overflow-hidden rounded-[4px] bg-[var(--sunken)]">
+            <div
+              className="h-full rounded-[4px]"
+              style={{
+                width: stage.value > 0 && total > 0 ? `${Math.max(2, (stage.value / total) * 100)}%` : '0%',
+                background: stage.color,
+              }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }

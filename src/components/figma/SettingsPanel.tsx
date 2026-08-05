@@ -19,10 +19,12 @@ const HOURS = Array.from({ length: 24 }, (_, hour) => hour)
 
 export function SettingsPanel({
   user,
+  sections,
   onDataChanged,
   onDisconnect,
 }: {
   user: FigmaUser
+  sections: { value: string; label: string }[]
   onDataChanged: () => void
   onDisconnect: () => void
 }) {
@@ -235,6 +237,143 @@ export function SettingsPanel({
                 max={12}
                 value={prefs.syncConcurrency}
                 onChange={(event) => void patch({ syncConcurrency: Number(event.target.value) || 1 })}
+                className="h-9 text-[12px]"
+              />
+            </Field>
+          </div>
+        </section>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <section className="rounded-card bg-surface p-4">
+          <h3 className="mb-1 text-[13px] font-semibold text-ink">Интерфейс</h3>
+          <p className="mb-4 text-[11px] leading-relaxed text-muted">
+            Плотность, стартовый раздел и режим отображения карточек.
+          </p>
+
+          <div className="space-y-3">
+            <Field label="Плотность">
+              <Select
+                value={prefs.density}
+                onChange={(event) => void patch({ density: event.target.value as 'compact' | 'comfortable' })}
+                className="h-9 text-[12px]"
+              >
+                <option value="comfortable">Просторная</option>
+                <option value="compact">Компактная</option>
+              </Select>
+            </Field>
+
+            <Field label="Раздел при открытии">
+              <Select
+                value={prefs.defaultSection}
+                onChange={(event) => void patch({ defaultSection: event.target.value })}
+                className="h-9 text-[12px]"
+              >
+                {sections.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+
+            <Checkbox
+              checked={prefs.tablesByDefault}
+              onChange={() => void patch({ tablesByDefault: !prefs.tablesByDefault })}
+              label="Открывать карточки сразу таблицей значений"
+            />
+          </div>
+        </section>
+
+        <section className="rounded-card bg-surface p-4">
+          <h3 className="mb-1 text-[13px] font-semibold text-ink">Пороги инсайтов</h3>
+          <p className="mb-4 text-[11px] leading-relaxed text-muted">
+            С какого момента наблюдение попадает в раздел «Инсайты» как отдельный вывод.
+          </p>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Файл заброшен, дней">
+              <Input
+                type="number"
+                min={1}
+                max={365}
+                value={prefs.insightThresholds.staleDays}
+                onChange={(event) =>
+                  void patch({
+                    insightThresholds: {
+                      ...prefs.insightThresholds,
+                      staleDays: Number(event.target.value) || 1,
+                    },
+                  })
+                }
+                className="h-9 text-[12px]"
+              />
+            </Field>
+            <Field label="Без ответа, дней">
+              <Input
+                type="number"
+                min={1}
+                max={180}
+                value={prefs.insightThresholds.unansweredDays}
+                onChange={(event) =>
+                  void patch({
+                    insightThresholds: {
+                      ...prefs.insightThresholds,
+                      unansweredDays: Number(event.target.value) || 1,
+                    },
+                  })
+                }
+                className="h-9 text-[12px]"
+              />
+            </Field>
+            <Field label="Концентрация, %">
+              <Input
+                type="number"
+                min={10}
+                max={100}
+                value={prefs.insightThresholds.concentrationPercent}
+                onChange={(event) =>
+                  void patch({
+                    insightThresholds: {
+                      ...prefs.insightThresholds,
+                      concentrationPercent: Number(event.target.value) || 10,
+                    },
+                  })
+                }
+                className="h-9 text-[12px]"
+              />
+            </Field>
+            <Field label="Значимое изменение, %">
+              <Input
+                type="number"
+                min={5}
+                max={100}
+                value={prefs.insightThresholds.dropPercent}
+                onChange={(event) =>
+                  void patch({
+                    insightThresholds: {
+                      ...prefs.insightThresholds,
+                      dropPercent: Number(event.target.value) || 5,
+                    },
+                  })
+                }
+                className="h-9 text-[12px]"
+              />
+            </Field>
+            <Field label="Ночная работа, %">
+              <Input
+                type="number"
+                min={5}
+                max={100}
+                value={prefs.insightThresholds.nightSharePercent}
+                onChange={(event) =>
+                  void patch({
+                    insightThresholds: {
+                      ...prefs.insightThresholds,
+                      nightSharePercent: Number(event.target.value) || 5,
+                    },
+                  })
+                }
                 className="h-9 text-[12px]"
               />
             </Field>

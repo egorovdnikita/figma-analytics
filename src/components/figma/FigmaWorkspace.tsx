@@ -10,6 +10,7 @@ import type {
 import { ipc, BoxUiError } from '@/lib/ipc'
 import { Avatar, Button, Spinner } from '@/components/ui'
 import { AppIcon } from '@/components/AppIcon'
+import { cn } from '@/lib/cn'
 import {
   AnalyticsPrefs,
   DEFAULT_FILTERS,
@@ -18,11 +19,15 @@ import {
   TIMELINE_BUCKETS,
   WINDOW_LABEL,
   applyFilters,
+  perPersonStats,
 } from './analytics'
 import { FilterBar } from './FilterBar'
-import { FigmaSidebar } from './FigmaSidebar'
+import { FigmaSidebar, type SectionItem } from './FigmaSidebar'
+import { CommandPalette, type Command } from './CommandPalette'
+import { VizPrefsProvider } from './charts'
 import { FigmaFileDetail } from './FigmaFileDetail'
 import { DashboardPanel } from './DashboardPanel'
+import { InsightsPanel } from './InsightsPanel'
 import { TrendsPanel } from './TrendsPanel'
 import { PeoplePanel } from './PeoplePanel'
 import { ThreadsPanel } from './ThreadsPanel'
@@ -31,29 +36,42 @@ import { FilesPanel } from './FilesPanel'
 import { LibraryPanel } from './LibraryPanel'
 import { SettingsPanel } from './SettingsPanel'
 
-type Section = 'dashboard' | 'trends' | 'people' | 'threads' | 'activity' | 'files' | 'library' | 'settings'
+type Section =
+  | 'insights'
+  | 'dashboard'
+  | 'trends'
+  | 'people'
+  | 'threads'
+  | 'activity'
+  | 'files'
+  | 'library'
+  | 'settings'
 
-const SECTIONS: { value: Section; label: string; icon: React.ComponentProps<typeof AppIcon>['name'] }[] = [
-  { value: 'dashboard', label: 'Дашборд', icon: 'AlignLeft' },
-  { value: 'trends', label: 'Тренды', icon: 'ArrowRight' },
-  { value: 'people', label: 'Люди', icon: 'Users' },
-  { value: 'threads', label: 'Обсуждения', icon: 'MessageSquare' },
-  { value: 'activity', label: 'Активность', icon: 'Clock' },
-  { value: 'files', label: 'Файлы', icon: 'CalendarDays' },
-  { value: 'library', label: 'Библиотека', icon: 'ShieldCheck' },
-  { value: 'settings', label: 'Настройки', icon: 'KeyRound' },
+const SECTIONS: SectionItem<Section>[] = [
+  { value: 'insights', label: 'Инсайты', icon: 'Bell', group: 'Обзор' },
+  { value: 'dashboard', label: 'Дашборд', icon: 'AlignLeft', group: 'Обзор' },
+  { value: 'trends', label: 'Тренды', icon: 'ArrowRight', group: 'Обзор' },
+  { value: 'people', label: 'Люди', icon: 'Users', group: 'Разрезы' },
+  { value: 'threads', label: 'Обсуждения', icon: 'MessageSquare', group: 'Разрезы' },
+  { value: 'files', label: 'Файлы', icon: 'CalendarDays', group: 'Разрезы' },
+  { value: 'library', label: 'Библиотека', icon: 'ShieldCheck', group: 'Разрезы' },
+  { value: 'activity', label: 'Активность', icon: 'Clock', group: 'Данные' },
+  { value: 'settings', label: 'Настройки', icon: 'KeyRound', group: 'Данные' },
 ]
 
 export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisconnect: () => void }) {
-  const [section, setSection] = useState<Section>('dashboard')
+  const [section, setSection] = useState<Section>('insights')
   const [selectedFile, setSelectedFile] = useState<{ key: string; name: string } | null>(null)
   const [filters, setFilters] = useState<FigmaFilters>(DEFAULT_FILTERS)
+  const [collapsed, setCollapsed] = useState(false)
+  const [paletteOpen, setPaletteOpen] = useState(false)
 
   const [teams, setTeams] = useState<FigmaTeamRef[]>([])
   const [events, setEvents] = useState<FigmaEvent[]>([])
   const [files, setFiles] = useState<FigmaFileIndexEntry[]>([])
   const [prefs, setPrefs] = useState<FigmaPrefs | null>(null)
   const [loading, setLoading] = useState(true)
+  const [bootstrapped, setBootstrapped] = useState(false)
 
   const [syncing, setSyncing] = useState(false)
   const [progress, setProgress] = useState<FigmaSyncProgress | null>(null)
@@ -76,6 +94,12 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
     setFiles(nextFiles)
     setPrefs(nextPrefs)
     setLoading(false)
+    // Раздел по умолчанию применяем однократно, иначе любой перезапрос данных
+    // выбрасывал бы пользователя обратно на стартовый экран.
+    setBootstrapped((already) => {
+      if (!already) setSection(nextPrefs.defaultSection as Section)
+      return true
+    })
   }, [])
 
   useEffect(() => {
@@ -83,6 +107,17 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
   }, [reload])
 
   useEffect(() => ipc.figmaOnSyncProgress(setProgress), [])
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setPaletteOpen((value) => !value)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   // Настройки рабочего ритма влияют и на метрики, и на таймлайны — прокидываем
   // их в аналитику вместо зашитых констант.
@@ -135,7 +170,87 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
 
   const openFile = (key: string, name: string) => setSelectedFile({ key, name })
 
+  const savePreset = async (name: string) => {
+    const next = [
+      ...(prefs?.filterPresets ?? []),
+      { id: `${Date.now()}`, name, filters: filters as unknown },
+    ]
+    setPrefs(await ipc.figmaSetPrefs({ filterPresets: next }))
+  }
+
+  const deletePreset = async (id: string) => {
+    const next = (prefs?.filterPresets ?? []).filter((item) => item.id !== id)
+    setPrefs(await ipc.figmaSetPrefs({ filterPresets: next }))
+  }
+
+  const togglePin = async (key: string, name: string) => {
+    const current = prefs?.pinnedFiles ?? []
+    const next = current.some((item) => item.key === key)
+      ? current.filter((item) => item.key !== key)
+      : [...current, { key, name }]
+    setPrefs(await ipc.figmaSetPrefs({ pinnedFiles: next }))
+  }
+
+  const commands: Command[] = useMemo(() => {
+    const list: Command[] = SECTIONS.map((item) => ({
+      id: `section-${item.value}`,
+      group: 'Разделы',
+      label: item.label,
+      hint: item.group,
+      icon: item.icon,
+      run: () => {
+        setSection(item.value)
+        setSelectedFile(null)
+      },
+    }))
+
+    list.push({
+      id: 'action-sync',
+      group: 'Действия',
+      label: 'Синхронизировать пространство',
+      icon: 'RefreshCw',
+      run: runSync,
+    })
+    list.push({
+      id: 'action-collapse',
+      group: 'Действия',
+      label: collapsed ? 'Развернуть навигацию' : 'Свернуть навигацию',
+      icon: collapsed ? 'ChevronRight' : 'ChevronLeft',
+      run: () => setCollapsed((value) => !value),
+    })
+
+    for (const file of files.slice(0, 200)) {
+      list.push({
+        id: `file-${file.fileKey}`,
+        group: 'Файлы',
+        label: file.name,
+        hint: file.projectName,
+        icon: 'CalendarDays',
+        run: () => openFile(file.fileKey, file.name),
+      })
+    }
+
+    for (const person of perPersonStats(events, analyticsPrefs).slice(0, 60)) {
+      list.push({
+        id: `person-${person.handle}`,
+        group: 'Участники',
+        label: person.handle,
+        hint: `${person.total} событий`,
+        avatar: person.img,
+        run: () => {
+          setSection('people')
+          setSelectedFile(null)
+        },
+      })
+    }
+
+    return list
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [files, events, analyticsPrefs, collapsed])
+
+  const dense = prefs?.density === 'compact'
   const showFilters = !selectedFile && section !== 'settings' && section !== 'library'
+  const isPinned = selectedFile ? (prefs?.pinnedFiles ?? []).some((item) => item.key === selectedFile.key) : false
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -150,9 +265,6 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
             {syncError}
           </span>
         ) : null}
-        <span className="no-drag text-[11px] text-faint">
-          {events.length > 0 ? `${events.length.toLocaleString('ru')} событий` : ''}
-        </span>
         <Button variant="ghost" size="sm" className="no-drag" onClick={runSync} disabled={syncing}>
           {syncing ? <Spinner className="h-3.5 w-3.5" /> : <AppIcon name="RefreshCw" size={14} />}
           {syncing ? 'Синхронизация…' : 'Синхронизировать'}
@@ -173,6 +285,11 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
           onSelectFile={openFile}
           teams={teams}
           onTeamsChanged={() => void reload()}
+          collapsed={collapsed}
+          onToggleCollapsed={() => setCollapsed((value) => !value)}
+          pinned={prefs?.pinnedFiles ?? []}
+          onUnpin={(key) => void togglePin(key, '')}
+          onOpenPalette={() => setPaletteOpen(true)}
         />
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -183,20 +300,36 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
               events={events}
               teams={teams}
               windowLabel={WINDOW_LABEL[filters.granularity]}
+              presets={prefs?.filterPresets ?? []}
+              onSavePreset={(name) => void savePreset(name)}
+              onDeletePreset={(id) => void deletePreset(id)}
+              matchedCount={scopedEvents.length}
+              totalCount={events.length}
             />
           ) : null}
 
-          <div className="scroll-thin min-h-0 flex-1 overflow-y-auto p-4">
+          <VizPrefsProvider tablesByDefault={prefs?.tablesByDefault ?? false}>
+          <div className={cn('scroll-thin min-h-0 flex-1 overflow-y-auto', dense ? 'p-2' : 'p-4')}>
             {selectedFile ? (
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={() => setSelectedFile(null)}
-                  className="flex h-8 items-center gap-1.5 rounded-control px-2 text-[12px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
-                >
-                  <AppIcon name="ChevronLeft" size={14} />
-                  Назад к аналитике
-                </button>
+              <div className={dense ? 'space-y-2' : 'space-y-3'}>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFile(null)}
+                    className="flex h-8 items-center gap-1.5 rounded-control px-2 text-[12px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
+                  >
+                    <AppIcon name="ChevronLeft" size={14} />
+                    Назад к аналитике
+                  </button>
+                  <Button
+                    variant={isPinned ? 'soft' : 'ghost'}
+                    size="sm"
+                    onClick={() => void togglePin(selectedFile.key, selectedFile.name)}
+                  >
+                    <AppIcon name={isPinned ? 'Check' : 'Plus'} size={14} />
+                    {isPinned ? 'Закреплён' : 'Закрепить'}
+                  </Button>
+                </div>
                 <FigmaFileDetail
                   key={selectedFile.key}
                   fileKey={selectedFile.key}
@@ -209,9 +342,23 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
                 <Spinner className="h-5 w-5" />
               </div>
             ) : section === 'settings' ? (
-              <SettingsPanel user={user} onDataChanged={() => void reload()} onDisconnect={onDisconnect} />
+              <SettingsPanel
+                user={user}
+                sections={SECTIONS.map((item) => ({ value: item.value, label: item.label }))}
+                onDataChanged={() => void reload()}
+                onDisconnect={onDisconnect}
+              />
             ) : events.length === 0 ? (
               <EmptyState onSync={runSync} syncing={syncing} hasTeams={teams.length > 0} />
+            ) : section === 'insights' ? (
+              <InsightsPanel
+                events={scopedEvents}
+                files={scopedFiles}
+                granularity={filters.granularity}
+                prefs={analyticsPrefs}
+                thresholds={prefs?.insightThresholds}
+                onOpenFile={openFile}
+              />
             ) : section === 'dashboard' ? (
               <DashboardPanel
                 events={scopedEvents}
@@ -245,8 +392,11 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
               />
             )}
           </div>
+          </VizPrefsProvider>
         </div>
       </div>
+
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={commands} />
     </div>
   )
 }
