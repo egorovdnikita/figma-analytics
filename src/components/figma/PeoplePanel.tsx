@@ -142,7 +142,7 @@ export function PeoplePanel({
           />
         </div>
 
-        <div className="scroll-thin scroll-soft max-h-[420px] overflow-y-auto pr-1">
+        <div className="scroll-thin max-h-[420px] overflow-y-auto pr-1">
           <div className="space-y-1">
             {filtered.map((person) => {
               const inWindow = currentByHandle.get(person.handle)
@@ -216,7 +216,7 @@ export function PeoplePanel({
 
       {hidden.length > 0 ? (
         <section className="rounded-card bg-surface p-4">
-          <h3 className="mb-2 text-[14px] font-medium text-ink">Скрытые из аналитики ({hidden.length})</h3>
+          <h3 className="mb-2 text-[14px] font-semibold text-ink">Скрытые из аналитики ({hidden.length})</h3>
           <p className="mb-3 text-[12px] text-muted">
             Их события полностью исключены из всех графиков и метрик раздела. Нажмите, чтобы вернуть.
           </p>
@@ -568,7 +568,7 @@ function PersonDetail({
         <div className="flex items-start gap-3">
           <Avatar src={allTime?.img} name={handle} size={44} />
           <div className="min-w-0 flex-1">
-            <h3 className="text-[16px] font-medium text-ink">{handle}</h3>
+            <h3 className="text-[16px] font-semibold text-ink">{handle}</h3>
             <p className="mt-0.5 text-[12px] text-muted">
               {allTime?.firstSeen ? `Первое событие ${relativeTime(allTime.firstSeen)}` : '—'}
               {allTime?.lastSeen ? ` · последнее ${relativeTime(allTime.lastSeen)}` : ''}
@@ -576,7 +576,7 @@ function PersonDetail({
             </p>
           </div>
           <div className="text-right">
-            <p className="font-display text-[24px] leading-none text-ink">
+            <p className="font-display display-md text-ink">
               {(allTime?.total ?? 0).toLocaleString('ru')}
             </p>
             <p className="mt-1 text-[12px] text-muted">Событий за всю историю</p>
@@ -765,7 +765,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-[12px] text-muted">{label}</p>
-      <p className="mt-0.5 font-display text-[18px] text-ink">{value}</p>
+      <p className="mt-0.5 font-display display-sm text-ink">{value}</p>
     </div>
   )
 }

@@ -346,7 +346,7 @@ export function FilterBar({
             <h4 className="mb-2 text-[13px] font-semibold text-ink">
               Проекты {filters.projects.length > 0 ? `(${filters.projects.length})` : ''}
             </h4>
-            <div className="scroll-thin scroll-soft max-h-[180px] space-y-0.5 overflow-y-auto pr-2">
+            <div className="scroll-thin max-h-[180px] space-y-0.5 overflow-y-auto pr-2">
               {projects.map((project) => (
                 <Checkbox
                   key={project.id}
@@ -363,7 +363,7 @@ export function FilterBar({
             <h4 className="mb-2 text-[13px] font-semibold text-ink">
               Участники {filters.people.length > 0 ? `(${filters.people.length})` : ''}
             </h4>
-            <div className="scroll-thin scroll-soft max-h-[220px] space-y-0.5 overflow-y-auto pr-2">
+            <div className="scroll-thin max-h-[220px] space-y-0.5 overflow-y-auto pr-2">
               {people.map((person) => (
                 <Checkbox
                   key={person.handle}

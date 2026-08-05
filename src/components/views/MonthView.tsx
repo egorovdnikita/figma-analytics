@@ -54,7 +54,7 @@ export function MonthView({
         {weekdayLabels.map((label) => (
           <div
             key={label}
-            className="truncate px-3 py-2 text-[12px] lowercase text-muted [&:not(:first-child)]:border-l [&:not(:first-child)]:border-line"
+            className="truncate px-3 py-2 text-[12px] text-muted [&:not(:first-child)]:border-l [&:not(:first-child)]:border-line"
           >
             {label}
           </div>
@@ -101,7 +101,7 @@ export function MonthView({
                       {format(day, 'd')}
                     </span>
                     {format(day, 'd') === '1' ? (
-                      <span className="text-[12px] lowercase text-muted">
+                      <span className="text-[12px] text-muted">
                         {format(day, 'LLL', { locale })}
                       </span>
                     ) : null}

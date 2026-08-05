@@ -26,14 +26,14 @@ export function Sidebar({ onCreate }: { onCreate: () => void }) {
         </div>
 
         <CalendarGroup
-          title="мои календари"
+          title="Мои календари"
           items={own}
           hidden={settings.hiddenCalendarIds}
           onToggle={toggleCalendar}
         />
         {shared.length > 0 ? (
           <CalendarGroup
-            title="другие календари"
+            title="Другие календари"
             items={shared}
             hidden={settings.hiddenCalendarIds}
             onToggle={toggleCalendar}
@@ -58,7 +58,7 @@ function CalendarGroup({
   if (!items.length) return null
   return (
     <section className="mt-3 rounded-card bg-surface p-3">
-      <h3 className="mb-1.5 pl-2 text-[12px] font-semibold lowercase text-muted">{title}</h3>
+      <h3 className="mb-1.5 pl-2 text-[12px] font-semibold text-faint">{title}</h3>
       <div className="space-y-0.5">
         {items.map((calendar) => (
           <Checkbox

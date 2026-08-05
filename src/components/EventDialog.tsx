@@ -605,7 +605,7 @@ function EventDetails({
                   }}
                 />
                 <span className="truncate">{attendee.displayName ?? attendee.email}</span>
-                {attendee.organizer ? <Chip>организатор</Chip> : null}
+                {attendee.organizer ? <Chip>Организатор</Chip> : null}
               </div>
             ))}
           </div>

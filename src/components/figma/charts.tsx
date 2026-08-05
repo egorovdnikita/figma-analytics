@@ -84,7 +84,7 @@ export function ChartCard({
     <section className={cn('viz rounded-card bg-surface p-4', className)}>
       <header className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-[14px] font-medium text-ink">{title}</h3>
+          <h3 className="text-[14px] font-semibold text-ink">{title}</h3>
           {subtitle ? <p className="mt-0.5 text-[12px] text-muted">{subtitle}</p> : null}
         </div>
         <div className="flex shrink-0 items-center gap-1">
@@ -103,7 +103,7 @@ export function ChartCard({
       </header>
 
       {showTable && table ? (
-        <div className="scroll-thin scroll-soft max-h-[320px] overflow-auto">{table}</div>
+        <div className="scroll-thin max-h-[320px] overflow-auto">{table}</div>
       ) : (
         children
       )}
@@ -628,7 +628,7 @@ export function Donut({
         ))}
         {centerValue ? (
           <>
-            <text x={radius} y={radius - 2} textAnchor="middle" className="fill-[var(--ink)] text-[20px] [font-family:var(--font-display)]">
+            <text x={radius} y={radius - 2} textAnchor="middle" className="fill-[var(--ink)] text-[26px] [font-family:var(--font-display)]">
               {centerValue}
             </text>
             <text x={radius} y={radius + 14} textAnchor="middle" className="fill-[var(--viz-muted)] text-[10px]">
@@ -694,7 +694,7 @@ export function StatTile({
     <div className="viz rounded-card bg-surface p-4">
       <p className="text-[13px] text-muted">{label}</p>
       <div className="mt-1 flex items-end justify-between gap-2">
-        <p className="font-display text-[30px] leading-none text-ink">{value}</p>
+        <p className="font-display display-lg text-ink">{value}</p>
         {spark && spark.length > 1 ? <Sparkline values={spark} /> : null}
       </div>
       {hasDelta ? (
@@ -1235,7 +1235,7 @@ export function HealthRing({
           x={radius}
           y={radius - 2}
           textAnchor="middle"
-          className="fill-[var(--ink)] text-[28px] [font-family:var(--font-display)]"
+          className="fill-[var(--ink)] text-[36px] [font-family:var(--font-display)]"
           transform={`rotate(90 ${radius} ${radius})`}
         >
           {Math.round(score)}

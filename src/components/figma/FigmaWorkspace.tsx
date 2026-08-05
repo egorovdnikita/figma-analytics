@@ -12,6 +12,7 @@ import { Button, Spinner } from '@/components/ui'
 import { AppIcon } from '@/components/AppIcon'
 import { CheckGlyph, PlusGlyph } from '@/components/Glyphs'
 import { cn } from '@/lib/cn'
+import { useScrollEdges } from '@/lib/useScrollEdges'
 import {
   AnalyticsPrefs,
   DEFAULT_FILTERS,
@@ -65,6 +66,7 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
   const [selectedFile, setSelectedFile] = useState<{ key: string; name: string } | null>(null)
   const [filters, setFilters] = useState<FigmaFilters>(DEFAULT_FILTERS)
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const mainScroll = useScrollEdges<HTMLElement>()
 
   const [teams, setTeams] = useState<FigmaTeamRef[]>([])
   const [events, setEvents] = useState<FigmaEvent[]>([])
@@ -269,7 +271,7 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <header className="shrink-0 px-4 pt-3">
             <div className="drag-region flex h-11 items-center justify-between gap-4">
-              <h1 className="truncate text-[28px] font-semibold leading-none tracking-tight text-ink">
+              <h1 className="truncate text-[28px] font-medium leading-none tracking-tight text-ink">
                 {selectedFile ? selectedFile.name : sectionTitle}
               </h1>
               <div className="no-drag flex shrink-0 items-center gap-2">
@@ -312,9 +314,11 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
 
           <VizPrefsProvider tablesByDefault={prefs?.tablesByDefault ?? false}>
           <main
+            ref={mainScroll.ref}
             className={cn(
-              'scroll-thin scroll-soft min-h-0 flex-1 overflow-y-auto px-4 pb-4',
+              'scroll-thin min-h-0 flex-1 overflow-y-auto px-4 pb-4',
               dense ? 'pt-2' : 'pt-3',
+              mainScroll.className,
             )}
           >
             {selectedFile ? (

@@ -59,7 +59,7 @@ export function Modal({
         style={{ maxWidth: width }}
       >
         <header className="flex items-start justify-between gap-4 px-6 pb-2 pt-5">
-          <h2 className="text-[20px] font-bold leading-tight text-ink">{title}</h2>
+          <h2 className="text-[20px] font-semibold leading-tight text-ink">{title}</h2>
           <IconButton label="Закрыть" onClick={onClose} className="-mr-2 -mt-1 h-9 w-9">
             <CloseGlyph />
           </IconButton>

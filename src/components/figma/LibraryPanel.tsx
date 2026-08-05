@@ -54,7 +54,7 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
   if (summary === 'error') {
     return (
       <div className="rounded-card bg-surface p-4">
-        <h3 className="text-[14px] font-medium text-ink">{team.label || team.id}</h3>
+        <h3 className="text-[14px] font-semibold text-ink">{team.label || team.id}</h3>
         <p className="mt-1 text-[13px] text-muted">
           Библиотека недоступна: у токена нет прав на library-эндпоинты этой команды либо в ней нет
           опубликованных файлов.
@@ -68,7 +68,7 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
   if (total === 0) {
     return (
       <div className="rounded-card bg-surface p-4">
-        <h3 className="text-[14px] font-medium text-ink">{team.label || team.id}</h3>
+        <h3 className="text-[14px] font-semibold text-ink">{team.label || team.id}</h3>
         <p className="mt-1 text-[13px] text-muted">В команде нет опубликованной библиотеки.</p>
       </div>
     )
@@ -78,22 +78,22 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
     <div className="space-y-3">
       <div className="viz flex items-center justify-between rounded-card bg-surface p-4">
         <div>
-          <h3 className="text-[14px] font-medium text-ink">{team.label || team.id}</h3>
+          <h3 className="text-[14px] font-semibold text-ink">{team.label || team.id}</h3>
           <p className="mt-0.5 text-[12px] text-muted">
             {summary.lastPublished ? `Публиковалась ${relativeTime(summary.lastPublished)}` : 'Дата публикации неизвестна'}
           </p>
         </div>
         <div className="flex gap-6 text-right">
           <div>
-            <p className="font-display text-[22px] leading-none text-ink">{summary.componentsCount}</p>
+            <p className="font-display display-md text-ink">{summary.componentsCount}</p>
             <p className="mt-1 text-[12px] text-muted">компонентов</p>
           </div>
           <div>
-            <p className="font-display text-[22px] leading-none text-ink">{summary.componentSetsCount}</p>
+            <p className="font-display display-md text-ink">{summary.componentSetsCount}</p>
             <p className="mt-1 text-[12px] text-muted">наборов</p>
           </div>
           <div>
-            <p className="font-display text-[22px] leading-none text-ink">{summary.stylesCount}</p>
+            <p className="font-display display-md text-ink">{summary.stylesCount}</p>
             <p className="mt-1 text-[12px] text-muted">стилей</p>
           </div>
         </div>
@@ -159,7 +159,7 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
       </div>
 
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-3 text-[14px] font-medium text-ink">Последние публикации</h3>
+        <h3 className="mb-3 text-[14px] font-semibold text-ink">Последние публикации</h3>
         <div className="space-y-1">
           {summary.recent.map((item) => (
             <div key={item.key} className="flex items-center gap-2.5 rounded-control px-2 py-1.5">

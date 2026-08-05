@@ -106,7 +106,7 @@ export function TimeGridView({
             key={day.toISOString()}
             className="flex flex-col items-center gap-0.5 border-l border-line py-2.5"
           >
-            <span className="text-[12px] lowercase text-muted">
+            <span className="text-[12px] text-muted">
               {format(day, 'EEEEEE', { locale })}
             </span>
             <span

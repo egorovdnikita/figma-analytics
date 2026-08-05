@@ -7,10 +7,10 @@ import { AppIcon } from '@/components/AppIcon'
 import type { ViewMode } from '@/types'
 
 const VIEWS: { value: ViewMode; label: string }[] = [
-  { value: 'day', label: 'день' },
-  { value: 'week', label: 'неделя' },
-  { value: 'month', label: 'месяц' },
-  { value: 'agenda', label: 'список' },
+  { value: 'day', label: 'День' },
+  { value: 'week', label: 'Неделя' },
+  { value: 'month', label: 'Месяц' },
+  { value: 'agenda', label: 'Список' },
 ]
 
 export function Topbar() {
@@ -22,22 +22,23 @@ export function Topbar() {
   return (
     <header className="shrink-0 px-4 pt-3">
       <div className="drag-region flex h-11 items-center justify-between gap-4">
-        <h1 className="truncate text-[28px] font-bold lowercase leading-none tracking-tight text-ink">
+        <h1 className="truncate text-[28px] font-medium leading-none tracking-tight text-ink">
           {title}
         </h1>
-        <div className="no-drag flex items-center gap-1">
-          <span className="mr-1 hidden text-[12px] text-faint md:inline">
-            {loading ? 'синхронизация…' : syncedAt ? `обновлено в ${format(syncedAt, 'HH:mm')}` : ''}
+        <div className="no-drag flex shrink-0 items-center gap-2">
+          <span className="hidden text-[12px] text-faint lg:inline">
+            {loading ? '' : syncedAt ? `Обновлено в ${format(syncedAt, 'HH:mm')}` : ''}
           </span>
-          <IconButton label="Обновить" onClick={() => void refresh()}>
-            {loading ? <Spinner /> : <AppIcon name="RefreshCw" size={16} />}
-          </IconButton>
+          <Button variant="soft" size="sm" onClick={() => void refresh()} disabled={loading}>
+            {loading ? <Spinner className="h-4 w-4" /> : <AppIcon name="RefreshCw" size={16} />}
+            {loading ? 'Синхронизация…' : 'Синхронизировать'}
+          </Button>
         </div>
       </div>
 
       <div className="mt-3 flex items-center gap-2 rounded-card bg-surface p-2">
         <Button variant="outline" size="sm" className="ml-1" onClick={() => setAnchor(new Date())}>
-          сегодня
+          Сегодня
         </Button>
         <div className="flex items-center">
           <IconButton

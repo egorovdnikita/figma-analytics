@@ -50,12 +50,12 @@ export function ProfileView() {
           <div className="flex items-center gap-4">
             <Avatar src={profile?.picture} name={profile?.name} size={64} />
             <div className="min-w-0">
-              <h2 className="truncate text-[24px] font-bold lowercase leading-tight text-ink">
+              <h2 className="truncate text-[24px] font-medium leading-tight text-ink">
                 {profile?.name ?? 'Аккаунт не подключён'}
               </h2>
               <p className="truncate text-[14px] text-muted">{profile?.email}</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {profile?.email_verified ? <Chip tone="grass">почта подтверждена</Chip> : null}
+                {profile?.email_verified ? <Chip tone="grass">Почта подтверждена</Chip> : null}
                 {profile?.hd ? <Chip tone="lilac">{profile.hd}</Chip> : null}
                 {profile?.locale ? <Chip>{profile.locale}</Chip> : null}
                 {appInfo ? <Chip>{appInfo.timeZone}</Chip> : null}
@@ -64,7 +64,7 @@ export function ProfileView() {
           </div>
         </section>
 
-        <Card title="доступ к Google">
+        <Card title="Доступ к Google">
           <div className="space-y-3">
             <div className="grid gap-2 sm:grid-cols-2">
               <Meta label="Токен обновления" value={session?.hasRefreshToken ? 'есть' : 'нет'} />
@@ -107,7 +107,7 @@ export function ProfileView() {
           </div>
         </Card>
 
-        <Card title="внешний вид">
+        <Card title="Внешний вид">
           <div className="space-y-4">
             <Row label="Тема">
               <Segmented
@@ -153,7 +153,7 @@ export function ProfileView() {
           </div>
         </Card>
 
-        <Card title="календарь">
+        <Card title="Календарь">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Вид по умолчанию">
               <Select
@@ -244,7 +244,7 @@ export function ProfileView() {
                   </div>
                   <div className="truncate text-[12px] text-faint">{calendar.id}</div>
                 </div>
-                {calendar.primary ? <Chip tone="grass">основной</Chip> : null}
+                {calendar.primary ? <Chip tone="grass">Основной</Chip> : null}
                 <Chip>{accessLabel(calendar.accessRole)}</Chip>
               </div>
             ))}
@@ -252,7 +252,7 @@ export function ProfileView() {
         </Card>
 
         {Object.keys(googleSettings).length ? (
-          <Card title="настройки из Google">
+          <Card title="Настройки из Google">
             <div className="grid gap-2 sm:grid-cols-2">
               <Meta label="Часовой пояс" value={googleSettings.timezone ?? '—'} />
               <Meta label="Формат времени" value={googleSettings.format24HourTime === 'true' ? '24 часа' : '12 часов'} />
@@ -262,7 +262,7 @@ export function ProfileView() {
           </Card>
         ) : null}
 
-        <Card title="о приложении">
+        <Card title="О приложении">
           <div className="grid gap-2 sm:grid-cols-2">
             <Meta label="Box UI" value={appInfo?.version ?? '—'} />
             <Meta label="Платформа" value={`${appInfo?.platform ?? ''} ${appInfo?.arch ?? ''}`} />
@@ -310,7 +310,7 @@ export function ProfileView() {
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="rounded-card bg-surface p-6">
-      <h3 className="mb-4 text-[14px] font-bold lowercase text-ink">{title}</h3>
+      <h3 className="mb-4 text-[14px] font-semibold text-ink">{title}</h3>
       {children}
     </section>
   )

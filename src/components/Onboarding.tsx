@@ -7,7 +7,7 @@ import { AppIcon } from '@/components/AppIcon'
 function Brand() {
   return (
     <div className="mb-8">
-      <span className="text-[24px] font-bold tracking-tight text-ink">Box UI</span>
+      <span className="text-[24px] font-semibold tracking-tight text-ink">Box UI</span>
     </div>
   )
 }
@@ -42,7 +42,7 @@ export function SetupScreen() {
   return (
     <Layout>
       <Brand />
-      <h1 className="text-[28px] font-bold lowercase leading-tight text-ink">
+      <h1 className="text-[28px] font-medium leading-tight text-ink">
         подключите свой OAuth-клиент
       </h1>
       <p className="mt-2 text-[14px] leading-relaxed text-muted">
@@ -100,7 +100,7 @@ export function SignInScreen() {
   return (
     <Layout>
       <Brand />
-      <h1 className="text-[28px] font-bold lowercase leading-tight text-ink">
+      <h1 className="text-[28px] font-medium leading-tight text-ink">
         ваш цифровой мозг начинается с календаря
       </h1>
       <p className="mt-3 text-[14px] leading-relaxed text-muted">

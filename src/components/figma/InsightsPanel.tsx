@@ -147,7 +147,7 @@ export function InsightsPanel({
       </ChartCard>
 
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-1 text-[14px] font-medium text-ink">Что происходит</h3>
+        <h3 className="mb-1 text-[14px] font-semibold text-ink">Что происходит</h3>
         <p className="mb-3 text-[12px] text-muted">
           Выводы собраны автоматически по текущей выборке. Пороги настраиваются в разделе «Настройки».
         </p>

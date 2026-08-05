@@ -30,7 +30,7 @@ export function MiniCalendar({
   return (
     <div className="px-1">
       <div className="mb-1.5 flex items-center justify-between pl-2">
-        <span className="text-[14px] font-semibold lowercase text-ink">
+        <span className="text-[14px] font-semibold text-ink">
           {format(month, 'LLLL yyyy', { locale })}
         </span>
         <div className="flex items-center">

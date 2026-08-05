@@ -65,13 +65,13 @@ export function AgendaView({
           <div className="sticky top-0 z-10 flex items-baseline gap-2 bg-surface px-5 py-2.5">
             <span
               className={cn(
-                'text-[16px] font-bold',
+                'text-[16px] font-semibold',
                 isToday(day) ? 'text-[var(--lilac)]' : 'text-ink',
               )}
             >
               {format(day, 'd MMMM', { locale })}
             </span>
-            <span className="text-[12px] lowercase text-muted">
+            <span className="text-[12px] text-muted">
               {format(day, 'EEEE', { locale })}
             </span>
           </div>
@@ -116,7 +116,7 @@ function AgendaRow({
         {formatEventRange(event, timeFormat)}
       </span>
       <span className="min-w-0 flex-1 truncate">
-        <span className={cn('text-[14px] font-medium text-ink', declined && 'line-through opacity-60')}>
+        <span className={cn('text-[14px] font-semibold text-ink', declined && 'line-through opacity-60')}>
           {event.summary || 'Без названия'}
         </span>
         {event.location ? (

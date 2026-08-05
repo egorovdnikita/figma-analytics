@@ -228,16 +228,41 @@ body {
 }
 
 /* Крупные числа. Отдельная утилита, а не глобальная подмена: узкий гротеск
-   хорош для цифр и совершенно не годится для текста. */
+   хорош для цифр и совершенно не годится для текста.
+
+   Кегль здесь заметно крупнее соседнего текста, но высота строки жёстко
+   привязана к --display-box: у гарнитуры метрики выше реальных глифов, и без
+   фиксации карточки начинали разъезжаться по высоте от одной смены шрифта. */
 .font-display {
   font-family: var(--font-display);
   font-weight: 400;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.005em;
+  font-size: var(--display-size);
+  line-height: var(--display-box);
+  display: inline-block;
+  height: var(--display-box);
+  /* Глифы сидят выше центра метрик — сдвигаем вниз, чтобы базовая линия
+     совпадала с той, что была у Inter того же кегля. */
+  transform: translateY(0.055em);
 }
 
-/* Мягкий край прокручиваемой области. Без него контент упирается в
-   фиксированную шапку ровным срезом — сверху и снизу подмешиваем
-   прозрачность, чтобы уходящие строки таяли, а не обрубались. */
+/* Кегли: коробка остаётся прежней, растёт только рисунок цифр. */
+.display-sm {
+  --display-size: 26px;
+  --display-box: 20px;
+}
+.display-md {
+  --display-size: 32px;
+  --display-box: 24px;
+}
+.display-lg {
+  --display-size: 40px;
+  --display-box: 30px;
+}
+
+/* Мягкий край прокручиваемой области. Классы вешает useScrollEdges — только
+   с той стороны, где контент реально уходит за границу, иначе затухание
+   съедало бы верх списка, который и не думал прокручиваться. */
 .scroll-soft {
   -webkit-mask-image: linear-gradient(
     to bottom,
@@ -253,4 +278,12 @@ body {
     #000 calc(100% - 14px),
     transparent 100%
   );
+}
+.scroll-soft-top {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 14px);
+}
+.scroll-soft-bottom {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 14px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 14px), transparent 100%);
 }

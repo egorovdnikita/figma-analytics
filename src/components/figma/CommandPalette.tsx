@@ -110,7 +110,7 @@ export function CommandPalette({
           <kbd className="shrink-0 rounded-chip bg-[var(--sunken)] px-1.5 py-0.5 text-[10px] text-muted">esc</kbd>
         </div>
 
-        <div ref={listRef} className="scroll-thin scroll-soft flex-1 overflow-y-auto p-2">
+        <div ref={listRef} className="scroll-thin flex-1 overflow-y-auto p-2">
           {results.length === 0 ? (
             <p className="p-6 text-center text-[14px] text-muted">Ничего не найдено</p>
           ) : (

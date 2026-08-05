@@ -5,6 +5,7 @@ import { Input, Spinner } from '@/components/ui'
 import { AppIcon, type IconName } from '@/components/AppIcon'
 import { CrossGlyph, PlusGlyph } from '@/components/Glyphs'
 import { cn } from '@/lib/cn'
+import { useScrollEdges } from '@/lib/useScrollEdges'
 import { AddTeamModal } from './AddTeamModal'
 
 export interface SectionItem<T extends string> {
@@ -42,6 +43,7 @@ export function FigmaSidebar<T extends string>({
 }: Props<T>) {
   const [filter, setFilter] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
+  const scroll = useScrollEdges<HTMLDivElement>()
 
   const groups = sections.reduce<Record<string, SectionItem<T>[]>>((acc, item) => {
     acc[item.group] = [...(acc[item.group] ?? []), item]
@@ -62,11 +64,14 @@ export function FigmaSidebar<T extends string>({
         </button>
       </div>
 
-      <div className="scroll-thin scroll-soft -mr-1 flex-1 overflow-y-auto pr-2 pt-1">
+      <div
+        ref={scroll.ref}
+        className={cn('scroll-thin -mr-1 flex-1 overflow-y-auto pr-2 pt-1', scroll.className)}
+      >
         <nav className="space-y-3">
           {Object.entries(groups).map(([group, items]) => (
             <section key={group} className="rounded-card bg-surface p-2">
-              <h3 className="mb-1 pl-2 text-[12px] font-medium text-faint">{group}</h3>
+              <h3 className="mb-1 pl-2 text-[12px] font-semibold text-faint">{group}</h3>
               <div className="space-y-0.5">
                 {items.map((item) => (
                   <button
@@ -91,7 +96,7 @@ export function FigmaSidebar<T extends string>({
 
         {pinned.length > 0 ? (
           <section className="mt-3 rounded-card bg-surface p-2">
-            <h3 className="mb-1 pl-2 text-[12px] font-medium text-faint">Закреплённые</h3>
+            <h3 className="mb-1 pl-2 text-[12px] font-semibold text-faint">Закреплённые</h3>
             <div className="space-y-0.5">
               {pinned.map((file) => (
                 <div key={file.key} className="group flex items-center rounded-control hover:bg-[var(--sunken)]">
@@ -123,7 +128,7 @@ export function FigmaSidebar<T extends string>({
 
         <section className="mt-3 rounded-card bg-surface p-2">
           <div className="mb-1 flex items-center justify-between pl-2">
-            <h3 className="text-[12px] font-medium text-faint">Команды</h3>
+            <h3 className="text-[12px] font-semibold text-faint">Команды</h3>
             <button
               type="button"
               onClick={() => setModalOpen(true)}

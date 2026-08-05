@@ -333,7 +333,7 @@ export function ThreadsPanel({
 
       <div className="viz rounded-card bg-surface p-4">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <h3 className="text-[14px] font-medium text-ink">Обсуждения</h3>
+          <h3 className="text-[14px] font-semibold text-ink">Обсуждения</h3>
           <Segmented
             value={filter}
             onChange={(value) => {
