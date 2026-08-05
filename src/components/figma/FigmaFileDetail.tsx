@@ -3,7 +3,7 @@ import { ipc } from '@/lib/ipc'
 import type { FigmaComment, FigmaFileMeta, FigmaVersion } from '@/types'
 import { Avatar, Segmented, Spinner, Button, Chip } from '@/components/ui'
 import { AppIcon } from '@/components/AppIcon'
-import { relativeTime, humanDuration, groupCommentThreads } from './utils'
+import { relativeTime, humanDuration, groupCommentThreads, groupReactions, emojiGlyph } from './utils'
 
 type Tab = 'overview' | 'versions' | 'comments'
 const PAGE_SIZE = 30
@@ -262,6 +262,7 @@ function CommentsTab({ fileKey }: { fileKey: string }) {
 }
 
 function CommentRow({ comment, compact }: { comment: FigmaComment; compact?: boolean }) {
+  const reactionGroups = groupReactions(comment.reactions)
   return (
     <div className="flex gap-2.5">
       <Avatar src={comment.user.img_url} name={comment.user.handle} size={compact ? 22 : 26} />
@@ -271,6 +272,18 @@ function CommentRow({ comment, compact }: { comment: FigmaComment; compact?: boo
           <span className="text-[11px] text-faint">{relativeTime(comment.created_at)}</span>
         </p>
         <p className="mt-0.5 whitespace-pre-wrap text-[13px] leading-relaxed text-ink">{comment.message}</p>
+        {reactionGroups.length > 0 ? (
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            {reactionGroups.map(([emoji, count]) => (
+              <span
+                key={emoji}
+                className="inline-flex h-5 items-center gap-1 rounded-chip bg-[var(--sunken)] px-1.5 text-[11px] text-muted"
+              >
+                {emojiGlyph(emoji)} {count}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
     </div>
   )

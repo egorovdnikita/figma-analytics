@@ -20,8 +20,12 @@ async function api<T>(pathname: string, attempt = 0): Promise<T> {
     headers: { 'X-Figma-Token': token },
   })
 
-  if (res.status === 429 && attempt < 3) {
-    await new Promise((resolve) => setTimeout(resolve, 600 * 2 ** attempt))
+  // Глубокая выкачка истории делает тысячи запросов, поэтому ждём дольше и
+  // настойчивее: упереться в 429 на середине синка дороже, чем потерять минуту.
+  if ((res.status === 429 || res.status >= 500) && attempt < 6) {
+    const retryAfter = Number(res.headers.get('retry-after'))
+    const wait = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 800 * 2 ** attempt
+    await new Promise((resolve) => setTimeout(resolve, Math.min(wait, 30_000)))
     return api<T>(pathname, attempt + 1)
   }
   if (!res.ok) {
@@ -121,6 +125,12 @@ export async function getFileVersions(fileKey: string, cursor?: string): Promise
 
 /* ---------- комментарии ---------- */
 
+export interface FigmaCommentReaction {
+  emoji: string
+  created_at: string
+  user: { id: string; handle: string; img_url: string }
+}
+
 export interface FigmaComment {
   id: string
   parent_id: string
@@ -129,8 +139,49 @@ export interface FigmaComment {
   resolved_at: string | null
   message: string
   order_id: string | null
+  reactions: FigmaCommentReaction[]
+  /** Якорь комментария на холсте — есть только у корневых, у ответов null. */
+  client_meta: { node_id?: string; node_offset?: { x: number; y: number } } | null
 }
 
 export function getFileComments(fileKey: string) {
   return api<{ comments: FigmaComment[] }>(`/files/${encodeURIComponent(fileKey)}/comments`)
+}
+
+/* ---------- библиотека команды (опубликованные компоненты/стили) ---------- */
+
+export interface FigmaLibraryItem {
+  key: string
+  name: string
+  description: string
+  created_at: string
+  updated_at: string
+  user: { id: string; handle: string; img_url: string }
+  containing_frame?: { pageName?: string; name?: string }
+  file_key?: string
+}
+
+interface LibraryPage<T> {
+  meta: { components?: T[]; component_sets?: T[]; styles?: T[] }
+}
+
+export async function getTeamComponents(teamId: string) {
+  const page = await api<LibraryPage<FigmaLibraryItem>>(
+    `/teams/${encodeURIComponent(teamId)}/components?${qs({ page_size: 100 })}`,
+  )
+  return page.meta.components ?? []
+}
+
+export async function getTeamComponentSets(teamId: string) {
+  const page = await api<LibraryPage<FigmaLibraryItem>>(
+    `/teams/${encodeURIComponent(teamId)}/component_sets?${qs({ page_size: 100 })}`,
+  )
+  return page.meta.component_sets ?? []
+}
+
+export async function getTeamStyles(teamId: string) {
+  const page = await api<LibraryPage<FigmaLibraryItem>>(
+    `/teams/${encodeURIComponent(teamId)}/styles?${qs({ page_size: 100 })}`,
+  )
+  return page.meta.styles ?? []
 }

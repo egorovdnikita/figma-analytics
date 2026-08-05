@@ -6,6 +6,7 @@ import { CalendarScreen } from '@/components/CalendarScreen'
 import { ProfileView } from '@/components/ProfileView'
 import { FigmaScreen } from '@/components/figma/FigmaScreen'
 import { PlaceholderScreen } from '@/components/PlaceholderScreen'
+import { DriveBrandIcon, MailBrandIcon, TasksBrandIcon } from '@/components/RailBrandIcons'
 import { SetupScreen, SignInScreen } from '@/components/Onboarding'
 import { IconStyleProvider } from '@/components/AppIcon'
 import { Spinner } from '@/components/ui'
@@ -49,12 +50,12 @@ function Shell() {
                 <ProfileView />
               ) : screen === 'figma' ? (
                 <FigmaScreen />
-              ) : screen === 'translator' ? (
-                <PlaceholderScreen icon="TextFieldFocus" title="Переводчик" />
+              ) : screen === 'mail' ? (
+                <PlaceholderScreen icon={<MailBrandIcon size={32} />} title="Почта" />
+              ) : screen === 'drive' ? (
+                <PlaceholderScreen icon={<DriveBrandIcon size={32} />} title="Диск" />
               ) : screen === 'tasks' ? (
-                <PlaceholderScreen icon="Check" title="Задачи" />
-              ) : screen === 'chat' ? (
-                <PlaceholderScreen icon="MessageSquare" title="Чат" />
+                <PlaceholderScreen icon={<TasksBrandIcon size={32} />} title="Задачи" />
               ) : (
                 <CalendarScreen
                   createSignal={createSignal}

@@ -1,0 +1,1161 @@
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { format } from 'date-fns'
+import { ru } from 'date-fns/locale'
+import { cn } from '@/lib/cn'
+
+/* ---------- измерение контейнера ----------
+ * Графики рисуем в пиксельных координатах, а не растягиваем viewBox: иначе
+ * подписи и толщина линий поплывут вместе с масштабом. */
+export function useMeasure<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null)
+  const [width, setWidth] = useState(0)
+
+  useLayoutEffect(() => {
+    const node = ref.current
+    if (!node) return
+    const observer = new ResizeObserver((entries) => {
+      const next = entries[0]?.contentRect.width ?? 0
+      setWidth((prev) => (Math.abs(prev - next) > 0.5 ? next : prev))
+    })
+    observer.observe(node)
+    setWidth(node.getBoundingClientRect().width)
+    return () => observer.disconnect()
+  }, [])
+
+  return { ref, width }
+}
+
+/* ---------- каркас карточки ---------- */
+
+export function ChartCard({
+  title,
+  subtitle,
+  action,
+  legend,
+  table,
+  children,
+  className,
+}: {
+  title: string
+  subtitle?: string
+  action?: ReactNode
+  legend?: ReactNode
+  /** Таблица значений — обязательная опора: в светлой теме часть слотов палитры
+   * идёт ниже контраста 3:1, поэтому цвет никогда не единственный способ
+   * прочитать величину. */
+  table?: ReactNode
+  children: ReactNode
+  className?: string
+}) {
+  const [showTable, setShowTable] = useState(false)
+
+  return (
+    <section className={cn('viz rounded-card bg-surface p-4', className)}>
+      <header className="mb-3 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="text-[13px] font-semibold text-ink">{title}</h3>
+          {subtitle ? <p className="mt-0.5 text-[11px] text-muted">{subtitle}</p> : null}
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
+          {action}
+          {table ? (
+            <button
+              type="button"
+              onClick={() => setShowTable((v) => !v)}
+              className="h-6 rounded-chip px-2 text-[11px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
+              aria-pressed={showTable}
+            >
+              {showTable ? 'График' : 'Таблица'}
+            </button>
+          ) : null}
+        </div>
+      </header>
+
+      {showTable && table ? (
+        <div className="scroll-thin max-h-[320px] overflow-auto">{table}</div>
+      ) : (
+        children
+      )}
+
+      {legend && !showTable ? <div className="mt-3">{legend}</div> : null}
+    </section>
+  )
+}
+
+export function Legend({ items }: { items: { label: string; color: string }[] }) {
+  return (
+    <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+      {items.map((item) => (
+        <li key={item.label} className="flex items-center gap-1.5 text-[11px] text-muted">
+          <span className="h-2.5 w-2.5 shrink-0 rounded-[3px]" style={{ background: item.color }} aria-hidden />
+          {item.label}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/* ---------- тултип ---------- */
+
+interface TooltipState {
+  x: number
+  y: number
+  content: ReactNode
+}
+
+function Tooltip({ state, width }: { state: TooltipState | null; width: number }) {
+  if (!state) return null
+  const flip = state.x > width * 0.6
+  return (
+    <div
+      className="pointer-events-none absolute z-10 min-w-[120px] rounded-control bg-[var(--ink)] px-2.5 py-1.5 text-[11px] leading-snug text-[var(--canvas)] shadow-pop"
+      style={{
+        left: flip ? undefined : state.x + 12,
+        right: flip ? width - state.x + 12 : undefined,
+        top: Math.max(0, state.y - 12),
+      }}
+    >
+      {state.content}
+    </div>
+  )
+}
+
+/* ---------- общая геометрия ---------- */
+
+const AXIS_BAND = 22
+const PAD_TOP = 8
+
+function niceTicks(max: number, count = 4): number[] {
+  if (max <= 0) return [0]
+  const raw = max / count
+  const magnitude = 10 ** Math.floor(Math.log10(raw))
+  // Все величины здесь счётные, поэтому шаг всегда целый: дробный шаг давал бы
+  // повторяющиеся подписи вроде «0, 0, 1, 1» после округления.
+  const step = Math.max(
+    1,
+    Math.ceil([1, 2, 5, 10].map((m) => m * magnitude).find((s) => s >= raw) ?? magnitude * 10),
+  )
+
+  // Верхнее деление обязано быть не меньше максимума ряда: иначе точки выше
+  // последнего деления уезжают за пределы области и линия рвётся.
+  const ticks: number[] = []
+  for (let value = 0; ; value += step) {
+    ticks.push(Math.round(value * 100) / 100)
+    if (value >= max) break
+    if (ticks.length > 24) break
+  }
+  return ticks
+}
+
+function formatCompact(value: number) {
+  if (Math.abs(value) >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`
+  if (Math.abs(value) >= 1_000) return `${(value / 1_000).toFixed(1)}K`
+  return String(Math.round(value))
+}
+
+/** Столбец со скруглённой вершиной и прямым основанием на базовой линии. */
+function columnPath(x: number, y: number, w: number, h: number, r = 4) {
+  const radius = Math.min(r, w / 2, Math.max(0, h))
+  if (h <= 0) return ''
+  return [
+    `M${x},${y + h}`,
+    `L${x},${y + radius}`,
+    `Q${x},${y} ${x + radius},${y}`,
+    `L${x + w - radius},${y}`,
+    `Q${x + w},${y} ${x + w},${y + radius}`,
+    `L${x + w},${y + h}`,
+    'Z',
+  ].join(' ')
+}
+
+/* ---------- линейный / площадной график ---------- */
+
+export interface SeriesPoint {
+  label: string
+  value: number
+}
+
+export function LineChart({
+  series,
+  height = 180,
+  formatValue = formatCompact,
+  area = false,
+}: {
+  series: { name: string; color: string; points: SeriesPoint[] }[]
+  height?: number
+  formatValue?: (value: number) => string
+  area?: boolean
+}) {
+  const { ref, width } = useMeasure<HTMLDivElement>()
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+  const [activeIndex, setActiveIndex] = useState<number | null>(null)
+
+  const points = series[0]?.points ?? []
+  const count = points.length
+  const max = Math.max(1, ...series.flatMap((s) => s.points.map((p) => p.value)))
+  const ticks = niceTicks(max)
+  const top = ticks[ticks.length - 1] || 1
+
+  const gutter = 34
+  const plotW = Math.max(0, width - gutter - 8)
+  const plotH = height - AXIS_BAND - PAD_TOP
+  const stepX = count > 1 ? plotW / (count - 1) : 0
+  const xAt = (i: number) => gutter + (count > 1 ? i * stepX : plotW / 2)
+  const yAt = (value: number) => PAD_TOP + plotH - (value / top) * plotH
+
+  const onMove = useCallback(
+    (event: React.MouseEvent<SVGSVGElement>) => {
+      if (count === 0 || plotW <= 0) return
+      const rect = event.currentTarget.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const index = count > 1 ? Math.round((x - gutter) / stepX) : 0
+      const clamped = Math.max(0, Math.min(count - 1, index))
+      setActiveIndex(clamped)
+      setTooltip({
+        x: xAt(clamped),
+        y: event.clientY - rect.top,
+        content: (
+          <div>
+            <p className="mb-0.5 font-medium">{points[clamped]?.label}</p>
+            {series.map((s) => (
+              <p key={s.name} className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="h-2 w-2 rounded-[2px]" style={{ background: s.color }} />
+                {s.name}: {formatValue(s.points[clamped]?.value ?? 0)}
+              </p>
+            ))}
+          </div>
+        ),
+      })
+    },
+    [count, plotW, stepX, series, points, formatValue],
+  )
+
+  return (
+    <div ref={ref} className="relative">
+      {width > 0 ? (
+        <svg
+          width={width}
+          height={height}
+          onMouseMove={onMove}
+          onMouseLeave={() => {
+            setTooltip(null)
+            setActiveIndex(null)
+          }}
+          role="img"
+        >
+          {ticks.map((tick) => (
+            <g key={tick}>
+              <line
+                x1={gutter}
+                x2={width - 8}
+                y1={yAt(tick)}
+                y2={yAt(tick)}
+                stroke="var(--viz-grid)"
+                strokeWidth={1}
+              />
+              <text x={gutter - 6} y={yAt(tick) + 3.5} textAnchor="end" className="fill-[var(--viz-muted)] text-[10px] [font-variant-numeric:tabular-nums]">
+                {formatValue(tick)}
+              </text>
+            </g>
+          ))}
+
+          {area && series.length === 1
+            ? (() => {
+                const s = series[0]
+                const d = [
+                  `M${xAt(0)},${PAD_TOP + plotH}`,
+                  ...s.points.map((p, i) => `L${xAt(i)},${yAt(p.value)}`),
+                  `L${xAt(count - 1)},${PAD_TOP + plotH}`,
+                  'Z',
+                ].join(' ')
+                return <path d={d} fill={s.color} opacity={0.1} />
+              })()
+            : null}
+
+          {series.map((s) => (
+            <path
+              key={s.name}
+              d={s.points.map((p, i) => `${i === 0 ? 'M' : 'L'}${xAt(i)},${yAt(p.value)}`).join(' ')}
+              fill="none"
+              stroke={s.color}
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ))}
+
+          {activeIndex !== null ? (
+            <>
+              <line
+                x1={xAt(activeIndex)}
+                x2={xAt(activeIndex)}
+                y1={PAD_TOP}
+                y2={PAD_TOP + plotH}
+                stroke="var(--viz-axis)"
+                strokeWidth={1}
+              />
+              {series.map((s) => (
+                <circle
+                  key={s.name}
+                  cx={xAt(activeIndex)}
+                  cy={yAt(s.points[activeIndex]?.value ?? 0)}
+                  r={4}
+                  fill={s.color}
+                  stroke="var(--viz-surface)"
+                  strokeWidth={2}
+                />
+              ))}
+            </>
+          ) : null}
+
+          {points.map((point, i) =>
+            i % Math.ceil(count / 6 || 1) === 0 ? (
+              <text
+                key={point.label + i}
+                x={xAt(i)}
+                y={height - 6}
+                textAnchor="middle"
+                className="fill-[var(--viz-muted)] text-[10px]"
+              >
+                {point.label}
+              </text>
+            ) : null,
+          )}
+        </svg>
+      ) : (
+        <div style={{ height }} />
+      )}
+      <Tooltip state={tooltip} width={width} />
+    </div>
+  )
+}
+
+/* ---------- столбцы с накоплением ---------- */
+
+export function StackedBars({
+  buckets,
+  series,
+  height = 200,
+}: {
+  buckets: { label: string; key: string }[]
+  series: { name: string; color: string; values: number[] }[]
+  height?: number
+}) {
+  const { ref, width } = useMeasure<HTMLDivElement>()
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+  const [hover, setHover] = useState<number | null>(null)
+
+  const totals = buckets.map((_, i) => series.reduce((sum, s) => sum + (s.values[i] ?? 0), 0))
+  const max = Math.max(1, ...totals)
+  const ticks = niceTicks(max)
+  const top = ticks[ticks.length - 1] || 1
+
+  const gutter = 34
+  const plotW = Math.max(0, width - gutter - 8)
+  const plotH = height - AXIS_BAND - PAD_TOP
+  const band = buckets.length > 0 ? plotW / buckets.length : 0
+  const barW = Math.min(24, band * 0.62)
+  const GAP = 2 // разрыв в цвет поверхности между сегментами стопки
+
+  return (
+    <div ref={ref} className="relative">
+      {width > 0 ? (
+        <svg width={width} height={height} role="img">
+          {ticks.map((tick) => (
+            <g key={tick}>
+              <line x1={gutter} x2={width - 8} y1={PAD_TOP + plotH - (tick / top) * plotH} y2={PAD_TOP + plotH - (tick / top) * plotH} stroke="var(--viz-grid)" strokeWidth={1} />
+              <text x={gutter - 6} y={PAD_TOP + plotH - (tick / top) * plotH + 3.5} textAnchor="end" className="fill-[var(--viz-muted)] text-[10px] [font-variant-numeric:tabular-nums]">
+                {formatCompact(tick)}
+              </text>
+            </g>
+          ))}
+
+          {buckets.map((bucket, i) => {
+            const x = gutter + i * band + (band - barW) / 2
+            let cursorY = PAD_TOP + plotH
+            const segments = series
+              .map((s) => ({ s, value: s.values[i] ?? 0 }))
+              .filter((entry) => entry.value > 0)
+
+            return (
+              <g
+                key={bucket.key}
+                onMouseEnter={(event) => {
+                  const rect = (event.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect()
+                  setHover(i)
+                  setTooltip({
+                    x: gutter + i * band + band / 2,
+                    y: event.clientY - rect.top,
+                    content: (
+                      <div>
+                        <p className="mb-0.5 font-medium">{bucket.label}</p>
+                        {series.map((s) => (
+                          <p key={s.name} className="flex items-center gap-1.5 whitespace-nowrap">
+                            <span className="h-2 w-2 rounded-[2px]" style={{ background: s.color }} />
+                            {s.name}: {s.values[i] ?? 0}
+                          </p>
+                        ))}
+                        <p className="mt-0.5 border-t border-white/20 pt-0.5">Всего: {totals[i]}</p>
+                      </div>
+                    ),
+                  })
+                }}
+                onMouseLeave={() => {
+                  setHover(null)
+                  setTooltip(null)
+                }}
+              >
+                {/* прозрачная зона наведения шире самого столбца */}
+                <rect x={gutter + i * band} y={PAD_TOP} width={band} height={plotH} fill="transparent" />
+                {segments.map(({ s, value }, segIndex) => {
+                  const rawH = (value / top) * plotH
+                  const h = Math.max(1, rawH - (segIndex === segments.length - 1 ? 0 : GAP))
+                  cursorY -= rawH
+                  const isTop = segIndex === segments.length - 1
+                  return (
+                    <path
+                      key={s.name}
+                      d={isTop ? columnPath(x, cursorY, barW, h) : `M${x},${cursorY} h${barW} v${h} h${-barW} Z`}
+                      fill={s.color}
+                      opacity={hover === null || hover === i ? 1 : 0.45}
+                    />
+                  )
+                })}
+              </g>
+            )
+          })}
+
+          {buckets.map((bucket, i) =>
+            i % Math.ceil(buckets.length / 8 || 1) === 0 ? (
+              <text key={bucket.key} x={gutter + i * band + band / 2} y={height - 6} textAnchor="middle" className="fill-[var(--viz-muted)] text-[10px]">
+                {bucket.label}
+              </text>
+            ) : null,
+          )}
+        </svg>
+      ) : (
+        <div style={{ height }} />
+      )}
+      <Tooltip state={tooltip} width={width} />
+    </div>
+  )
+}
+
+/* ---------- горизонтальный рейтинг ---------- */
+
+export function HBars({
+  items,
+  color = 'var(--viz-1)',
+  formatValue = (v: number) => String(v),
+  max: maxOverride,
+}: {
+  items: { label: string; value: number; hint?: string }[]
+  color?: string
+  formatValue?: (value: number) => string
+  max?: number
+}) {
+  const max = Math.max(1, maxOverride ?? Math.max(...items.map((i) => i.value), 1))
+  return (
+    <div className="space-y-2">
+      {items.map((item) => (
+        <div key={item.label} className="flex items-center gap-3">
+          <span className="w-[38%] shrink-0 truncate text-[12px] text-ink" title={item.label}>
+            {item.label}
+          </span>
+          <div className="relative h-3 flex-1 overflow-hidden rounded-[4px] bg-[var(--sunken)]">
+            <div
+              className="h-full rounded-[4px]"
+              style={{ width: `${Math.max(2, (item.value / max) * 100)}%`, background: color }}
+              title={item.hint}
+            />
+          </div>
+          <span className="w-12 shrink-0 text-right text-[12px] text-muted [font-variant-numeric:tabular-nums]">
+            {formatValue(item.value)}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/* ---------- теплокарта «день недели × час» ---------- */
+
+export function Heatmap({
+  rows,
+  grid,
+  max,
+}: {
+  rows: string[]
+  grid: number[][]
+  max: number
+}) {
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+  const { ref, width } = useMeasure<HTMLDivElement>()
+
+  const stepColor = (value: number) => {
+    if (value === 0) return 'var(--viz-seq-0)'
+    const ratio = value / max
+    if (ratio <= 0.16) return 'var(--viz-seq-1)'
+    if (ratio <= 0.33) return 'var(--viz-seq-2)'
+    if (ratio <= 0.5) return 'var(--viz-seq-3)'
+    if (ratio <= 0.68) return 'var(--viz-seq-4)'
+    if (ratio <= 0.85) return 'var(--viz-seq-5)'
+    return 'var(--viz-seq-6)'
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      <div className="flex flex-col gap-1">
+        {rows.map((row, rowIndex) => (
+          <div key={row} className="flex items-center gap-1">
+            <span className="w-6 shrink-0 text-[10px] text-muted">{row}</span>
+            <div className="flex flex-1 gap-[2px]">
+              {grid[rowIndex].map((value, hour) => (
+                <div
+                  key={hour}
+                  className="h-4 flex-1 rounded-[2px]"
+                  style={{ background: stepColor(value) }}
+                  onMouseEnter={(event) => {
+                    const parent = (event.currentTarget.offsetParent as HTMLElement) ?? null
+                    const rect = event.currentTarget.getBoundingClientRect()
+                    const parentRect = parent?.getBoundingClientRect()
+                    setTooltip({
+                      x: rect.left - (parentRect?.left ?? 0),
+                      y: rect.top - (parentRect?.top ?? 0),
+                      content: `${row}, ${String(hour).padStart(2, '0')}:00 — ${value}`,
+                    })
+                  }}
+                  onMouseLeave={() => setTooltip(null)}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+        <div className="mt-1 flex items-center gap-1 pl-7">
+          {[0, 6, 12, 18, 23].map((hour) => (
+            <span key={hour} className="flex-1 text-[10px] text-muted" style={{ flexGrow: hour === 23 ? 0 : 1 }}>
+              {String(hour).padStart(2, '0')}
+            </span>
+          ))}
+        </div>
+      </div>
+      <Tooltip state={tooltip} width={width} />
+    </div>
+  )
+}
+
+/* ---------- кольцевая диаграмма (только для доли целого, ≤6 сегментов) ---------- */
+
+export function Donut({
+  segments,
+  size = 132,
+  centerLabel,
+  centerValue,
+}: {
+  segments: { label: string; value: number; color: string }[]
+  size?: number
+  centerLabel?: string
+  centerValue?: string
+}) {
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+  const total = segments.reduce((sum, s) => sum + s.value, 0)
+  const radius = size / 2
+  const thickness = 18
+  const inner = radius - thickness
+  let angle = -Math.PI / 2
+
+  const arc = (value: number) => {
+    const sweep = total > 0 ? (value / total) * Math.PI * 2 : 0
+    const start = angle
+    const end = angle + sweep
+    angle = end
+    const large = sweep > Math.PI ? 1 : 0
+    const p = (a: number, r: number) => `${radius + Math.cos(a) * r},${radius + Math.sin(a) * r}`
+    return `M${p(start, radius)} A${radius},${radius} 0 ${large} 1 ${p(end, radius)} L${p(end, inner)} A${inner},${inner} 0 ${large} 0 ${p(start, inner)} Z`
+  }
+
+  return (
+    <div className="relative flex items-center gap-4">
+      <svg width={size} height={size} role="img" className="shrink-0">
+        {segments.map((segment) => (
+          <path
+            key={segment.label}
+            d={arc(segment.value)}
+            fill={segment.color}
+            stroke="var(--viz-surface)"
+            strokeWidth={2}
+            onMouseEnter={(event) => {
+              const rect = (event.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect()
+              setTooltip({
+                x: event.clientX - rect.left,
+                y: event.clientY - rect.top,
+                content: `${segment.label}: ${segment.value} (${total ? Math.round((segment.value / total) * 100) : 0}%)`,
+              })
+            }}
+            onMouseLeave={() => setTooltip(null)}
+          />
+        ))}
+        {centerValue ? (
+          <>
+            <text x={radius} y={radius - 2} textAnchor="middle" className="fill-[var(--ink)] text-[18px] font-bold">
+              {centerValue}
+            </text>
+            <text x={radius} y={radius + 14} textAnchor="middle" className="fill-[var(--viz-muted)] text-[10px]">
+              {centerLabel}
+            </text>
+          </>
+        ) : null}
+      </svg>
+      <ul className="min-w-0 flex-1 space-y-1.5">
+        {segments.map((segment) => (
+          <li key={segment.label} className="flex items-center gap-2 text-[12px]">
+            <span className="h-2.5 w-2.5 shrink-0 rounded-[3px]" style={{ background: segment.color }} />
+            <span className="min-w-0 flex-1 truncate text-ink">{segment.label}</span>
+            <span className="shrink-0 text-muted [font-variant-numeric:tabular-nums]">
+              {segment.value} · {total ? Math.round((segment.value / total) * 100) : 0}%
+            </span>
+          </li>
+        ))}
+      </ul>
+      <Tooltip state={tooltip} width={size} />
+    </div>
+  )
+}
+
+/* ---------- спарклайн и плитка показателя ---------- */
+
+export function Sparkline({ values, color = 'var(--viz-1)', width = 72, height = 22 }: { values: number[]; color?: string; width?: number; height?: number }) {
+  if (values.length < 2) return <div style={{ width, height }} />
+  const max = Math.max(...values, 1)
+  const step = width / (values.length - 1)
+  const d = values.map((value, i) => `${i === 0 ? 'M' : 'L'}${i * step},${height - (value / max) * (height - 3) - 1.5}`).join(' ')
+  return (
+    <svg width={width} height={height} aria-hidden className="shrink-0">
+      <path d={d} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function StatTile({
+  label,
+  value,
+  delta,
+  deltaLabel,
+  spark,
+  invertDelta = false,
+  hint,
+}: {
+  label: string
+  value: string
+  /** null — сравнивать не с чем (в прошлом периоде было ноль). */
+  delta?: number | null
+  deltaLabel?: string
+  spark?: number[]
+  /** true — рост это плохо (например, время ответа). */
+  invertDelta?: boolean
+  hint?: string
+}) {
+  const hasDelta = delta !== undefined && delta !== null && Number.isFinite(delta)
+  const positive = hasDelta && (invertDelta ? (delta as number) < 0 : (delta as number) > 0)
+  const negative = hasDelta && (invertDelta ? (delta as number) > 0 : (delta as number) < 0)
+
+  return (
+    <div className="viz rounded-card bg-surface p-4">
+      <p className="text-[12px] text-muted">{label}</p>
+      <div className="mt-1 flex items-end justify-between gap-2">
+        <p className="text-[24px] font-bold leading-none text-ink">{value}</p>
+        {spark && spark.length > 1 ? <Sparkline values={spark} /> : null}
+      </div>
+      {hasDelta ? (
+        <p
+          className="mt-1.5 flex items-center gap-1 text-[11px]"
+          style={{ color: positive ? 'var(--viz-good)' : negative ? 'var(--viz-bad)' : 'var(--muted)' }}
+        >
+          <span aria-hidden>{(delta as number) > 0 ? '▲' : (delta as number) < 0 ? '▼' : '■'}</span>
+          {(delta as number) > 0 ? '+' : ''}
+          {(delta as number).toFixed(0)}% {deltaLabel}
+        </p>
+      ) : delta === null ? (
+        <p className="mt-1.5 text-[11px] text-muted">нет данных за прошлый период</p>
+      ) : hint ? (
+        <p className="mt-1.5 text-[11px] text-muted">{hint}</p>
+      ) : null}
+    </div>
+  )
+}
+
+/* ---------- сравнение текущего и прошлого периода ---------- */
+
+export function ComparisonBars({
+  items,
+  currentLabel,
+  previousLabel,
+}: {
+  items: { label: string; current: number; previous: number }[]
+  currentLabel: string
+  previousLabel: string
+}) {
+  const max = Math.max(1, ...items.flatMap((item) => [item.current, item.previous]))
+  return (
+    <div className="space-y-3">
+      {items.map((item) => (
+        <div key={item.label}>
+          <div className="mb-1 flex items-baseline justify-between text-[12px]">
+            <span className="text-ink">{item.label}</span>
+            <span className="text-muted [font-variant-numeric:tabular-nums]">
+              {item.current} / {item.previous}
+            </span>
+          </div>
+          <div className="space-y-[3px]">
+            <div className="h-2.5 rounded-[4px]" style={{ width: `${Math.max(1, (item.current / max) * 100)}%`, background: 'var(--viz-1)' }} />
+            <div className="h-2.5 rounded-[4px]" style={{ width: `${Math.max(1, (item.previous / max) * 100)}%`, background: 'var(--viz-axis)' }} />
+          </div>
+        </div>
+      ))}
+      <Legend
+        items={[
+          { label: currentLabel, color: 'var(--viz-1)' },
+          { label: previousLabel, color: 'var(--viz-axis)' },
+        ]}
+      />
+    </div>
+  )
+}
+
+/** Хук для «удержать прошлый кадр» — чтобы при перерисовке не мигал скелетон. */
+export function useDeferredFlag(active: boolean, delay = 120) {
+  const [flag, setFlag] = useState(active)
+  useEffect(() => {
+    if (active) {
+      setFlag(true)
+      return
+    }
+    const timer = setTimeout(() => setFlag(false), delay)
+    return () => clearTimeout(timer)
+  }, [active, delay])
+  return flag
+}
+
+/* ---------- календарь активности (график вкладов) ---------- */
+
+export function CalendarHeatmap({
+  cells,
+  max,
+  weeks = 53,
+}: {
+  cells: { date: Date; key: string; count: number }[]
+  max: number
+  weeks?: number
+}) {
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+  const { ref, width } = useMeasure<HTMLDivElement>()
+
+  // Раскладываем по колонкам-неделям: строка — день недели, начиная с понедельника.
+  const columns: ({ date: Date; key: string; count: number } | null)[][] = []
+  let column: ({ date: Date; key: string; count: number } | null)[] = []
+  const firstWeekday = (cells[0]?.date.getDay() ?? 1 + 6) % 7
+  for (let i = 0; i < firstWeekday; i += 1) column.push(null)
+  for (const cell of cells) {
+    column.push(cell)
+    if (column.length === 7) {
+      columns.push(column)
+      column = []
+    }
+  }
+  if (column.length > 0) {
+    while (column.length < 7) column.push(null)
+    columns.push(column)
+  }
+  const visible = columns.slice(-weeks)
+
+  const step = (count: number) => {
+    if (count === 0) return 'var(--viz-seq-0)'
+    const ratio = count / max
+    if (ratio <= 0.15) return 'var(--viz-seq-1)'
+    if (ratio <= 0.3) return 'var(--viz-seq-2)'
+    if (ratio <= 0.5) return 'var(--viz-seq-3)'
+    if (ratio <= 0.7) return 'var(--viz-seq-4)'
+    if (ratio <= 0.88) return 'var(--viz-seq-5)'
+    return 'var(--viz-seq-6)'
+  }
+
+  const monthLabels: { index: number; label: string }[] = []
+  let lastMonth = -1
+  visible.forEach((col, index) => {
+    const firstReal = col.find(Boolean)
+    if (!firstReal) return
+    const month = firstReal.date.getMonth()
+    if (month !== lastMonth) {
+      monthLabels.push({ index, label: format(firstReal.date, 'LLL', { locale: ru }) })
+      lastMonth = month
+    }
+  })
+
+  return (
+    <div ref={ref} className="relative">
+      <div className="scroll-thin overflow-x-auto pb-1">
+        <div className="inline-block min-w-full">
+          <div className="mb-1 flex gap-[3px] pl-7">
+            {visible.map((_, index) => {
+              const label = monthLabels.find((entry) => entry.index === index)
+              return (
+                <span key={index} className="w-[11px] shrink-0 text-[9px] text-muted">
+                  {label ? label.label : ''}
+                </span>
+              )
+            })}
+          </div>
+
+          <div className="flex gap-[3px]">
+            <div className="flex w-6 shrink-0 flex-col gap-[3px] text-[9px] text-muted">
+              {['Пн', '', 'Ср', '', 'Пт', '', 'Вс'].map((label, index) => (
+                <span key={index} className="h-[11px] leading-[11px]">
+                  {label}
+                </span>
+              ))}
+            </div>
+
+            {visible.map((col, colIndex) => (
+              <div key={colIndex} className="flex flex-col gap-[3px]">
+                {col.map((cell, rowIndex) => (
+                  <div
+                    key={rowIndex}
+                    className="h-[11px] w-[11px] shrink-0 rounded-[2px]"
+                    style={{ background: cell ? step(cell.count) : 'transparent' }}
+                    onMouseEnter={(event) => {
+                      if (!cell) return
+                      const parent = event.currentTarget.closest('.relative') as HTMLElement | null
+                      const rect = event.currentTarget.getBoundingClientRect()
+                      const parentRect = parent?.getBoundingClientRect()
+                      setTooltip({
+                        x: rect.left - (parentRect?.left ?? 0),
+                        y: rect.top - (parentRect?.top ?? 0),
+                        content: `${format(cell.date, 'd MMMM yyyy', { locale: ru })} — ${cell.count}`,
+                      })
+                    }}
+                    onMouseLeave={() => setTooltip(null)}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted">
+        <span>меньше</span>
+        {['var(--viz-seq-0)', 'var(--viz-seq-1)', 'var(--viz-seq-2)', 'var(--viz-seq-3)', 'var(--viz-seq-4)', 'var(--viz-seq-5)', 'var(--viz-seq-6)'].map(
+          (color) => (
+            <span key={color} className="h-[10px] w-[10px] rounded-[2px]" style={{ background: color }} />
+          ),
+        )}
+        <span>больше</span>
+      </div>
+
+      <Tooltip state={tooltip} width={width} />
+    </div>
+  )
+}
+
+/* ---------- изменение позиций в рейтинге ---------- */
+
+export function BumpChart({
+  series,
+  buckets,
+  depth,
+  colors,
+  height = 200,
+}: {
+  series: { handle: string; points: { label: string; rank: number; value: number }[] }[]
+  buckets: string[]
+  depth: number
+  colors: string[]
+  height?: number
+}) {
+  const { ref, width } = useMeasure<HTMLDivElement>()
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+  const [hover, setHover] = useState<string | null>(null)
+
+  const gutter = 28
+  const rightPad = 96
+  const plotW = Math.max(0, width - gutter - rightPad)
+  const plotH = height - AXIS_BAND - PAD_TOP
+  const stepX = buckets.length > 1 ? plotW / (buckets.length - 1) : 0
+  const xAt = (i: number) => gutter + i * stepX
+  const yAt = (rank: number) => PAD_TOP + ((rank - 1) / Math.max(1, depth - 1)) * plotH
+
+  return (
+    <div ref={ref} className="relative">
+      {width > 0 ? (
+        <svg width={width} height={height} role="img">
+          {Array.from({ length: depth }, (_, index) => index + 1).map((rank) => (
+            <g key={rank}>
+              <line x1={gutter} x2={gutter + plotW} y1={yAt(rank)} y2={yAt(rank)} stroke="var(--viz-grid)" strokeWidth={1} />
+              <text x={gutter - 6} y={yAt(rank) + 3.5} textAnchor="end" className="fill-[var(--viz-muted)] text-[10px]">
+                {rank}
+              </text>
+            </g>
+          ))}
+
+          {series.map((entry, index) => {
+            const color = colors[index % colors.length]
+            const dim = hover !== null && hover !== entry.handle
+            return (
+              <g
+                key={entry.handle}
+                onMouseEnter={() => setHover(entry.handle)}
+                onMouseLeave={() => {
+                  setHover(null)
+                  setTooltip(null)
+                }}
+                opacity={dim ? 0.25 : 1}
+              >
+                <path
+                  d={entry.points.map((point, i) => `${i === 0 ? 'M' : 'L'}${xAt(i)},${yAt(point.rank)}`).join(' ')}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {entry.points.map((point, i) => (
+                  <circle
+                    key={i}
+                    cx={xAt(i)}
+                    cy={yAt(point.rank)}
+                    r={4}
+                    fill={color}
+                    stroke="var(--viz-surface)"
+                    strokeWidth={2}
+                    onMouseEnter={(event) => {
+                      const rect = (event.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect()
+                      setTooltip({
+                        x: xAt(i),
+                        y: event.clientY - rect.top,
+                        content: `${entry.handle} · ${point.label}: место ${point.rank}, ${point.value} событий`,
+                      })
+                    }}
+                  />
+                ))}
+                <text
+                  x={xAt(entry.points.length - 1) + 8}
+                  y={yAt(entry.points[entry.points.length - 1]?.rank ?? 1) + 3.5}
+                  className="fill-[var(--ink)] text-[10px]"
+                >
+                  {entry.handle.length > 13 ? `${entry.handle.slice(0, 12)}…` : entry.handle}
+                </text>
+              </g>
+            )
+          })}
+
+          {buckets.map((label, i) =>
+            i % Math.ceil(buckets.length / 6 || 1) === 0 ? (
+              <text key={label + i} x={xAt(i)} y={height - 6} textAnchor="middle" className="fill-[var(--viz-muted)] text-[10px]">
+                {label}
+              </text>
+            ) : null,
+          )}
+        </svg>
+      ) : (
+        <div style={{ height }} />
+      )}
+      <Tooltip state={tooltip} width={width} />
+    </div>
+  )
+}
+
+/* ---------- диаграмма рассеяния ---------- */
+
+export function ScatterPlot({
+  points,
+  xLabel,
+  yLabel,
+  height = 220,
+  onSelect,
+}: {
+  points: { label: string; x: number; y: number; size?: number }[]
+  xLabel: string
+  yLabel: string
+  height?: number
+  onSelect?: (label: string) => void
+}) {
+  const { ref, width } = useMeasure<HTMLDivElement>()
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+
+  const maxX = Math.max(1, ...points.map((point) => point.x))
+  const maxY = Math.max(1, ...points.map((point) => point.y))
+  const ticksX = niceTicks(maxX, 4)
+  const ticksY = niceTicks(maxY, 4)
+  const topX = ticksX[ticksX.length - 1] || 1
+  const topY = ticksY[ticksY.length - 1] || 1
+
+  const gutter = 36
+  const plotW = Math.max(0, width - gutter - 12)
+  const plotH = height - AXIS_BAND - PAD_TOP
+  const xAt = (value: number) => gutter + (value / topX) * plotW
+  const yAt = (value: number) => PAD_TOP + plotH - (value / topY) * plotH
+
+  return (
+    <div ref={ref} className="relative">
+      {width > 0 ? (
+        <svg width={width} height={height} role="img">
+          {ticksY.map((tick) => (
+            <g key={`y${tick}`}>
+              <line x1={gutter} x2={gutter + plotW} y1={yAt(tick)} y2={yAt(tick)} stroke="var(--viz-grid)" strokeWidth={1} />
+              <text x={gutter - 6} y={yAt(tick) + 3.5} textAnchor="end" className="fill-[var(--viz-muted)] text-[10px] [font-variant-numeric:tabular-nums]">
+                {formatCompact(tick)}
+              </text>
+            </g>
+          ))}
+          {ticksX.map((tick) => (
+            <text key={`x${tick}`} x={xAt(tick)} y={height - 6} textAnchor="middle" className="fill-[var(--viz-muted)] text-[10px] [font-variant-numeric:tabular-nums]">
+              {formatCompact(tick)}
+            </text>
+          ))}
+
+          {points.map((point) => (
+            <circle
+              key={point.label}
+              cx={xAt(point.x)}
+              cy={yAt(point.y)}
+              r={Math.max(5, Math.min(12, point.size ?? 5))}
+              fill="var(--viz-1)"
+              fillOpacity={0.75}
+              stroke="var(--viz-surface)"
+              strokeWidth={2}
+              className={onSelect ? 'cursor-pointer' : undefined}
+              onClick={() => onSelect?.(point.label)}
+              onMouseEnter={(event) => {
+                const rect = (event.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect()
+                setTooltip({
+                  x: xAt(point.x),
+                  y: event.clientY - rect.top,
+                  content: `${point.label} — ${xLabel}: ${point.x}, ${yLabel}: ${point.y}`,
+                })
+              }}
+              onMouseLeave={() => setTooltip(null)}
+            />
+          ))}
+        </svg>
+      ) : (
+        <div style={{ height }} />
+      )}
+      <p className="mt-1 text-[10px] text-muted">
+        по горизонтали — {xLabel}, по вертикали — {yLabel}
+      </p>
+      <Tooltip state={tooltip} width={width} />
+    </div>
+  )
+}
+
+/* ---------- малые множители: спарклайн на каждого ---------- */
+
+export function SmallMultiples({
+  items,
+  color = 'var(--viz-1)',
+}: {
+  items: { label: string; values: number[]; total: number }[]
+  color?: string
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+      {items.map((item) => (
+        <div key={item.label} className="flex items-center gap-2">
+          <span className="w-[38%] shrink-0 truncate text-[11.5px] text-ink" title={item.label}>
+            {item.label}
+          </span>
+          <Sparkline values={item.values} color={color} width={96} height={24} />
+          <span className="ml-auto text-[11px] text-muted [font-variant-numeric:tabular-nums]">{item.total}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/* ---------- матрица год × месяц ---------- */
+
+const MONTHS_SHORT = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
+
+export function YearMonthGrid({
+  rows,
+  max,
+}: {
+  rows: { year: number; months: number[] }[]
+  max: number
+}) {
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+  const { ref, width } = useMeasure<HTMLDivElement>()
+
+  const step = (value: number) => {
+    if (value === 0) return 'var(--viz-seq-0)'
+    const ratio = value / max
+    if (ratio <= 0.15) return 'var(--viz-seq-1)'
+    if (ratio <= 0.3) return 'var(--viz-seq-2)'
+    if (ratio <= 0.5) return 'var(--viz-seq-3)'
+    if (ratio <= 0.7) return 'var(--viz-seq-4)'
+    if (ratio <= 0.88) return 'var(--viz-seq-5)'
+    return 'var(--viz-seq-6)'
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      <div className="flex gap-1 pl-10 text-[10px] text-muted">
+        {MONTHS_SHORT.map((month) => (
+          <span key={month} className="flex-1 text-center">
+            {month}
+          </span>
+        ))}
+      </div>
+      <div className="mt-1 space-y-1">
+        {rows.map((row) => (
+          <div key={row.year} className="flex items-center gap-1">
+            <span className="w-9 shrink-0 text-[10px] text-muted [font-variant-numeric:tabular-nums]">{row.year}</span>
+            {row.months.map((value, month) => (
+              <div
+                key={month}
+                className="h-6 flex-1 rounded-[3px]"
+                style={{ background: step(value) }}
+                onMouseEnter={(event) => {
+                  const parent = event.currentTarget.closest('.relative') as HTMLElement | null
+                  const rect = event.currentTarget.getBoundingClientRect()
+                  const parentRect = parent?.getBoundingClientRect()
+                  setTooltip({
+                    x: rect.left - (parentRect?.left ?? 0),
+                    y: rect.top - (parentRect?.top ?? 0),
+                    content: `${MONTHS_SHORT[month]} ${row.year} — ${value}`,
+                  })
+                }}
+                onMouseLeave={() => setTooltip(null)}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      <Tooltip state={tooltip} width={width} />
+    </div>
+  )
+}
+
+/* ---------- двойная линия: текущий период против прошлого года ---------- */
+
+export function DualLine({
+  points,
+  currentLabel,
+  previousLabel,
+  height = 190,
+}: {
+  points: { label: string; current: number; lastYear: number }[]
+  currentLabel: string
+  previousLabel: string
+  height?: number
+}) {
+  return (
+    <LineChart
+      height={height}
+      series={[
+        { name: currentLabel, color: 'var(--viz-1)', points: points.map((p) => ({ label: p.label, value: p.current })) },
+        { name: previousLabel, color: 'var(--viz-2)', points: points.map((p) => ({ label: p.label, value: p.lastYear })) },
+      ]}
+    />
+  )
+}

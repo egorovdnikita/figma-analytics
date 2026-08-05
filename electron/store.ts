@@ -185,13 +185,92 @@ export interface FigmaTeamRef {
   label: string
 }
 
+/** Настройки раздела: под них подстраиваются метрики «ночной работы»,
+ * «выходных» и глубина синхронизации. У разных команд разный рабочий ритм,
+ * поэтому пороги не зашиты в код. */
+export interface FigmaPrefs {
+  workdayStart: number
+  workdayEnd: number
+  nightStart: number
+  nightEnd: number
+  /** Дни недели, считающиеся выходными: 0 — воскресенье, 6 — суббота. */
+  weekendDays: number[]
+  /** Сколько корзин показывать на таймлайне при каждой гранулярности. */
+  timelineBuckets: { day: number; week: number; month: number; year: number }
+  /** Потолок страниц истории версий на файл при синхронизации (30 версий/стр). */
+  syncDepthPages: number
+  /** Параллельных файлов при синхронизации. */
+  syncConcurrency: number
+}
+
+export const defaultFigmaPrefs: FigmaPrefs = {
+  workdayStart: 9,
+  workdayEnd: 19,
+  nightStart: 22,
+  nightEnd: 7,
+  weekendDays: [0, 6],
+  timelineBuckets: { day: 30, week: 12, month: 12, year: 5 },
+  syncDepthPages: 400,
+  syncConcurrency: 4,
+}
+
+interface FigmaSettings {
+  teams: FigmaTeamRef[]
+  /** Участники, скрытые из аналитики вручную: подрядчики, боты, люди из
+   * соседних команд, попавшие в файлы через шаринг. */
+  hiddenUsers: string[]
+  prefs: FigmaPrefs
+}
+
+const FIGMA_SETTINGS_FILE = 'figma-settings.json'
+const defaultFigmaSettings: FigmaSettings = { teams: [], hiddenUsers: [], prefs: defaultFigmaPrefs }
+
+function readFigmaSettings(): FigmaSettings {
+  const stored = readJson<FigmaSettings>(FIGMA_SETTINGS_FILE, defaultFigmaSettings)
+  return {
+    teams: stored.teams ?? [],
+    hiddenUsers: stored.hiddenUsers ?? [],
+    prefs: {
+      ...defaultFigmaPrefs,
+      ...(stored.prefs ?? {}),
+      timelineBuckets: { ...defaultFigmaPrefs.timelineBuckets, ...(stored.prefs?.timelineBuckets ?? {}) },
+    },
+  }
+}
+
+export function getFigmaPrefs(): FigmaPrefs {
+  return readFigmaSettings().prefs
+}
+
+export function saveFigmaPrefs(patch: Partial<FigmaPrefs>): FigmaPrefs {
+  const settings = readFigmaSettings()
+  const prefs: FigmaPrefs = {
+    ...settings.prefs,
+    ...patch,
+    timelineBuckets: { ...settings.prefs.timelineBuckets, ...(patch.timelineBuckets ?? {}) },
+  }
+  writeJson(FIGMA_SETTINGS_FILE, { ...settings, prefs })
+  return prefs
+}
+
 export function getFigmaTeams(): FigmaTeamRef[] {
-  return readJson<{ teams: FigmaTeamRef[] }>('figma-settings.json', { teams: [] }).teams
+  return readFigmaSettings().teams
 }
 
 export function saveFigmaTeams(teams: FigmaTeamRef[]) {
-  writeJson('figma-settings.json', { teams })
+  // Пишем поверх прочитанного целиком, иначе перезапись файла затрёт список
+  // скрытых участников, который живёт в том же файле.
+  writeJson(FIGMA_SETTINGS_FILE, { ...readFigmaSettings(), teams })
   return teams
+}
+
+export function getFigmaHiddenUsers(): string[] {
+  return readFigmaSettings().hiddenUsers
+}
+
+export function saveFigmaHiddenUsers(hiddenUsers: string[]) {
+  writeJson(FIGMA_SETTINGS_FILE, { ...readFigmaSettings(), hiddenUsers })
+  return hiddenUsers
 }
 
 /* ---------- Figma: дисковый кэш (проекты/файлы/версии/комментарии) ----------
@@ -207,16 +286,35 @@ export interface FigmaFileCache {
   versionsCursor: string | null
   comments: unknown[]
   fetchedAt: number
+  /** Откуда файл — нужно, чтобы события можно было группировать по проекту/команде. */
+  fileName?: string
+  projectId?: string
+  projectName?: string
+  teamId?: string
+  teamName?: string
+  /** true — вся история версий выкачана до конца (курсор исчерпан). */
+  versionsComplete?: boolean
+}
+
+export interface FigmaLibraryCache {
+  data: unknown
+  fetchedAt: number
 }
 
 interface FigmaCacheShape {
   projectsByTeam: Record<string, unknown[]>
   filesByProject: Record<string, unknown[]>
   files: Record<string, FigmaFileCache>
+  libraryByTeam: Record<string, FigmaLibraryCache>
 }
 
 const FIGMA_CACHE_FILE = 'figma-cache.json'
-const emptyFigmaCache: FigmaCacheShape = { projectsByTeam: {}, filesByProject: {}, files: {} }
+const emptyFigmaCache: FigmaCacheShape = {
+  projectsByTeam: {},
+  filesByProject: {},
+  files: {},
+  libraryByTeam: {},
+}
 
 export function readFigmaCache(): FigmaCacheShape {
   return readJson<FigmaCacheShape>(FIGMA_CACHE_FILE, emptyFigmaCache)

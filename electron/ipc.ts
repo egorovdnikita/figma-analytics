@@ -1,16 +1,20 @@
-import { app, BrowserWindow, ipcMain, nativeTheme, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, nativeTheme, shell } from 'electron'
+import fs from 'node:fs'
 import * as auth from './auth'
 import * as google from './google'
 import * as figma from './figma'
 import * as figmaCache from './figmaCache'
 import {
   AppSettings,
+  FigmaPrefs,
   clearCredentials,
   clearFigmaToken,
   getCredentials,
+  getFigmaPrefs,
   getFigmaToken,
   getSettings,
   saveCredentials,
+  saveFigmaPrefs,
   saveFigmaToken,
   saveSettings,
   storageInfo,
@@ -146,6 +150,30 @@ export function registerIpc(getWindow: () => BrowserWindow | null) {
     figmaCache.getComments(fileKey, offset, limit),
   )
   handle('figma:overview', () => figmaCache.overviewSnapshot())
+  handle('figma:teamLibrary', (teamId: string) => figmaCache.getTeamLibrary(teamId))
+  handle('figma:events', () => figmaCache.buildEvents())
+  handle('figma:fileIndex', () => figmaCache.fileIndex())
+  handle('figma:peopleDirectory', () => figmaCache.peopleDirectory())
+  handle('figma:hiddenUsers', () => figmaCache.listHiddenUsers())
+  handle('figma:setHiddenUsers', (handles: string[]) => figmaCache.setHiddenUsers(handles))
+  handle('figma:prefs', () => getFigmaPrefs())
+  handle('figma:setPrefs', (patch: Partial<FigmaPrefs>) => saveFigmaPrefs(patch))
+  handle('figma:cacheStats', () => figmaCache.cacheStats())
+  handle('figma:clearCache', () => figmaCache.clearCache())
+  handle('figma:exportCsv', async () => {
+    const window = getWindow()
+    const result = await dialog.showSaveDialog(window ?? undefined!, {
+      title: 'Выгрузить события Figma',
+      defaultPath: `figma-events-${new Date().toISOString().slice(0, 10)}.csv`,
+      filters: [{ name: 'CSV', extensions: ['csv'] }],
+    })
+    if (result.canceled || !result.filePath) return { saved: false, path: null }
+    fs.writeFileSync(result.filePath, figmaCache.exportEventsCsv(), 'utf8')
+    return { saved: true, path: result.filePath }
+  })
+  handle('figma:sync', () =>
+    figmaCache.syncAll((progress) => getWindow()?.webContents.send('figma:syncProgress', progress)),
+  )
 
   /* системное */
   handle('app:info', () => ({

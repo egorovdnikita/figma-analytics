@@ -151,6 +151,12 @@ export interface FigmaVersion {
   user: { id: string; handle: string; img_url: string }
 }
 
+export interface FigmaCommentReaction {
+  emoji: string
+  created_at: string
+  user: { id: string; handle: string; img_url: string }
+}
+
 export interface FigmaComment {
   id: string
   parent_id: string
@@ -159,6 +165,105 @@ export interface FigmaComment {
   resolved_at: string | null
   message: string
   order_id: string | null
+  reactions: FigmaCommentReaction[]
+}
+
+export interface FigmaLibrarySummary {
+  componentsCount: number
+  componentSetsCount: number
+  stylesCount: number
+  lastPublished: string | null
+  recent: Array<{
+    key: string
+    name: string
+    kind: 'component' | 'component_set' | 'style'
+    updatedAt: string
+    user: { handle: string; img_url: string }
+  }>
+  byAuthor: Array<{ handle: string; img_url: string; count: number }>
+}
+
+export type FigmaEventKind = 'version' | 'comment' | 'reply' | 'resolve' | 'reaction'
+
+export interface FigmaEvent {
+  kind: FigmaEventKind
+  ts: string
+  userId: string
+  handle: string
+  img: string
+  fileKey: string
+  fileName: string
+  projectId: string
+  projectName: string
+  teamId: string
+  teamName: string
+  label?: string
+  message?: string
+  emoji?: string
+  threadId?: string
+  nodeId?: string
+}
+
+export interface FigmaFileIndexEntry {
+  fileKey: string
+  name: string
+  projectId: string
+  projectName: string
+  teamId: string
+  teamName: string
+  lastModified: string | null
+  thumbnailUrl: string | null
+  versions: number
+  comments: number
+  openComments: number
+  versionsComplete: boolean
+  fetchedAt: number
+}
+
+export interface FigmaDirectoryPerson {
+  handle: string
+  img: string
+  events: number
+  hidden: boolean
+}
+
+export interface FigmaPrefs {
+  workdayStart: number
+  workdayEnd: number
+  nightStart: number
+  nightEnd: number
+  weekendDays: number[]
+  timelineBuckets: { day: number; week: number; month: number; year: number }
+  syncDepthPages: number
+  syncConcurrency: number
+}
+
+export interface FigmaCacheStats {
+  files: number
+  versions: number
+  comments: number
+  reactions: number
+  incompleteFiles: number
+  oldestEvent: string | null
+  newestEvent: string | null
+  bytes: number
+  directory: string
+  lastFetchedAt: number | null
+}
+
+export interface FigmaSyncProgress {
+  phase: 'projects' | 'files' | 'history' | 'done'
+  done: number
+  total: number
+  current: string
+}
+
+export interface FigmaSyncResult {
+  files: number
+  versions: number
+  comments: number
+  errors: string[]
+  finishedAt: number
 }
 
 export interface FigmaPage<T> {

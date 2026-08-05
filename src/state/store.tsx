@@ -21,7 +21,7 @@ import type {
   ViewMode,
 } from '@/types'
 
-export type Screen = 'calendar' | 'profile' | 'translator' | 'tasks' | 'chat' | 'figma'
+export type Screen = 'calendar' | 'profile' | 'mail' | 'drive' | 'tasks' | 'figma'
 type Notice = { kind: 'info' | 'error' | 'success'; text: string } | null
 
 const defaultSettings: AppSettings = {

@@ -3,12 +3,20 @@ import type {
   AppSettings,
   Calendar,
   CalendarEvent,
+  FigmaCacheStats,
   FigmaCommentsPage,
+  FigmaDirectoryPerson,
+  FigmaEvent,
+  FigmaFileIndexEntry,
   FigmaFileMeta,
   FigmaFileSummary,
+  FigmaLibrarySummary,
   FigmaOverviewEntry,
   FigmaPage,
+  FigmaPrefs,
   FigmaProject,
+  FigmaSyncProgress,
+  FigmaSyncResult,
   FigmaTeamRef,
   FigmaUser,
   FigmaVersion,
@@ -70,6 +78,19 @@ interface RawApi {
     versions(fileKey: string, offset: number, limit: number): Promise<Envelope<FigmaPage<FigmaVersion>>>
     comments(fileKey: string, offset: number, limit: number): Promise<Envelope<FigmaCommentsPage>>
     overview(): Promise<Envelope<FigmaOverviewEntry[]>>
+    teamLibrary(teamId: string): Promise<Envelope<FigmaLibrarySummary>>
+    events(): Promise<Envelope<FigmaEvent[]>>
+    fileIndex(): Promise<Envelope<FigmaFileIndexEntry[]>>
+    peopleDirectory(): Promise<Envelope<FigmaDirectoryPerson[]>>
+    prefs(): Promise<Envelope<FigmaPrefs>>
+    setPrefs(patch: Partial<FigmaPrefs>): Promise<Envelope<FigmaPrefs>>
+    cacheStats(): Promise<Envelope<FigmaCacheStats>>
+    clearCache(): Promise<Envelope<boolean>>
+    exportCsv(): Promise<Envelope<{ saved: boolean; path: string | null }>>
+    hiddenUsers(): Promise<Envelope<string[]>>
+    setHiddenUsers(handles: string[]): Promise<Envelope<string[]>>
+    sync(): Promise<Envelope<FigmaSyncResult>>
+    onSyncProgress(listener: (progress: FigmaSyncProgress) => void): () => void
   }
 }
 
@@ -144,4 +165,18 @@ export const ipc = {
   figmaComments: (fileKey: string, offset: number, limit: number) =>
     unwrap(raw().figma.comments(fileKey, offset, limit)),
   figmaOverview: () => unwrap(raw().figma.overview()),
+  figmaTeamLibrary: (teamId: string) => unwrap(raw().figma.teamLibrary(teamId)),
+  figmaEvents: () => unwrap(raw().figma.events()),
+  figmaFileIndex: () => unwrap(raw().figma.fileIndex()),
+  figmaPeopleDirectory: () => unwrap(raw().figma.peopleDirectory()),
+  figmaPrefs: () => unwrap(raw().figma.prefs()),
+  figmaSetPrefs: (patch: Partial<FigmaPrefs>) => unwrap(raw().figma.setPrefs(patch)),
+  figmaCacheStats: () => unwrap(raw().figma.cacheStats()),
+  figmaClearCache: () => unwrap(raw().figma.clearCache()),
+  figmaExportCsv: () => unwrap(raw().figma.exportCsv()),
+  figmaHiddenUsers: () => unwrap(raw().figma.hiddenUsers()),
+  figmaSetHiddenUsers: (handles: string[]) => unwrap(raw().figma.setHiddenUsers(handles)),
+  figmaSync: () => unwrap(raw().figma.sync()),
+  figmaOnSyncProgress: (listener: (progress: FigmaSyncProgress) => void) =>
+    raw().figma.onSyncProgress(listener),
 }

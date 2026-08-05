@@ -61,6 +61,23 @@ const api = {
     comments: (fileKey: string, offset: number, limit: number) =>
       invoke<any>('figma:comments', fileKey, offset, limit),
     overview: () => invoke<any[]>('figma:overview'),
+    teamLibrary: (teamId: string) => invoke<any>('figma:teamLibrary', teamId),
+    events: () => invoke<any[]>('figma:events'),
+    fileIndex: () => invoke<any[]>('figma:fileIndex'),
+    peopleDirectory: () => invoke<any[]>('figma:peopleDirectory'),
+    prefs: () => invoke<any>('figma:prefs'),
+    setPrefs: (patch: Record<string, unknown>) => invoke<any>('figma:setPrefs', patch),
+    cacheStats: () => invoke<any>('figma:cacheStats'),
+    clearCache: () => invoke<boolean>('figma:clearCache'),
+    exportCsv: () => invoke<{ saved: boolean; path: string | null }>('figma:exportCsv'),
+    hiddenUsers: () => invoke<string[]>('figma:hiddenUsers'),
+    setHiddenUsers: (handles: string[]) => invoke<string[]>('figma:setHiddenUsers', handles),
+    sync: () => invoke<any>('figma:sync'),
+    onSyncProgress: (listener: (progress: any) => void) => {
+      const handler = (_event: unknown, progress: any) => listener(progress)
+      ipcRenderer.on('figma:syncProgress', handler)
+      return () => ipcRenderer.off('figma:syncProgress', handler)
+    },
   },
 }
 

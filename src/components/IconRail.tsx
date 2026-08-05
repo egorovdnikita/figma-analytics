@@ -1,14 +1,38 @@
 import { useApp, type Screen } from '@/state/store'
 import { Avatar } from '@/components/ui'
-import { AppIcon, type IconName } from '@/components/AppIcon'
+import { AppIcon } from '@/components/AppIcon'
 import { FigmaIcon } from '@/components/FigmaIcon'
+import { CalendarBrandIcon, DriveBrandIcon, MailBrandIcon, TasksBrandIcon } from '@/components/RailBrandIcons'
 import { cn } from '@/lib/cn'
 
-const SECTIONS: { screen: Screen; label: string; icon: IconName }[] = [
-  { screen: 'calendar', label: 'Календарь', icon: 'CalendarDays' },
-  { screen: 'translator', label: 'Переводчик', icon: 'TextFieldFocus' },
-  { screen: 'tasks', label: 'Задачи', icon: 'Check' },
-  { screen: 'chat', label: 'Чат', icon: 'MessageSquare' },
+/** Фирменные иконки не перекрашиваются через currentColor — неактивное
+ * состояние показываем притушенной (40%) копией того же цветного значка. */
+const SECTIONS: { screen: Screen; label: string; render: (active: boolean) => React.ReactNode }[] = [
+  {
+    screen: 'figma',
+    label: 'Figma',
+    render: (active) => <FigmaIcon size={20} className={active ? 'opacity-100' : 'opacity-40'} />,
+  },
+  {
+    screen: 'calendar',
+    label: 'Календарь',
+    render: (active) => <CalendarBrandIcon size={20} className={active ? 'opacity-100' : 'opacity-40'} />,
+  },
+  {
+    screen: 'mail',
+    label: 'Почта',
+    render: (active) => <MailBrandIcon size={20} className={active ? 'opacity-100' : 'opacity-40'} />,
+  },
+  {
+    screen: 'drive',
+    label: 'Диск',
+    render: (active) => <DriveBrandIcon size={20} className={active ? 'opacity-100' : 'opacity-40'} />,
+  },
+  {
+    screen: 'tasks',
+    label: 'Задачи',
+    render: (active) => <TasksBrandIcon size={20} className={active ? 'opacity-100' : 'opacity-40'} />,
+  },
 ]
 
 export function IconRail() {
@@ -21,16 +45,10 @@ export function IconRail() {
           key={section.screen}
           active={screen === section.screen}
           onClick={() => setScreen(section.screen)}
-          icon={<AppIcon name={section.icon} size={20} />}
+          icon={section.render(screen === section.screen)}
           label={section.label}
         />
       ))}
-      <RailItem
-        active={screen === 'figma'}
-        onClick={() => setScreen('figma')}
-        icon={<FigmaIcon active={screen === 'figma'} size={20} />}
-        label="Figma"
-      />
 
       <div className="flex-1" />
 

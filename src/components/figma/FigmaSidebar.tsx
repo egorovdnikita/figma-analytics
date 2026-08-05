@@ -1,161 +1,121 @@
 import { useEffect, useState } from 'react'
-import { ipc, BoxUiError } from '@/lib/ipc'
+import { ipc } from '@/lib/ipc'
 import type { FigmaFileSummary, FigmaProject, FigmaTeamRef } from '@/types'
-import { Button, Input, Spinner } from '@/components/ui'
-import { AppIcon } from '@/components/AppIcon'
+import { Input, Spinner } from '@/components/ui'
+import { AppIcon, type IconName } from '@/components/AppIcon'
 import { cn } from '@/lib/cn'
+import { AddTeamModal } from './AddTeamModal'
 
-interface Props {
-  selectedFileKey: string | null
-  onSelectFile: (key: string, name: string) => void
-  onSelectOverview: () => void
+interface SectionItem<T extends string> {
+  value: T
+  label: string
+  icon: IconName
 }
 
-export function FigmaSidebar({ selectedFileKey, onSelectFile, onSelectOverview }: Props) {
-  const [teams, setTeams] = useState<FigmaTeamRef[]>([])
-  const [teamsLoading, setTeamsLoading] = useState(true)
-  const [addingTeam, setAddingTeam] = useState(false)
+interface Props<T extends string> {
+  sections: SectionItem<T>[]
+  section: T
+  onSection: (section: T) => void
+  selectedFileKey: string | null
+  onSelectFile: (key: string, name: string) => void
+  teams: FigmaTeamRef[]
+  onTeamsChanged: (teams: FigmaTeamRef[]) => void
+}
+
+export function FigmaSidebar<T extends string>({
+  sections,
+  section,
+  onSection,
+  selectedFileKey,
+  onSelectFile,
+  teams,
+  onTeamsChanged,
+}: Props<T>) {
   const [filter, setFilter] = useState('')
-
-  const loadTeams = () => {
-    setTeamsLoading(true)
-    ipc
-      .figmaTeamsList()
-      .then(setTeams)
-      .finally(() => setTeamsLoading(false))
-  }
-
-  useEffect(loadTeams, [])
+  const [modalOpen, setModalOpen] = useState(false)
 
   return (
-    <aside className="flex h-full w-[264px] shrink-0 flex-col gap-2 p-3 pr-0">
-      <div className="no-drag pr-2">
-        <button
-          type="button"
-          onClick={onSelectOverview}
-          className={cn(
-            'flex h-10 w-full items-center gap-2 rounded-control px-3 text-[13px] font-medium transition-colors',
-            selectedFileKey === null ? 'bg-surface text-ink' : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
-          )}
-        >
-          <AppIcon name="AlignLeft" size={16} />
-          Обзор пространства
-        </button>
-      </div>
+    <aside className="flex h-full w-[264px] shrink-0 flex-col gap-3 border-r border-line p-3">
+      <nav className="space-y-0.5">
+        {sections.map((item) => (
+          <button
+            key={item.value}
+            type="button"
+            onClick={() => onSection(item.value)}
+            className={cn(
+              'flex h-9 w-full items-center gap-2 rounded-control px-2.5 text-[13px] font-medium transition-colors',
+              section === item.value && selectedFileKey === null
+                ? 'bg-surface text-ink'
+                : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
+            )}
+          >
+            <AppIcon name={item.icon} size={16} />
+            {item.label}
+          </button>
+        ))}
+      </nav>
 
-      <div className="no-drag pr-2">
+      <div className="border-t border-line pt-3">
+        <div className="mb-2 flex items-center justify-between pl-1">
+          <h3 className="text-[11px] font-semibold uppercase tracking-wide text-faint">Команды</h3>
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
+            className="flex h-6 w-6 items-center justify-center rounded-control text-muted hover:bg-[var(--sunken)] hover:text-ink"
+            aria-label="Добавить команду"
+            title="Добавить команду"
+          >
+            <AppIcon name="Plus" size={16} />
+          </button>
+        </div>
+
         <Input
           value={filter}
           onChange={(event) => setFilter(event.target.value)}
-          placeholder="Поиск по загруженному…"
-          className="h-9 text-[13px]"
+          placeholder="Фильтр по дереву…"
+          className="h-8 text-[12px]"
         />
       </div>
 
-      <div className="scroll-thin flex-1 overflow-y-auto pr-2">
-        <div className="rounded-card bg-surface p-2">
-          <div className="flex items-center justify-between px-1.5 py-1">
-            <h3 className="text-[12px] font-semibold lowercase text-muted">команды</h3>
-            <button
-              type="button"
-              onClick={() => setAddingTeam((v) => !v)}
-              className="flex h-6 w-6 items-center justify-center rounded-control text-muted hover:bg-[var(--sunken)] hover:text-ink"
-              aria-label="Добавить команду"
-              title="Добавить команду"
-            >
-              <AppIcon name="Plus" size={16} />
-            </button>
+      <div className="scroll-thin -mr-1 flex-1 overflow-y-auto pr-1">
+        {teams.length === 0 ? (
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
+            className="w-full rounded-control border border-dashed border-line px-3 py-4 text-[12px] leading-relaxed text-muted hover:border-[var(--lilac)] hover:text-ink"
+          >
+            Команд пока нет.
+            <br />
+            Добавить команду
+          </button>
+        ) : (
+          <div className="space-y-0.5">
+            {teams.map((team) => (
+              <TeamNode
+                key={team.id}
+                team={team}
+                filter={filter}
+                selectedFileKey={selectedFileKey}
+                onSelectFile={onSelectFile}
+                onRemoved={async () => {
+                  const next = await ipc.figmaTeamsRemove(team.id)
+                  onTeamsChanged(next)
+                }}
+              />
+            ))}
           </div>
-
-          {addingTeam ? (
-            <AddTeamForm
-              onAdded={(next) => {
-                setTeams(next)
-                setAddingTeam(false)
-              }}
-              onCancel={() => setAddingTeam(false)}
-            />
-          ) : null}
-
-          {teamsLoading ? (
-            <div className="flex justify-center py-4">
-              <Spinner className="h-4 w-4" />
-            </div>
-          ) : teams.length === 0 && !addingTeam ? (
-            <p className="px-1.5 py-2 text-[12px] leading-relaxed text-faint">
-              Команд пока нет. ID команды — в URL страницы команды в Figma:
-              figma.com/files/team/<b>ID</b>/…
-            </p>
-          ) : (
-            <div className="mt-1 space-y-0.5">
-              {teams.map((team) => (
-                <TeamNode
-                  key={team.id}
-                  team={team}
-                  filter={filter}
-                  selectedFileKey={selectedFileKey}
-                  onSelectFile={onSelectFile}
-                  onRemoved={loadTeams}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        )}
       </div>
+
+      <AddTeamModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onAdded={(next) => {
+          setModalOpen(false)
+          onTeamsChanged(next)
+        }}
+      />
     </aside>
-  )
-}
-
-function AddTeamForm({ onAdded, onCancel }: { onAdded: (teams: FigmaTeamRef[]) => void; onCancel: () => void }) {
-  const [id, setId] = useState('')
-  const [label, setLabel] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const submit = async () => {
-    if (!id.trim()) {
-      setError('Нужен ID команды')
-      return
-    }
-    setBusy(true)
-    setError(null)
-    try {
-      const next = await ipc.figmaTeamsAdd(id, label)
-      onAdded(next)
-    } catch (err) {
-      setError(err instanceof BoxUiError ? err.message : 'Не удалось добавить команду')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  return (
-    <div className="mb-1 space-y-1.5 rounded-control bg-[var(--sunken)] p-2">
-      <Input
-        value={id}
-        onChange={(event) => setId(event.target.value)}
-        placeholder="ID команды"
-        className="h-8 text-[12px]"
-        autoFocus
-      />
-      <Input
-        value={label}
-        onChange={(event) => setLabel(event.target.value)}
-        placeholder="Название (необязательно)"
-        className="h-8 text-[12px]"
-        onKeyDown={(event) => event.key === 'Enter' && void submit()}
-      />
-      {error ? <p className="text-[11px] text-[var(--danger)]">{error}</p> : null}
-      <div className="flex gap-1.5">
-        <Button variant="primary" size="sm" onClick={submit} disabled={busy} className="h-7 px-2.5 text-[11px]">
-          {busy ? <Spinner className="h-3 w-3" /> : null}
-          Добавить
-        </Button>
-        <Button variant="ghost" size="sm" onClick={onCancel} className="h-7 px-2.5 text-[11px]">
-          Отмена
-        </Button>
-      </div>
-    </div>
   )
 }
 
@@ -176,26 +136,17 @@ function TeamNode({
   const [loading, setLoading] = useState(false)
   const [projects, setProjects] = useState<FigmaProject[] | null>(null)
 
-  const load = () => {
+  useEffect(() => {
+    if (!expanded || projects !== null) return
     setLoading(true)
     ipc
       .figmaProjects(team.id)
       .then(setProjects)
       .finally(() => setLoading(false))
-  }
-
-  useEffect(() => {
-    if (expanded && projects === null) load()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expanded])
-
-  const remove = async () => {
-    await ipc.figmaTeamsRemove(team.id)
-    onRemoved()
-  }
+  }, [expanded, projects, team.id])
 
   const visibleProjects = filter
-    ? (projects ?? []).filter((p) => p.name.toLowerCase().includes(filter.toLowerCase()))
+    ? (projects ?? []).filter((project) => project.name.toLowerCase().includes(filter.toLowerCase()))
     : projects
 
   return (
@@ -211,7 +162,7 @@ function TeamNode({
         </button>
         <button
           type="button"
-          onClick={remove}
+          onClick={onRemoved}
           className="mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-control text-faint opacity-0 hover:bg-[var(--line)] hover:text-ink group-hover:opacity-100"
           aria-label="Убрать команду"
           title="Убрать из списка"
@@ -258,21 +209,17 @@ function ProjectNode({
   const [loading, setLoading] = useState(false)
   const [files, setFiles] = useState<FigmaFileSummary[] | null>(null)
 
-  const load = () => {
+  useEffect(() => {
+    if (!expanded || files !== null) return
     setLoading(true)
     ipc
       .figmaFiles(project.id)
       .then(setFiles)
       .finally(() => setLoading(false))
-  }
-
-  useEffect(() => {
-    if (expanded && files === null) load()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expanded])
+  }, [expanded, files, project.id])
 
   const visibleFiles = filter
-    ? (files ?? []).filter((f) => f.name.toLowerCase().includes(filter.toLowerCase()))
+    ? (files ?? []).filter((file) => file.name.toLowerCase().includes(filter.toLowerCase()))
     : files
 
   return (
