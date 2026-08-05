@@ -64,7 +64,6 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
   const [section, setSection] = useState<Section>('insights')
   const [selectedFile, setSelectedFile] = useState<{ key: string; name: string } | null>(null)
   const [filters, setFilters] = useState<FigmaFilters>(DEFAULT_FILTERS)
-  const [collapsed, setCollapsed] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
 
   const [teams, setTeams] = useState<FigmaTeamRef[]>([])
@@ -212,13 +211,6 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
       icon: 'RefreshCw',
       run: runSync,
     })
-    list.push({
-      id: 'action-collapse',
-      group: 'Действия',
-      label: collapsed ? 'Развернуть навигацию' : 'Свернуть навигацию',
-      icon: collapsed ? 'ChevronRight' : 'ChevronLeft',
-      run: () => setCollapsed((value) => !value),
-    })
 
     for (const file of files.slice(0, 200)) {
       list.push({
@@ -247,7 +239,7 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
 
     return list
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [files, events, analyticsPrefs, collapsed])
+  }, [files, events, analyticsPrefs])
 
   const dense = prefs?.density === 'compact'
   const showFilters = !selectedFile && section !== 'settings' && section !== 'library'
@@ -269,8 +261,6 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
           onSelectFile={openFile}
           teams={teams}
           onTeamsChanged={() => void reload()}
-          collapsed={collapsed}
-          onToggleCollapsed={() => setCollapsed((value) => !value)}
           pinned={prefs?.pinnedFiles ?? []}
           onUnpin={(key) => void togglePin(key, '')}
           onOpenPalette={() => setPaletteOpen(true)}
@@ -279,18 +269,22 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <header className="shrink-0 px-4 pt-3">
             <div className="drag-region flex h-11 items-center justify-between gap-4">
-              <h1 className="truncate text-[28px] font-bold lowercase leading-none tracking-tight text-ink">
+              <h1 className="truncate text-[28px] font-semibold leading-none tracking-tight text-ink">
                 {selectedFile ? selectedFile.name : sectionTitle}
               </h1>
-              <div className="no-drag flex items-center gap-2">
+              <div className="no-drag flex shrink-0 items-center gap-2">
                 {syncError ? (
-                  <span className="max-w-[280px] truncate text-[12px] text-[var(--danger)]" title={syncError}>
+                  <span className="max-w-[240px] truncate text-[12px] text-[var(--danger)]" title={syncError}>
                     {syncError}
                   </span>
                 ) : null}
-                <span className="hidden text-[12px] text-faint md:inline">
+                <span className="hidden text-[12px] text-faint lg:inline">
                   {events.length > 0 ? `${events.length.toLocaleString('ru')} событий` : ''}
                 </span>
+                <Button variant="soft" size="sm" onClick={runSync} disabled={syncing}>
+                  {syncing ? <Spinner className="h-4 w-4" /> : <AppIcon name="RefreshCw" size={16} />}
+                  {syncing ? 'Синхронизация…' : 'Синхронизировать'}
+                </Button>
               </div>
             </div>
 
@@ -307,22 +301,22 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
                 matchedCount={scopedEvents.length}
                 totalCount={events.length}
                 syncing={syncing}
-                onSync={runSync}
                 progress={progress}
               />
-            ) : (
+            ) : syncing && progress ? (
               <div className="mt-3 flex items-center gap-2 rounded-card bg-surface p-2">
-                <Button variant="soft" size="sm" className="ml-1" onClick={runSync} disabled={syncing}>
-                  {syncing ? <Spinner className="h-4 w-4" /> : <AppIcon name="RefreshCw" size={16} />}
-                  {syncing ? 'Синхронизация…' : 'Синхронизировать'}
-                </Button>
-                {syncing && progress ? <SyncProgressInline progress={progress} /> : null}
+                <SyncProgressInline progress={progress} />
               </div>
-            )}
+            ) : null}
           </header>
 
           <VizPrefsProvider tablesByDefault={prefs?.tablesByDefault ?? false}>
-          <main className={cn('scroll-thin min-h-0 flex-1 overflow-y-auto p-4', dense ? 'pt-2' : 'pt-3')}>
+          <main
+            className={cn(
+              'scroll-thin scroll-soft min-h-0 flex-1 overflow-y-auto px-4 pb-4',
+              dense ? 'pt-2' : 'pt-3',
+            )}
+          >
             {selectedFile ? (
               <div className={dense ? 'space-y-2' : 'space-y-3'}>
                 <div className="flex items-center gap-2">

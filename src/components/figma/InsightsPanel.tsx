@@ -126,7 +126,7 @@ export function InsightsPanel({
     <div className="space-y-3">
       <ChartCard
         title="Пульс пространства"
-        subtitle="сводный индекс из пяти наблюдаемых признаков — каждый виден отдельно"
+        subtitle="Сводный индекс из пяти наблюдаемых признаков — каждый виден отдельно"
         table={
           <table className="w-full text-[13px]">
             <tbody>
@@ -147,7 +147,7 @@ export function InsightsPanel({
       </ChartCard>
 
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-1 text-[14px] font-semibold text-ink">Что происходит</h3>
+        <h3 className="mb-1 text-[14px] font-medium text-ink">Что происходит</h3>
         <p className="mb-3 text-[12px] text-muted">
           Выводы собраны автоматически по текущей выборке. Пороги настраиваются в разделе «Настройки».
         </p>
@@ -161,7 +161,7 @@ export function InsightsPanel({
       <div className="grid grid-cols-2 gap-3">
         <ChartCard
           title="Куда идёт активность"
-          subtitle="продолжение линейного тренда на 4 периода с коридором в одно σ"
+          subtitle="Продолжение линейного тренда на 4 периода с коридором в одно σ"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -188,7 +188,7 @@ export function InsightsPanel({
 
         <ChartCard
           title="Жизненный цикл файлов"
-          subtitle="по давности последнего события"
+          subtitle="По давности последнего события"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -233,7 +233,7 @@ export function InsightsPanel({
       <div className="grid grid-cols-2 gap-3">
         <ChartCard
           title="Как быстро отвечают"
-          subtitle="распределение времени до первого ответа, в часах"
+          subtitle="Распределение времени до первого ответа, в часах"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -272,7 +272,7 @@ export function InsightsPanel({
 
         <ChartCard
           title="Признаки переработок"
-          subtitle="ночная работа, выходные и длинные серии без перерыва"
+          subtitle="Ночная работа, выходные и длинные серии без перерыва"
           table={
             <table className="w-full text-[13px]">
               <thead>
@@ -326,7 +326,7 @@ export function InsightsPanel({
 
       <ChartCard
         title="Граф связей команды"
-        subtitle="кто с кем пересекается в файлах — толщина линии равна числу общих файлов"
+        subtitle="Кто с кем пересекается в файлах — толщина линии равна числу общих файлов"
         table={
           <table className="w-full text-[13px]">
             <tbody>
@@ -349,7 +349,7 @@ export function InsightsPanel({
 
       <ChartCard
         title="Удержание участников по когортам"
-        subtitle="строка — месяц первого появления, столбец — сколько из них активны N месяцев спустя"
+        subtitle="Строка — месяц первого появления, столбец — сколько из них активны N месяцев спустя"
         table={
           <table className="w-full text-[13px]">
             <tbody>

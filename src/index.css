@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Крупные числа набираются узким тяжёлым гротеском: на дашборде значения
+   стоят рядом друг с другом, и сжатое начертание не даёт им расползаться. */
+@font-face {
+  font-family: 'Coolvetica Heavy Comp';
+  src: url('./assets/fonts/coolvetica-heavy-comp.otf') format('opentype');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* background/base/primary, background/base/secondary (Box UI | Tokens, Mode=Light) */
   --canvas: #f5f5f5;
@@ -24,6 +34,7 @@
   --overlay: rgb(0 0 0 / 0.48);
   --shadow-card: 0 1px 2px rgb(22 23 26 / 0.04);
   --font-body: 'Inter Variable', 'Golos Text', -apple-system, 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Coolvetica Heavy Comp', 'Inter Variable', system-ui, sans-serif;
   color-scheme: light;
 }
 
@@ -152,7 +163,7 @@ body {
 /* Тонкие скроллбары в стиле интерфейса */
 .scroll-thin {
   scrollbar-width: thin;
-  scrollbar-color: var(--faint) transparent;
+  scrollbar-color: color-mix(in srgb, var(--faint) 18%, transparent) transparent;
 }
 /* Только для сеток MonthView/TimeGridView: резервируем место под скроллбар
    всегда, иначе колонки сетки сдвигаются относительно шапки, у которой
@@ -166,13 +177,13 @@ body {
   height: 10px;
 }
 .scroll-thin::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--faint) 55%, transparent);
+  background: color-mix(in srgb, var(--faint) 18%, transparent);
   border: 3px solid transparent;
   background-clip: content-box;
   border-radius: 4px;
 }
 .scroll-thin::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--muted) 70%, transparent);
+  background: color-mix(in srgb, var(--muted) 24%, transparent);
   background-clip: content-box;
 }
 
@@ -214,4 +225,32 @@ body {
 }
 .animate-fade {
   animation: boxui-fade 0.14s ease-out;
+}
+
+/* Крупные числа. Отдельная утилита, а не глобальная подмена: узкий гротеск
+   хорош для цифр и совершенно не годится для текста. */
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* Мягкий край прокручиваемой области. Без него контент упирается в
+   фиксированную шапку ровным срезом — сверху и снизу подмешиваем
+   прозрачность, чтобы уходящие строки таяли, а не обрубались. */
+.scroll-soft {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 14px,
+    #000 calc(100% - 14px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 14px,
+    #000 calc(100% - 14px),
+    transparent 100%
+  );
 }

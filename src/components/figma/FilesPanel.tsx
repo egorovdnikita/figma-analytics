@@ -83,7 +83,7 @@ export function FilesPanel({
       <div className="grid grid-cols-2 gap-3">
         <ChartCard
           title="Самые нагруженные файлы"
-          subtitle="события за текущий период"
+          subtitle="События за текущий период"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -104,7 +104,7 @@ export function FilesPanel({
 
         <ChartCard
           title="Открытых обсуждений"
-          subtitle="файлы с незакрытыми комментариями"
+          subtitle="Файлы с незакрытыми комментариями"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -135,7 +135,7 @@ export function FilesPanel({
 
       <div className="viz rounded-card bg-surface p-4">
         <div className="mb-3 flex items-center gap-3">
-          <h3 className="text-[14px] font-semibold text-ink">Все файлы ({rows.length})</h3>
+          <h3 className="text-[14px] font-medium text-ink">Все файлы ({rows.length})</h3>
           <div className="ml-auto w-[240px]">
             <Input
               value={query}
@@ -146,7 +146,7 @@ export function FilesPanel({
           </div>
         </div>
 
-        <div className="scroll-thin max-h-[520px] overflow-auto">
+        <div className="scroll-thin scroll-soft max-h-[520px] overflow-auto pt-1">
           <table className="w-full text-[13px]">
             <thead className="sticky top-0 bg-surface">
               <tr className="text-left text-[12px] text-faint">
@@ -201,7 +201,7 @@ export function FilesPanel({
 
       {stale.length > 0 ? (
         <section className="rounded-card bg-surface p-4">
-          <h3 className="mb-3 flex items-center gap-1.5 text-[14px] font-semibold text-ink">
+          <h3 className="mb-3 flex items-center gap-1.5 text-[14px] font-medium text-ink">
             <AppIcon name="CalendarOff" size={15} className="text-[var(--danger)]" />
             Заброшенные файлы — 30+ дней без изменений ({stale.length})
           </h3>

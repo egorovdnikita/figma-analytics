@@ -48,7 +48,7 @@ export function FigmaFileDetail({
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-[16px] font-semibold text-ink">{meta?.name ?? fallbackName}</h2>
+          <h2 className="truncate text-[16px] font-medium text-ink">{meta?.name ?? fallbackName}</h2>
           <p className="mt-0.5 text-[13px] text-muted">
             {meta ? (
               <>
@@ -104,7 +104,7 @@ function FileOverviewTab({ fileKey }: { fileKey: string }) {
   return (
     <div className="grid grid-cols-2 gap-3">
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-3 text-[14px] font-semibold text-ink">Последние сохранения</h3>
+        <h3 className="mb-3 text-[14px] font-medium text-ink">Последние сохранения</h3>
         {versions === null ? (
           <Spinner className="h-4 w-4" />
         ) : (
@@ -121,7 +121,7 @@ function FileOverviewTab({ fileKey }: { fileKey: string }) {
       </section>
 
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-3 text-[14px] font-semibold text-ink">Комментарии</h3>
+        <h3 className="mb-3 text-[14px] font-medium text-ink">Комментарии</h3>
         {commentStats === null ? (
           <Spinner className="h-4 w-4" />
         ) : (

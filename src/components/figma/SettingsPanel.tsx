@@ -98,7 +98,7 @@ export function SettingsPanel({
       ) : null}
 
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-1 text-[14px] font-semibold text-ink">Подключение</h3>
+        <h3 className="mb-1 text-[14px] font-medium text-ink">Подключение</h3>
         <p className="mb-3 text-[12px] text-muted">
           Токен хранится только на этом компьютере и шифруется средствами операционной системы.
         </p>
@@ -117,7 +117,7 @@ export function SettingsPanel({
 
       <div className="grid grid-cols-2 gap-3">
         <section className="rounded-card bg-surface p-4">
-          <h3 className="mb-1 text-[14px] font-semibold text-ink">Рабочий ритм команды</h3>
+          <h3 className="mb-1 text-[14px] font-medium text-ink">Рабочий ритм команды</h3>
           <p className="mb-4 text-[12px] leading-relaxed text-muted">
             От этих порогов зависят метрики «ночной работы», «работы в выходные» и фильтр «только рабочие часы».
           </p>
@@ -134,7 +134,7 @@ export function SettingsPanel({
                 ))}
               </Select>
             </Field>
-            <Field label="по">
+            <Field label="По">
               <Select
                 value={String(prefs.workdayEnd)}
                 onChange={(event) => void patch({ workdayEnd: Number(event.target.value) })}
@@ -156,7 +156,7 @@ export function SettingsPanel({
                 ))}
               </Select>
             </Field>
-            <Field label="по">
+            <Field label="По">
               <Select
                 value={String(prefs.nightEnd)}
                 onChange={(event) => void patch({ nightEnd: Number(event.target.value) })}
@@ -192,7 +192,7 @@ export function SettingsPanel({
         </section>
 
         <section className="rounded-card bg-surface p-4">
-          <h3 className="mb-1 text-[14px] font-semibold text-ink">Графики и синхронизация</h3>
+          <h3 className="mb-1 text-[14px] font-medium text-ink">Графики и синхронизация</h3>
           <p className="mb-4 text-[12px] leading-relaxed text-muted">
             Сколько периодов показывать на таймлайнах и как глубоко копать историю при синхронизации.
           </p>
@@ -230,7 +230,7 @@ export function SettingsPanel({
                 className="h-9 text-[13px]"
               />
             </Field>
-            <Field label="Файлов параллельно" hint="больше — быстрее, но выше риск лимитов">
+            <Field label="Файлов параллельно" hint="Больше — быстрее, но выше риск лимитов">
               <Input
                 type="number"
                 min={1}
@@ -246,7 +246,7 @@ export function SettingsPanel({
 
       <div className="grid grid-cols-2 gap-3">
         <section className="rounded-card bg-surface p-4">
-          <h3 className="mb-1 text-[14px] font-semibold text-ink">Интерфейс</h3>
+          <h3 className="mb-1 text-[14px] font-medium text-ink">Интерфейс</h3>
           <p className="mb-4 text-[12px] leading-relaxed text-muted">
             Плотность, стартовый раздел и режим отображения карточек.
           </p>
@@ -286,7 +286,7 @@ export function SettingsPanel({
         </section>
 
         <section className="rounded-card bg-surface p-4">
-          <h3 className="mb-1 text-[14px] font-semibold text-ink">Пороги инсайтов</h3>
+          <h3 className="mb-1 text-[14px] font-medium text-ink">Пороги инсайтов</h3>
           <p className="mb-4 text-[12px] leading-relaxed text-muted">
             С какого момента наблюдение попадает в раздел «Инсайты» как отдельный вывод.
           </p>
@@ -382,7 +382,7 @@ export function SettingsPanel({
       </div>
 
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-3 text-[14px] font-semibold text-ink">Собранные данные</h3>
+        <h3 className="mb-3 text-[14px] font-medium text-ink">Собранные данные</h3>
         {stats ? (
           <>
             <div className="grid grid-cols-6 gap-3">
@@ -424,11 +424,11 @@ export function SettingsPanel({
       </section>
 
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-1 text-[14px] font-semibold text-ink">Участники в аналитике</h3>
+        <h3 className="mb-1 text-[14px] font-medium text-ink">Участники в аналитике</h3>
         <p className="mb-3 text-[12px] text-muted">
           Скрытые исключены из всех метрик раздела. Нажмите на карточку, чтобы переключить.
         </p>
-        <div className="scroll-thin max-h-[280px] space-y-0.5 overflow-y-auto pr-1">
+        <div className="scroll-thin scroll-soft max-h-[280px] space-y-0.5 overflow-y-auto pr-1">
           {directory.map((person) => (
             <Checkbox
               key={person.handle}
@@ -455,7 +455,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-[12px] text-muted">{label}</p>
-      <p className="mt-0.5 text-[16px] font-semibold text-ink [font-variant-numeric:tabular-nums]">{value}</p>
+      <p className="mt-0.5 font-display text-[19px] text-ink">{value}</p>
     </div>
   )
 }

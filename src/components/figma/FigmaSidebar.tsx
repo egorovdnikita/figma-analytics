@@ -23,8 +23,6 @@ interface Props<T extends string> {
   onSelectFile: (key: string, name: string) => void
   teams: FigmaTeamRef[]
   onTeamsChanged: (teams: FigmaTeamRef[]) => void
-  collapsed: boolean
-  onToggleCollapsed: () => void
   pinned: FigmaPinnedFile[]
   onUnpin: (key: string) => void
   onOpenPalette: () => void
@@ -38,8 +36,6 @@ export function FigmaSidebar<T extends string>({
   onSelectFile,
   teams,
   onTeamsChanged,
-  collapsed,
-  onToggleCollapsed,
   pinned,
   onUnpin,
   onOpenPalette,
@@ -52,67 +48,25 @@ export function FigmaSidebar<T extends string>({
     return acc
   }, {})
 
-  if (collapsed) {
-    return (
-      <aside className="flex h-full w-14 shrink-0 flex-col items-center gap-1 py-3">
-        <button
-          type="button"
-          onClick={onToggleCollapsed}
-          className="mb-1 flex h-9 w-9 items-center justify-center rounded-control text-muted hover:bg-[var(--sunken)] hover:text-ink"
-          aria-label="Развернуть навигацию"
-          title="Развернуть навигацию"
-        >
-          <AppIcon name="ChevronRight" size={16} />
-        </button>
-        {sections.map((item) => (
-          <button
-            key={item.value}
-            type="button"
-            onClick={() => onSection(item.value)}
-            className={cn(
-              'flex h-9 w-9 items-center justify-center rounded-control transition-colors',
-              section === item.value && selectedFileKey === null
-                ? 'bg-surface text-ink'
-                : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
-            )}
-            aria-label={item.label}
-            title={item.label}
-          >
-            <AppIcon name={item.icon} size={16} />
-          </button>
-        ))}
-      </aside>
-    )
-  }
-
   return (
     <aside className="flex h-full w-[248px] shrink-0 flex-col gap-3 p-3 pr-0">
-      <div className="flex items-center gap-1 pr-2">
+      <div className="pr-2">
         <button
           type="button"
           onClick={onOpenPalette}
-          className="flex h-10 min-w-0 flex-1 items-center gap-2 whitespace-nowrap rounded-control bg-surface px-3 text-[13px] text-muted transition-colors hover:text-ink"
+          className="flex h-10 w-full items-center gap-2 whitespace-nowrap rounded-control bg-surface px-3 text-[13px] text-muted transition-colors hover:text-ink"
         >
           <AppIcon name="Search" size={16} className="shrink-0" />
           Поиск
           <kbd className="ml-auto shrink-0 rounded-chip bg-[var(--sunken)] px-1.5 py-0.5 text-[11px]">⌘K</kbd>
         </button>
-        <button
-          type="button"
-          onClick={onToggleCollapsed}
-          className="flex h-10 w-9 shrink-0 items-center justify-center rounded-control text-muted transition-colors hover:bg-surface hover:text-ink"
-          aria-label="Свернуть навигацию"
-          title="Свернуть навигацию"
-        >
-          <AppIcon name="ChevronLeft" size={16} />
-        </button>
       </div>
 
-      <div className="scroll-thin -mr-1 flex-1 overflow-y-auto pr-2">
+      <div className="scroll-thin scroll-soft -mr-1 flex-1 overflow-y-auto pr-2 pt-1">
         <nav className="space-y-3">
           {Object.entries(groups).map(([group, items]) => (
             <section key={group} className="rounded-card bg-surface p-2">
-              <h3 className="mb-1 pl-2 text-[12px] font-semibold lowercase text-muted">{group}</h3>
+              <h3 className="mb-1 pl-2 text-[12px] font-medium text-faint">{group}</h3>
               <div className="space-y-0.5">
                 {items.map((item) => (
                   <button
@@ -123,7 +77,7 @@ export function FigmaSidebar<T extends string>({
                       'flex h-9 w-full items-center gap-2.5 rounded-control px-2 text-[13px] font-medium transition-colors',
                       section === item.value && selectedFileKey === null
                         ? 'bg-[var(--sunken)] text-ink'
-                        : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
+                        : 'text-faint hover:bg-[var(--sunken)] hover:text-ink',
                     )}
                   >
                     <AppIcon name={item.icon} size={16} />
@@ -137,7 +91,7 @@ export function FigmaSidebar<T extends string>({
 
         {pinned.length > 0 ? (
           <section className="mt-3 rounded-card bg-surface p-2">
-            <h3 className="mb-1 pl-2 text-[12px] font-semibold lowercase text-muted">закреплённые</h3>
+            <h3 className="mb-1 pl-2 text-[12px] font-medium text-faint">Закреплённые</h3>
             <div className="space-y-0.5">
               {pinned.map((file) => (
                 <div key={file.key} className="group flex items-center rounded-control hover:bg-[var(--sunken)]">
@@ -169,7 +123,7 @@ export function FigmaSidebar<T extends string>({
 
         <section className="mt-3 rounded-card bg-surface p-2">
           <div className="mb-1 flex items-center justify-between pl-2">
-            <h3 className="text-[12px] font-semibold lowercase text-muted">команды</h3>
+            <h3 className="text-[12px] font-medium text-faint">Команды</h3>
             <button
               type="button"
               onClick={() => setModalOpen(true)}

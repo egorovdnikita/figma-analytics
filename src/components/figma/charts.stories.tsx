@@ -64,16 +64,16 @@ export const ПлиткаПоказателя: Story = {
         label="Событий за период"
         value="1 284"
         delta={18}
-        deltaLabel="к прошлым 7 дням"
+        deltaLabel="К прошлым 7 дням"
         spark={[8, 12, 9, 15, 11, 19, 16, 22]}
       />
       <StatTile
         label="Среднее время закрытия"
         value="5 дней"
         delta={24}
-        deltaLabel="к прошлым 7 дням"
+        deltaLabel="К прошлым 7 дням"
         invertDelta
-        hint="меньше — лучше"
+        hint="Меньше — лучше"
       />
       <StatTile label="Участников" value="14" delta={null} />
     </div>
@@ -84,7 +84,7 @@ export const КарточкаСТаблицей: Story = {
   render: () => (
     <ChartCard
       title="Активность по типам событий"
-      subtitle="переключатель «Таблица» — обязательная опора для цвета"
+      subtitle="Переключатель «Таблица» — обязательная опора для цвета"
       legend={<Legend items={SERIES.map((item) => ({ label: item.name, color: item.color }))} />}
       table={
         <table className="w-full text-[12px]">

@@ -89,7 +89,7 @@ export function DashboardPanel({
           delta={model.delta.resolutionMs}
           deltaLabel={PREVIOUS_LABEL[granularity]}
           invertDelta
-          hint="меньше — лучше"
+          hint="Меньше — лучше"
         />
         <StatTile
           label="Реакций"
@@ -119,7 +119,7 @@ export function DashboardPanel({
       <div className="grid grid-cols-2 gap-3">
         <ChartCard
           title="Сколько людей были активны"
-          subtitle="уникальные участники в каждом периоде"
+          subtitle="Уникальные участники в каждом периоде"
           table={
             <SimpleTable
               head={['Период', 'Участников']}
@@ -168,7 +168,7 @@ export function DashboardPanel({
       <div className="grid grid-cols-2 gap-3">
         <ChartCard
           title="Когда команда работает"
-          subtitle="день недели × час, по всем событиям"
+          subtitle="День недели × час, по всем событиям"
           table={
             <SimpleTable
               head={['День', 'Событий']}
@@ -204,7 +204,7 @@ export function DashboardPanel({
       <div className="grid grid-cols-2 gap-3">
         <ChartCard
           title="Самые активные файлы"
-          subtitle="по числу событий за период"
+          subtitle="По числу событий за период"
           table={<SimpleTable head={['Файл', 'Событий']} rows={model.topFiles.map((f) => [f.label, String(f.value)])} />}
         >
           <HBars items={model.topFiles} />
@@ -226,7 +226,7 @@ export function DashboardPanel({
 
         <ChartCard
           title="Активность по проектам"
-          subtitle="события за период"
+          subtitle="События за период"
           table={
             <SimpleTable head={['Проект', 'Событий']} rows={model.topProjects.map((p) => [p.label, String(p.value)])} />
           }
@@ -238,7 +238,7 @@ export function DashboardPanel({
       <div className="grid grid-cols-2 gap-3">
         <ChartCard
           title="Кто сделал больше всего"
-          subtitle="участники по числу событий за период"
+          subtitle="Участники по числу событий за период"
           table={
             <SimpleTable
               head={['Участник', 'Событий']}
@@ -255,7 +255,7 @@ export function DashboardPanel({
 
         <ChartCard
           title="Распределение по часам суток"
-          subtitle="все события за всю историю"
+          subtitle="Все события за всю историю"
           table={
             <SimpleTable
               head={['Час', 'Событий']}
@@ -277,7 +277,7 @@ export function DashboardPanel({
       {model.topTeams.length > 1 ? (
         <ChartCard
           title="Активность по командам"
-          subtitle="события за период"
+          subtitle="События за период"
           table={
             <SimpleTable head={['Команда', 'Событий']} rows={model.topTeams.map((t) => [t.label, String(t.value)])} />
           }

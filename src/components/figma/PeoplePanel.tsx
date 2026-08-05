@@ -142,7 +142,7 @@ export function PeoplePanel({
           />
         </div>
 
-        <div className="scroll-thin max-h-[420px] overflow-y-auto pr-1">
+        <div className="scroll-thin scroll-soft max-h-[420px] overflow-y-auto pr-1">
           <div className="space-y-1">
             {filtered.map((person) => {
               const inWindow = currentByHandle.get(person.handle)
@@ -216,7 +216,7 @@ export function PeoplePanel({
 
       {hidden.length > 0 ? (
         <section className="rounded-card bg-surface p-4">
-          <h3 className="mb-2 text-[14px] font-semibold text-ink">Скрытые из аналитики ({hidden.length})</h3>
+          <h3 className="mb-2 text-[14px] font-medium text-ink">Скрытые из аналитики ({hidden.length})</h3>
           <p className="mb-3 text-[12px] text-muted">
             Их события полностью исключены из всех графиков и метрик раздела. Нажмите, чтобы вернуть.
           </p>
@@ -310,7 +310,7 @@ function TeamSummary({
       <div className="grid grid-cols-2 gap-3">
         <ChartCard
           title="Концентрация активности"
-          subtitle="какую долю всей работы делают самые активные"
+          subtitle="Какую долю всей работы делают самые активные"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -341,7 +341,7 @@ function TeamSummary({
 
         <ChartCard
           title="Кто с кем работает"
-          subtitle="пары участников по общим файлам"
+          subtitle="Пары участников по общим файлам"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -373,7 +373,7 @@ function TeamSummary({
 
       <ChartCard
         title="Динамика состава"
-        subtitle="сколько разных людей были активны в каждом периоде"
+        subtitle="Сколько разных людей были активны в каждом периоде"
         table={<HeadcountTable events={events} granularity={granularity} />}
       >
         <HeadcountChart events={events} granularity={granularity} />
@@ -568,7 +568,7 @@ function PersonDetail({
         <div className="flex items-start gap-3">
           <Avatar src={allTime?.img} name={handle} size={44} />
           <div className="min-w-0 flex-1">
-            <h3 className="text-[16px] font-semibold text-ink">{handle}</h3>
+            <h3 className="text-[16px] font-medium text-ink">{handle}</h3>
             <p className="mt-0.5 text-[12px] text-muted">
               {allTime?.firstSeen ? `Первое событие ${relativeTime(allTime.firstSeen)}` : '—'}
               {allTime?.lastSeen ? ` · последнее ${relativeTime(allTime.lastSeen)}` : ''}
@@ -576,10 +576,10 @@ function PersonDetail({
             </p>
           </div>
           <div className="text-right">
-            <p className="text-[22px] font-bold leading-none text-ink">
+            <p className="font-display text-[24px] leading-none text-ink">
               {(allTime?.total ?? 0).toLocaleString('ru')}
             </p>
-            <p className="mt-1 text-[12px] text-muted">событий за всю историю</p>
+            <p className="mt-1 text-[12px] text-muted">Событий за всю историю</p>
             <p
               className="mt-0.5 text-[12px]"
               style={{ color: delta === null ? 'var(--muted)' : delta >= 0 ? 'var(--viz-good)' : 'var(--viz-bad)' }}
@@ -620,7 +620,7 @@ function PersonDetail({
       <div className="grid grid-cols-2 gap-3">
         <ChartCard
           title={`Динамика: ${handle}`}
-          subtitle="все события участника по периодам"
+          subtitle="Все события участника по периодам"
           legend={
             <Legend items={PERSON_KINDS.map((kind) => ({ label: EVENT_LABELS[kind], color: EVENT_COLOR_VAR[kind] }))} />
           }
@@ -664,7 +664,7 @@ function PersonDetail({
 
         <ChartCard
           title={`Расписание: ${handle}`}
-          subtitle="день недели × час, за всю историю"
+          subtitle="День недели × час, за всю историю"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -687,7 +687,7 @@ function PersonDetail({
       <div className="grid grid-cols-3 gap-3">
         <ChartCard
           title="Файлы"
-          subtitle="по числу событий"
+          subtitle="По числу событий"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -708,7 +708,7 @@ function PersonDetail({
 
         <ChartCard
           title="Проекты"
-          subtitle="по числу событий"
+          subtitle="По числу событий"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -729,7 +729,7 @@ function PersonDetail({
 
         <ChartCard
           title="Профиль активности"
-          subtitle="доли типов событий"
+          subtitle="Доли типов событий"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -765,7 +765,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-[12px] text-muted">{label}</p>
-      <p className="mt-0.5 text-[16px] font-semibold text-ink">{value}</p>
+      <p className="mt-0.5 font-display text-[18px] text-ink">{value}</p>
     </div>
   )
 }

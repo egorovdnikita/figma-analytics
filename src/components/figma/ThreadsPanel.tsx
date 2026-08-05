@@ -153,12 +153,12 @@ export function ThreadsPanel({
         <StatTile
           label="Без единого ответа"
           value={String(model.unanswered.length)}
-          hint="никто не откликнулся"
+          hint="Никто не откликнулся"
         />
         <StatTile
           label="Медиана до ответа"
           value={model.medianResponse !== null ? formatDurationMs(model.medianResponse) : '—'}
-          hint="половина вопросов быстрее"
+          hint="Половина вопросов быстрее"
         />
         <StatTile
           label="Среднее до ответа"
@@ -167,7 +167,7 @@ export function ThreadsPanel({
         <StatTile
           label="90-й процентиль ответа"
           value={model.p90Response !== null ? formatDurationMs(model.p90Response) : '—'}
-          hint="худшие 10% случаев"
+          hint="Худшие 10% случаев"
         />
         <StatTile
           label="Медиана до закрытия"
@@ -181,7 +181,7 @@ export function ThreadsPanel({
 
       <ChartCard
         title="Открыто и закрыто по периодам"
-        subtitle="если открывается стабильно больше, чем закрывается — долг обсуждений растёт"
+        subtitle="Если открывается стабильно больше, чем закрывается — долг обсуждений растёт"
         table={
           <table className="w-full text-[13px]">
             <thead>
@@ -223,7 +223,7 @@ export function ThreadsPanel({
       <div className="grid grid-cols-3 gap-3">
         <ChartCard
           title="Кто задаёт вопросы"
-          subtitle="авторы корневых обсуждений"
+          subtitle="Авторы корневых обсуждений"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -242,7 +242,7 @@ export function ThreadsPanel({
 
         <ChartCard
           title="Кто отвечает"
-          subtitle="участие в чужих обсуждениях"
+          subtitle="Участие в чужих обсуждениях"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -265,7 +265,7 @@ export function ThreadsPanel({
 
         <ChartCard
           title="Реакции"
-          subtitle="какими эмодзи пользуется команда"
+          subtitle="Какими эмодзи пользуется команда"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -298,7 +298,7 @@ export function ThreadsPanel({
 
       <ChartCard
         title="Файлы: обсуждений против незакрытых"
-        subtitle="точки справа-сверху — файлы с накопленным долгом обсуждений"
+        subtitle="Точки справа-сверху — файлы с накопленным долгом обсуждений"
         table={
           <table className="w-full text-[13px]">
             <thead>
@@ -333,7 +333,7 @@ export function ThreadsPanel({
 
       <div className="viz rounded-card bg-surface p-4">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <h3 className="text-[14px] font-semibold text-ink">Обсуждения</h3>
+          <h3 className="text-[14px] font-medium text-ink">Обсуждения</h3>
           <Segmented
             value={filter}
             onChange={(value) => {
@@ -386,7 +386,7 @@ export function ThreadsPanel({
                     закрыто за {thread.resolveMs !== null ? formatDurationMs(thread.resolveMs) : '—'}
                   </span>
                 ) : thread.replies === 0 ? (
-                  <span style={{ color: 'var(--viz-bad)' }}>без ответа {thread.ageDays} дн.</span>
+                  <span style={{ color: 'var(--viz-bad)' }}>Без ответа {thread.ageDays} дн.</span>
                 ) : (
                   <span className="text-muted">
                     ответ через {thread.responseMs !== null ? formatDurationMs(thread.responseMs) : '—'}

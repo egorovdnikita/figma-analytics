@@ -104,12 +104,12 @@ export function TrendsPanel({
           label="Накоплено за всё время"
           value={events.length.toLocaleString('ru')}
           spark={model.cumulative}
-          hint="суммарно событий в выборке"
+          hint="Суммарно событий в выборке"
         />
         <StatTile
           label="Тренд последних периодов"
           value={`${model.slope > 0 ? '+' : ''}${model.slope.toFixed(1)}`}
-          hint="изменение за период, в среднем"
+          hint="Изменение за период, в среднем"
         />
         <StatTile
           label="Пиковый период"
@@ -120,7 +120,7 @@ export function TrendsPanel({
 
       <ChartCard
         title="Тренд с сглаживанием"
-        subtitle="сырые значения и скользящее среднее — всплески отдельно от тенденции"
+        subtitle="Сырые значения и скользящее среднее — всплески отдельно от тенденции"
         legend={
           <Legend
             items={[
@@ -179,7 +179,7 @@ export function TrendsPanel({
       <div className="grid grid-cols-2 gap-3">
         <ChartCard
           title="Год к году"
-          subtitle="тот же период годом ранее"
+          subtitle="Тот же период годом ранее"
           legend={
             <Legend
               items={[
@@ -228,7 +228,7 @@ export function TrendsPanel({
 
         <ChartCard
           title="Накопленный объём"
-          subtitle="как рос суммарный след команды"
+          subtitle="Как рос суммарный след команды"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -263,7 +263,7 @@ export function TrendsPanel({
 
       <ChartCard
         title="Календарь активности"
-        subtitle="каждый день за последний год — сразу видны отпуска, авралы и мёртвые недели"
+        subtitle="Каждый день за последний год — сразу видны отпуска, авралы и мёртвые недели"
         table={
           <table className="w-full text-[13px]">
             <tbody>
@@ -289,7 +289,7 @@ export function TrendsPanel({
       <div className="grid grid-cols-2 gap-3">
         <ChartCard
           title="Сезонность по месяцам"
-          subtitle="год × месяц за всю историю"
+          subtitle="Год × месяц за всю историю"
           table={
             <table className="w-full text-[13px]">
               <tbody>
@@ -366,7 +366,7 @@ export function TrendsPanel({
 
       <ChartCard
         title="Кто поднимается и падает в рейтинге"
-        subtitle="место участника по активности в каждом периоде — 1 сверху"
+        subtitle="Место участника по активности в каждом периоде — 1 сверху"
         table={
           <table className="w-full text-[13px]">
             <thead>
@@ -408,7 +408,7 @@ export function TrendsPanel({
 
       <ChartCard
         title="Темп каждого участника"
-        subtitle="одинаковый масштаб времени, разные люди — видно, кто разогнался, а кто затих"
+        subtitle="Одинаковый масштаб времени, разные люди — видно, кто разогнался, а кто затих"
         table={
           <table className="w-full text-[13px]">
             <tbody>

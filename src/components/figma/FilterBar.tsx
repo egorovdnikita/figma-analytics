@@ -7,7 +7,7 @@ import type {
   FigmaSyncProgress,
   FigmaTeamRef,
 } from '@/types'
-import { Button, Checkbox, Input, Modal, Segmented, Select, Spinner } from '@/components/ui'
+import { Button, Checkbox, Input, Modal, Segmented, Select } from '@/components/ui'
 import { AppIcon } from '@/components/AppIcon'
 import { CrossGlyph } from '@/components/Glyphs'
 import { SyncProgressInline } from './FigmaWorkspace'
@@ -48,7 +48,6 @@ export function FilterBar({
   matchedCount,
   totalCount,
   syncing,
-  onSync,
   progress,
 }: {
   filters: FigmaFilters
@@ -63,7 +62,6 @@ export function FilterBar({
   matchedCount: number
   totalCount: number
   syncing: boolean
-  onSync: () => void
   progress: FigmaSyncProgress | null
 }) {
   const [open, setOpen] = useState(false)
@@ -116,11 +114,6 @@ export function FilterBar({
   return (
     <>
       <div className="mt-3 flex flex-wrap items-center gap-2 rounded-card bg-surface p-2">
-        <Button variant="soft" size="sm" className="ml-1" onClick={onSync} disabled={syncing}>
-          {syncing ? <Spinner className="h-4 w-4" /> : <AppIcon name="RefreshCw" size={16} />}
-          {syncing ? 'Синхронизация…' : 'Синхронизировать'}
-        </Button>
-
         {syncing && progress ? (
           <SyncProgressInline progress={progress} />
         ) : (
@@ -129,7 +122,7 @@ export function FilterBar({
               value={filters.granularity}
               onChange={(value) => onChange({ ...filters, granularity: value as Granularity })}
               options={GRANULARITY_OPTIONS}
-              className="bg-[var(--sunken)]"
+              className="ml-1 bg-[var(--sunken)]"
             />
 
             <div className="w-[186px]">
@@ -353,7 +346,7 @@ export function FilterBar({
             <h4 className="mb-2 text-[13px] font-semibold text-ink">
               Проекты {filters.projects.length > 0 ? `(${filters.projects.length})` : ''}
             </h4>
-            <div className="scroll-thin max-h-[180px] space-y-0.5 overflow-y-auto pr-2">
+            <div className="scroll-thin scroll-soft max-h-[180px] space-y-0.5 overflow-y-auto pr-2">
               {projects.map((project) => (
                 <Checkbox
                   key={project.id}
@@ -370,7 +363,7 @@ export function FilterBar({
             <h4 className="mb-2 text-[13px] font-semibold text-ink">
               Участники {filters.people.length > 0 ? `(${filters.people.length})` : ''}
             </h4>
-            <div className="scroll-thin max-h-[220px] space-y-0.5 overflow-y-auto pr-2">
+            <div className="scroll-thin scroll-soft max-h-[220px] space-y-0.5 overflow-y-auto pr-2">
               {people.map((person) => (
                 <Checkbox
                   key={person.handle}
