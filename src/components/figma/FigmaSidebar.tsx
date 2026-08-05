@@ -3,6 +3,7 @@ import { ipc } from '@/lib/ipc'
 import type { FigmaFileSummary, FigmaPinnedFile, FigmaProject, FigmaTeamRef } from '@/types'
 import { Input, Spinner } from '@/components/ui'
 import { AppIcon, type IconName } from '@/components/AppIcon'
+import { CrossGlyph, PlusGlyph } from '@/components/Glyphs'
 import { cn } from '@/lib/cn'
 import { AddTeamModal } from './AddTeamModal'
 
@@ -53,7 +54,7 @@ export function FigmaSidebar<T extends string>({
 
   if (collapsed) {
     return (
-      <aside className="flex h-full w-14 shrink-0 flex-col items-center gap-1 border-r border-line py-3">
+      <aside className="flex h-full w-14 shrink-0 flex-col items-center gap-1 py-3">
         <button
           type="button"
           onClick={onToggleCollapsed}
@@ -85,136 +86,138 @@ export function FigmaSidebar<T extends string>({
   }
 
   return (
-    <aside className="flex h-full w-[248px] shrink-0 flex-col gap-3 border-r border-line p-3">
-      <button
-        type="button"
-        onClick={onOpenPalette}
-        className="flex h-9 w-full items-center gap-2 rounded-control bg-[var(--sunken)] px-2.5 text-[12.5px] text-muted transition-colors hover:text-ink"
-      >
-        <AppIcon name="Search" size={15} />
-        Быстрый переход
-        <kbd className="ml-auto rounded-chip bg-surface px-1.5 py-0.5 text-[10px]">⌘K</kbd>
-      </button>
+    <aside className="flex h-full w-[248px] shrink-0 flex-col gap-3 p-3 pr-0">
+      <div className="flex items-center gap-1 pr-2">
+        <button
+          type="button"
+          onClick={onOpenPalette}
+          className="flex h-10 min-w-0 flex-1 items-center gap-2 whitespace-nowrap rounded-control bg-surface px-3 text-[13px] text-muted transition-colors hover:text-ink"
+        >
+          <AppIcon name="Search" size={16} className="shrink-0" />
+          Поиск
+          <kbd className="ml-auto shrink-0 rounded-chip bg-[var(--sunken)] px-1.5 py-0.5 text-[11px]">⌘K</kbd>
+        </button>
+        <button
+          type="button"
+          onClick={onToggleCollapsed}
+          className="flex h-10 w-9 shrink-0 items-center justify-center rounded-control text-muted transition-colors hover:bg-surface hover:text-ink"
+          aria-label="Свернуть навигацию"
+          title="Свернуть навигацию"
+        >
+          <AppIcon name="ChevronLeft" size={16} />
+        </button>
+      </div>
 
-      <nav className="space-y-3">
-        {Object.entries(groups).map(([group, items]) => (
-          <div key={group}>
-            <p className="mb-1 pl-2.5 text-[10.5px] font-semibold uppercase tracking-wide text-faint">{group}</p>
+      <div className="scroll-thin -mr-1 flex-1 overflow-y-auto pr-2">
+        <nav className="space-y-3">
+          {Object.entries(groups).map(([group, items]) => (
+            <section key={group} className="rounded-card bg-surface p-2">
+              <h3 className="mb-1 pl-2 text-[12px] font-semibold lowercase text-muted">{group}</h3>
+              <div className="space-y-0.5">
+                {items.map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => onSection(item.value)}
+                    className={cn(
+                      'flex h-9 w-full items-center gap-2.5 rounded-control px-2 text-[13px] font-medium transition-colors',
+                      section === item.value && selectedFileKey === null
+                        ? 'bg-[var(--sunken)] text-ink'
+                        : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
+                    )}
+                  >
+                    <AppIcon name={item.icon} size={16} />
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </section>
+          ))}
+        </nav>
+
+        {pinned.length > 0 ? (
+          <section className="mt-3 rounded-card bg-surface p-2">
+            <h3 className="mb-1 pl-2 text-[12px] font-semibold lowercase text-muted">закреплённые</h3>
             <div className="space-y-0.5">
-              {items.map((item) => (
-                <button
-                  key={item.value}
-                  type="button"
-                  onClick={() => onSection(item.value)}
-                  className={cn(
-                    'flex h-8 w-full items-center gap-2 rounded-control px-2.5 text-[13px] font-medium transition-colors',
-                    section === item.value && selectedFileKey === null
-                      ? 'bg-surface text-ink'
-                      : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
-                  )}
-                >
-                  <AppIcon name={item.icon} size={15} />
-                  {item.label}
-                </button>
+              {pinned.map((file) => (
+                <div key={file.key} className="group flex items-center rounded-control hover:bg-[var(--sunken)]">
+                  <button
+                    type="button"
+                    onClick={() => onSelectFile(file.key, file.name)}
+                    className={cn(
+                      'flex h-8 min-w-0 flex-1 items-center gap-1.5 px-2 text-left text-[13px] transition-colors',
+                      selectedFileKey === file.key ? 'text-ink' : 'text-muted',
+                    )}
+                    title={file.name}
+                  >
+                    <span className="truncate">{file.name}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onUnpin(file.key)}
+                    className="mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-control text-faint opacity-0 hover:text-ink group-hover:opacity-100"
+                    aria-label="Открепить"
+                    title="Открепить"
+                  >
+                    <CrossGlyph size={13} />
+                  </button>
+                </div>
               ))}
             </div>
-          </div>
-        ))}
-      </nav>
+          </section>
+        ) : null}
 
-      {pinned.length > 0 ? (
-        <div className="border-t border-line pt-3">
-          <p className="mb-1 pl-2.5 text-[10.5px] font-semibold uppercase tracking-wide text-faint">Закреплённые</p>
-          <div className="space-y-0.5">
-            {pinned.map((file) => (
-              <div key={file.key} className="group flex items-center rounded-control hover:bg-[var(--sunken)]">
-                <button
-                  type="button"
-                  onClick={() => onSelectFile(file.key, file.name)}
-                  className={cn(
-                    'flex h-7 min-w-0 flex-1 items-center gap-1.5 px-2 text-left text-[12.5px] transition-colors',
-                    selectedFileKey === file.key ? 'text-ink' : 'text-muted',
-                  )}
-                  title={file.name}
-                >
-                  <span className="truncate">{file.name}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onUnpin(file.key)}
-                  className="mr-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-control text-faint opacity-0 hover:text-ink group-hover:opacity-100"
-                  aria-label="Открепить"
-                  title="Открепить"
-                >
-                  <AppIcon name="X" size={12} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      <div className="border-t border-line pt-3">
-        <div className="mb-2 flex items-center justify-between pl-2.5">
-          <h3 className="text-[10.5px] font-semibold uppercase tracking-wide text-faint">Команды</h3>
-          <div className="flex items-center gap-0.5">
+        <section className="mt-3 rounded-card bg-surface p-2">
+          <div className="mb-1 flex items-center justify-between pl-2">
+            <h3 className="text-[12px] font-semibold lowercase text-muted">команды</h3>
             <button
               type="button"
               onClick={() => setModalOpen(true)}
-              className="flex h-6 w-6 items-center justify-center rounded-control text-muted hover:bg-[var(--sunken)] hover:text-ink"
+              className="flex h-7 w-7 items-center justify-center rounded-control text-muted hover:bg-[var(--sunken)] hover:text-ink"
               aria-label="Добавить команду"
               title="Добавить команду"
             >
-              <AppIcon name="Plus" size={15} />
+              <PlusGlyph size={16} />
             </button>
+          </div>
+
+          <div className="px-1 pb-1">
+            <Input
+              value={filter}
+              onChange={(event) => setFilter(event.target.value)}
+              placeholder="Фильтр по дереву…"
+              className="h-9 bg-[var(--sunken)] text-[13px]"
+            />
+          </div>
+
+          {teams.length === 0 ? (
             <button
               type="button"
-              onClick={onToggleCollapsed}
-              className="flex h-6 w-6 items-center justify-center rounded-control text-muted hover:bg-[var(--sunken)] hover:text-ink"
-              aria-label="Свернуть навигацию"
-              title="Свернуть навигацию"
+              onClick={() => setModalOpen(true)}
+              className="mt-1 w-full rounded-control px-3 py-4 text-[13px] leading-relaxed text-muted hover:bg-[var(--sunken)] hover:text-ink"
             >
-              <AppIcon name="ChevronLeft" size={15} />
+              Команд пока нет.
+              <br />
+              Добавить команду
             </button>
-          </div>
-        </div>
-
-        <Input
-          value={filter}
-          onChange={(event) => setFilter(event.target.value)}
-          placeholder="Фильтр по дереву…"
-          className="h-8 text-[12px]"
-        />
-      </div>
-
-      <div className="scroll-thin -mr-1 flex-1 overflow-y-auto pr-1">
-        {teams.length === 0 ? (
-          <button
-            type="button"
-            onClick={() => setModalOpen(true)}
-            className="w-full rounded-control border border-dashed border-line px-3 py-4 text-[12px] leading-relaxed text-muted hover:border-[var(--lilac)] hover:text-ink"
-          >
-            Команд пока нет.
-            <br />
-            Добавить команду
-          </button>
-        ) : (
-          <div className="space-y-0.5">
-            {teams.map((team) => (
-              <TeamNode
-                key={team.id}
-                team={team}
-                filter={filter}
-                selectedFileKey={selectedFileKey}
-                onSelectFile={onSelectFile}
-                onRemoved={async () => {
-                  const next = await ipc.figmaTeamsRemove(team.id)
-                  onTeamsChanged(next)
-                }}
-              />
-            ))}
-          </div>
-        )}
+          ) : (
+            <div className="mt-1 space-y-0.5">
+              {teams.map((team) => (
+                <TeamNode
+                  key={team.id}
+                  team={team}
+                  filter={filter}
+                  selectedFileKey={selectedFileKey}
+                  onSelectFile={onSelectFile}
+                  onRemoved={async () => {
+                    const next = await ipc.figmaTeamsRemove(team.id)
+                    onTeamsChanged(next)
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </section>
       </div>
 
       <AddTeamModal
@@ -277,7 +280,7 @@ function TeamNode({
           aria-label="Убрать команду"
           title="Убрать из списка"
         >
-          <AppIcon name="X" size={13} />
+          <CrossGlyph size={14} />
         </button>
       </div>
 
@@ -337,9 +340,9 @@ function ProjectNode({
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="flex h-7 w-full items-center gap-1.5 rounded-control px-1.5 text-[12.5px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
+        className="flex h-8 w-full items-center gap-1.5 rounded-control px-1.5 text-[13px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
       >
-        <AppIcon name={expanded ? 'ChevronDown' : 'ChevronRight'} size={13} className="text-faint" />
+        <AppIcon name={expanded ? 'ChevronDown' : 'ChevronRight'} size={14} className="text-faint" />
         <span className="truncate">{project.name}</span>
       </button>
 
@@ -350,7 +353,7 @@ function ProjectNode({
               <Spinner className="h-3 w-3" />
             </div>
           ) : (visibleFiles ?? []).length === 0 ? (
-            <p className="px-1.5 py-1 text-[11px] text-faint">Файлов нет</p>
+            <p className="px-1.5 py-1 text-[12px] text-faint">Файлов нет</p>
           ) : (
             (visibleFiles ?? []).map((file) => (
               <button
@@ -358,7 +361,7 @@ function ProjectNode({
                 type="button"
                 onClick={() => onSelectFile(file.key, file.name)}
                 className={cn(
-                  'flex h-7 w-full items-center gap-1.5 rounded-control px-1.5 text-left text-[12.5px] transition-colors',
+                  'flex h-8 w-full items-center gap-1.5 rounded-control px-1.5 text-left text-[13px] transition-colors',
                   selectedFileKey === file.key
                     ? 'bg-[var(--sunken)] text-ink'
                     : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',

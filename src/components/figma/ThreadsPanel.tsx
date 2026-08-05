@@ -134,7 +134,7 @@ export function ThreadsPanel({
 
   if (model.threads.length === 0) {
     return (
-      <p className="rounded-card bg-surface p-6 text-center text-[13px] text-muted">
+      <p className="rounded-card bg-surface p-6 text-center text-[14px] text-muted">
         Обсуждений в выборке нет. Ослабьте фильтры или запустите синхронизацию.
       </p>
     )
@@ -183,9 +183,9 @@ export function ThreadsPanel({
         title="Открыто и закрыто по периодам"
         subtitle="если открывается стабильно больше, чем закрывается — долг обсуждений растёт"
         table={
-          <table className="w-full text-[12px]">
+          <table className="w-full text-[13px]">
             <thead>
-              <tr className="text-left text-[11px] text-faint">
+              <tr className="text-left text-[12px] text-faint">
                 <th className="pb-1.5 font-medium">Период</th>
                 <th className="pb-1.5 pl-2 text-right font-medium">Открыто</th>
                 <th className="pb-1.5 pl-2 text-right font-medium">Закрыто</th>
@@ -225,7 +225,7 @@ export function ThreadsPanel({
           title="Кто задаёт вопросы"
           subtitle="авторы корневых обсуждений"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {model.askers.map((item) => (
                   <tr key={item.label} className="border-t border-line">
@@ -244,7 +244,7 @@ export function ThreadsPanel({
           title="Кто отвечает"
           subtitle="участие в чужих обсуждениях"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {model.responders.map((item) => (
                   <tr key={item.label} className="border-t border-line">
@@ -257,7 +257,7 @@ export function ThreadsPanel({
           }
         >
           {model.responders.length === 0 ? (
-            <p className="text-[12px] text-muted">Ответов пока нет</p>
+            <p className="text-[13px] text-muted">Ответов пока нет</p>
           ) : (
             <HBars items={model.responders} color="var(--viz-3)" />
           )}
@@ -267,7 +267,7 @@ export function ThreadsPanel({
           title="Реакции"
           subtitle="какими эмодзи пользуется команда"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {model.emoji.map((item) => (
                   <tr key={item.key} className="border-t border-line">
@@ -280,7 +280,7 @@ export function ThreadsPanel({
           }
         >
           {model.emoji.length === 0 ? (
-            <p className="text-[12px] text-muted">Реакций нет</p>
+            <p className="text-[13px] text-muted">Реакций нет</p>
           ) : (
             <Donut
               size={112}
@@ -300,9 +300,9 @@ export function ThreadsPanel({
         title="Файлы: обсуждений против незакрытых"
         subtitle="точки справа-сверху — файлы с накопленным долгом обсуждений"
         table={
-          <table className="w-full text-[12px]">
+          <table className="w-full text-[13px]">
             <thead>
-              <tr className="text-left text-[11px] text-faint">
+              <tr className="text-left text-[12px] text-faint">
                 <th className="pb-1.5 font-medium">Файл</th>
                 <th className="pb-1.5 pl-2 text-right font-medium">Обсуждений</th>
                 <th className="pb-1.5 pl-2 text-right font-medium">Открыто</th>
@@ -333,7 +333,7 @@ export function ThreadsPanel({
 
       <div className="viz rounded-card bg-surface p-4">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <h3 className="text-[13px] font-semibold text-ink">Обсуждения</h3>
+          <h3 className="text-[14px] font-semibold text-ink">Обсуждения</h3>
           <Segmented
             value={filter}
             onChange={(value) => {
@@ -356,7 +356,7 @@ export function ThreadsPanel({
                 setLimit(40)
               }}
               placeholder="Поиск по тексту, автору, файлу…"
-              className="h-8 text-[12px]"
+              className="h-8 text-[13px]"
             />
           </div>
         </div>
@@ -371,16 +371,16 @@ export function ThreadsPanel({
             >
               <Avatar src={thread.authorImg} name={thread.author} size={24} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[12.5px] text-ink">
+                <p className="truncate text-[13.5px] text-ink">
                   <span className="font-medium">{thread.author}</span>{' '}
                   <span className="text-muted">{thread.message || '(без текста)'}</span>
                 </p>
-                <p className="mt-0.5 text-[11px] text-faint">
+                <p className="mt-0.5 text-[12px] text-faint">
                   {thread.fileName} · {thread.replies} ответов · {thread.reactions} реакций ·{' '}
                   {relativeTime(thread.openedAt)}
                 </p>
               </div>
-              <div className="w-[150px] shrink-0 text-right text-[11px]">
+              <div className="w-[150px] shrink-0 text-right text-[12px]">
                 {thread.resolvedAt ? (
                   <span style={{ color: 'var(--viz-good)' }}>
                     закрыто за {thread.resolveMs !== null ? formatDurationMs(thread.resolveMs) : '—'}
@@ -397,14 +397,14 @@ export function ThreadsPanel({
           ))}
         </div>
 
-        {visible.length === 0 ? <p className="p-6 text-center text-[13px] text-muted">Ничего не найдено</p> : null}
+        {visible.length === 0 ? <p className="p-6 text-center text-[14px] text-muted">Ничего не найдено</p> : null}
 
         {visible.length === limit ? (
           <div className="flex justify-center pt-2">
             <button
               type="button"
               onClick={() => setLimit((value) => value + 40)}
-              className="h-8 rounded-control px-3 text-[12px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
+              className="h-8 rounded-control px-3 text-[13px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
             >
               Показать ещё
             </button>

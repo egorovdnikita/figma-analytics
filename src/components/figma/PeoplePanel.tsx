@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { FigmaDirectoryPerson, FigmaEvent } from '@/types'
 import { ipc } from '@/lib/ipc'
 import { Avatar, Input, Segmented } from '@/components/ui'
-import { AppIcon } from '@/components/AppIcon'
+import { CrossGlyph, PlusGlyph } from '@/components/Glyphs'
 import {
   EVENT_COLOR_VAR,
   EVENT_KINDS,
@@ -95,7 +95,7 @@ export function PeoplePanel({
 
   if (allTime.length === 0) {
     return (
-      <p className="rounded-card bg-surface p-6 text-center text-[13px] text-muted">
+      <p className="rounded-card bg-surface p-6 text-center text-[14px] text-muted">
         Данных об участниках нет. Запустите синхронизацию, чтобы собрать историю пространства.
       </p>
     )
@@ -138,7 +138,7 @@ export function PeoplePanel({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Поиск по участникам…"
-            className="h-8 text-[12px]"
+            className="h-8 text-[13px]"
           />
         </div>
 
@@ -165,8 +165,8 @@ export function PeoplePanel({
                     <Avatar src={person.img} name={person.handle} size={26} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline justify-between gap-2">
-                        <span className="truncate text-[12.5px] text-ink">{person.handle}</span>
-                        <span className="shrink-0 text-[11px] text-muted [font-variant-numeric:tabular-nums]">
+                        <span className="truncate text-[13.5px] text-ink">{person.handle}</span>
+                        <span className="shrink-0 text-[12px] text-muted [font-variant-numeric:tabular-nums]">
                           {person.total.toLocaleString('ru')}
                         </span>
                       </div>
@@ -183,7 +183,7 @@ export function PeoplePanel({
                           ) : null,
                         )}
                       </div>
-                      <p className="mt-1 text-[10.5px] text-faint">
+                      <p className="mt-1 text-[11.5px] text-faint">
                         {person.files} файлов · {person.activeDays} активных дней
                         {person.silentDays > 0 ? ` · молчит ${person.silentDays} дн.` : ' · активен сегодня'}
                       </p>
@@ -191,7 +191,7 @@ export function PeoplePanel({
                   </button>
 
                   <span
-                    className="w-12 shrink-0 text-right text-[11px] [font-variant-numeric:tabular-nums]"
+                    className="w-12 shrink-0 text-right text-[12px] [font-variant-numeric:tabular-nums]"
                     style={{ color: delta === null ? 'var(--muted)' : delta >= 0 ? 'var(--viz-good)' : 'var(--viz-bad)' }}
                     title={`Изменение ${PREVIOUS_LABEL[granularity]}`}
                   >
@@ -205,7 +205,7 @@ export function PeoplePanel({
                     aria-label={`Скрыть ${person.handle} из аналитики`}
                     title="Скрыть из аналитики — например, человека из другой команды"
                   >
-                    <AppIcon name="X" size={13} />
+                    <CrossGlyph size={14} />
                   </button>
                 </div>
               )
@@ -216,8 +216,8 @@ export function PeoplePanel({
 
       {hidden.length > 0 ? (
         <section className="rounded-card bg-surface p-4">
-          <h3 className="mb-2 text-[13px] font-semibold text-ink">Скрытые из аналитики ({hidden.length})</h3>
-          <p className="mb-3 text-[11px] text-muted">
+          <h3 className="mb-2 text-[14px] font-semibold text-ink">Скрытые из аналитики ({hidden.length})</h3>
+          <p className="mb-3 text-[12px] text-muted">
             Их события полностью исключены из всех графиков и метрик раздела. Нажмите, чтобы вернуть.
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -226,13 +226,13 @@ export function PeoplePanel({
                 key={person.handle}
                 type="button"
                 onClick={() => void unhide(person.handle)}
-                className="flex h-7 items-center gap-1.5 rounded-chip bg-[var(--sunken)] px-2.5 text-[12px] text-muted hover:text-ink"
+                className="flex h-7 items-center gap-1.5 rounded-chip bg-[var(--sunken)] px-2.5 text-[13px] text-muted hover:text-ink"
                 title="Вернуть в аналитику"
               >
                 <Avatar src={person.img} name={person.handle} size={16} />
                 {person.handle}
                 <span className="text-faint">· {person.events}</span>
-                <AppIcon name="Plus" size={12} />
+                <PlusGlyph size={13} />
               </button>
             ))}
           </div>
@@ -312,7 +312,7 @@ function TeamSummary({
           title="Концентрация активности"
           subtitle="какую долю всей работы делают самые активные"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 <tr className="border-t border-line">
                   <td className="py-1.5 text-ink">Топ-1 участник</td>
@@ -333,7 +333,7 @@ function TeamSummary({
           <div className="space-y-3 pt-1">
             <Meter label="Доля топ-1 участника" value={model.busTop1} />
             <Meter label="Доля топ-3 участников" value={model.busTop3} />
-            <p className="text-[11px] leading-relaxed text-muted">
+            <p className="text-[12px] leading-relaxed text-muted">
               Чем выше доля, тем сильнее пространство зависит от нескольких человек.
             </p>
           </div>
@@ -343,7 +343,7 @@ function TeamSummary({
           title="Кто с кем работает"
           subtitle="пары участников по общим файлам"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {model.pairs.map((pair) => (
                   <tr key={`${pair.a}|${pair.b}`} className="border-t border-line">
@@ -360,7 +360,7 @@ function TeamSummary({
           }
         >
           {model.pairs.length === 0 ? (
-            <p className="text-[12px] text-muted">Пересечений по файлам не найдено</p>
+            <p className="text-[13px] text-muted">Пересечений по файлам не найдено</p>
           ) : (
             <HBars
               color="var(--viz-3)"
@@ -402,7 +402,7 @@ function HeadcountChart({ events, granularity }: { events: FigmaEvent[]; granula
 function HeadcountTable({ events, granularity }: { events: FigmaEvent[]; granularity: Granularity }) {
   const points = useMemo(() => headcountPoints(events, granularity), [events, granularity])
   return (
-    <table className="w-full text-[12px]">
+    <table className="w-full text-[13px]">
       <tbody>
         {points.map((point) => (
           <tr key={point.label} className="border-t border-line">
@@ -418,7 +418,7 @@ function HeadcountTable({ events, granularity }: { events: FigmaEvent[]; granula
 function Meter({ label, value }: { label: string; value: number | null }) {
   return (
     <div>
-      <div className="mb-1 flex items-baseline justify-between text-[12px]">
+      <div className="mb-1 flex items-baseline justify-between text-[13px]">
         <span className="text-ink">{label}</span>
         <span className="text-muted [font-variant-numeric:tabular-nums]">
           {value !== null ? `${value.toFixed(0)}%` : '—'}
@@ -453,9 +453,9 @@ function RosterTable({
   scope: Scope
 }) {
   return (
-    <table className="w-full text-[12px]">
+    <table className="w-full text-[13px]">
       <thead className="sticky top-0 bg-surface">
-        <tr className="text-left text-[11px] text-faint">
+        <tr className="text-left text-[12px] text-faint">
           <th className="pb-1.5 font-medium">Участник</th>
           {PERSON_KINDS.map((kind) => (
             <th key={kind} className="pb-1.5 pl-2 text-right font-medium">
@@ -568,8 +568,8 @@ function PersonDetail({
         <div className="flex items-start gap-3">
           <Avatar src={allTime?.img} name={handle} size={44} />
           <div className="min-w-0 flex-1">
-            <h3 className="text-[15px] font-semibold text-ink">{handle}</h3>
-            <p className="mt-0.5 text-[11px] text-muted">
+            <h3 className="text-[16px] font-semibold text-ink">{handle}</h3>
+            <p className="mt-0.5 text-[12px] text-muted">
               {allTime?.firstSeen ? `Первое событие ${relativeTime(allTime.firstSeen)}` : '—'}
               {allTime?.lastSeen ? ` · последнее ${relativeTime(allTime.lastSeen)}` : ''}
               {allTime?.tenureDays ? ` · в пространстве ${allTime.tenureDays} дн.` : ''}
@@ -579,9 +579,9 @@ function PersonDetail({
             <p className="text-[22px] font-bold leading-none text-ink">
               {(allTime?.total ?? 0).toLocaleString('ru')}
             </p>
-            <p className="mt-1 text-[11px] text-muted">событий за всю историю</p>
+            <p className="mt-1 text-[12px] text-muted">событий за всю историю</p>
             <p
-              className="mt-0.5 text-[11px]"
+              className="mt-0.5 text-[12px]"
               style={{ color: delta === null ? 'var(--muted)' : delta >= 0 ? 'var(--viz-good)' : 'var(--viz-bad)' }}
             >
               {delta === null
@@ -591,7 +591,7 @@ function PersonDetail({
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-6 gap-3 border-t border-line pt-3 text-[12px]">
+        <div className="mt-4 grid grid-cols-6 gap-3 rounded-control bg-[var(--sunken)] p-3 text-[13px]">
           <Metric
             label="Доля в команде"
             value={teamTotal > 0 ? `${(((allTime?.total ?? 0) / teamTotal) * 100).toFixed(1)}%` : '—'}
@@ -625,9 +625,9 @@ function PersonDetail({
             <Legend items={PERSON_KINDS.map((kind) => ({ label: EVENT_LABELS[kind], color: EVENT_COLOR_VAR[kind] }))} />
           }
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <thead>
-                <tr className="text-left text-[11px] text-faint">
+                <tr className="text-left text-[12px] text-faint">
                   <th className="pb-1.5 font-medium">Период</th>
                   {PERSON_KINDS.map((kind) => (
                     <th key={kind} className="pb-1.5 pl-2 text-right font-medium">
@@ -666,7 +666,7 @@ function PersonDetail({
           title={`Расписание: ${handle}`}
           subtitle="день недели × час, за всю историю"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {heat.rows.map((row, i) => (
                   <tr key={row} className="border-t border-line">
@@ -689,7 +689,7 @@ function PersonDetail({
           title="Файлы"
           subtitle="по числу событий"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {topFiles.map((file) => (
                   <tr key={file.label} className="border-t border-line">
@@ -710,7 +710,7 @@ function PersonDetail({
           title="Проекты"
           subtitle="по числу событий"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {topProjects.map((project) => (
                   <tr key={project.label} className="border-t border-line">
@@ -731,7 +731,7 @@ function PersonDetail({
           title="Профиль активности"
           subtitle="доли типов событий"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {PERSON_KINDS.map((kind) => (
                   <tr key={kind} className="border-t border-line">
@@ -764,8 +764,8 @@ function PersonDetail({
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[11px] text-muted">{label}</p>
-      <p className="mt-0.5 text-[15px] font-semibold text-ink">{value}</p>
+      <p className="text-[12px] text-muted">{label}</p>
+      <p className="mt-0.5 text-[16px] font-semibold text-ink">{value}</p>
     </div>
   )
 }

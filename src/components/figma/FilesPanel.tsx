@@ -72,7 +72,7 @@ export function FilesPanel({
 
   if (files.length === 0) {
     return (
-      <p className="rounded-card bg-surface p-6 text-center text-[13px] text-muted">
+      <p className="rounded-card bg-surface p-6 text-center text-[14px] text-muted">
         Файлов в кэше нет. Запустите синхронизацию, чтобы собрать пространство.
       </p>
     )
@@ -85,7 +85,7 @@ export function FilesPanel({
           title="Самые нагруженные файлы"
           subtitle="события за текущий период"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {rows.slice(0, 12).map((file) => (
                   <tr key={file.fileKey} className="border-t border-line">
@@ -106,7 +106,7 @@ export function FilesPanel({
           title="Открытых обсуждений"
           subtitle="файлы с незакрытыми комментариями"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {rows
                   .filter((f) => f.openComments > 0)
@@ -135,21 +135,21 @@ export function FilesPanel({
 
       <div className="viz rounded-card bg-surface p-4">
         <div className="mb-3 flex items-center gap-3">
-          <h3 className="text-[13px] font-semibold text-ink">Все файлы ({rows.length})</h3>
+          <h3 className="text-[14px] font-semibold text-ink">Все файлы ({rows.length})</h3>
           <div className="ml-auto w-[240px]">
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Поиск по файлам и проектам…"
-              className="h-8 text-[12px]"
+              className="h-8 text-[13px]"
             />
           </div>
         </div>
 
         <div className="scroll-thin max-h-[520px] overflow-auto">
-          <table className="w-full text-[12px]">
+          <table className="w-full text-[13px]">
             <thead className="sticky top-0 bg-surface">
-              <tr className="text-left text-[11px] text-faint">
+              <tr className="text-left text-[12px] text-faint">
                 <SortHeader label="Файл" active={sort === 'name'} onClick={() => setSort('name')} />
                 <th className="pb-2 pl-2 font-medium">Проект</th>
                 <SortHeader label="Событий" align="right" active={sort === 'activity'} onClick={() => setSort('activity')} />
@@ -201,7 +201,7 @@ export function FilesPanel({
 
       {stale.length > 0 ? (
         <section className="rounded-card bg-surface p-4">
-          <h3 className="mb-3 flex items-center gap-1.5 text-[13px] font-semibold text-ink">
+          <h3 className="mb-3 flex items-center gap-1.5 text-[14px] font-semibold text-ink">
             <AppIcon name="CalendarOff" size={15} className="text-[var(--danger)]" />
             Заброшенные файлы — 30+ дней без изменений ({stale.length})
           </h3>
@@ -211,10 +211,10 @@ export function FilesPanel({
                 key={file.fileKey}
                 type="button"
                 onClick={() => onOpenFile(file.fileKey, file.name)}
-                className="flex h-8 w-full items-center gap-2 rounded-control px-2 text-left text-[12.5px] text-ink hover:bg-[var(--sunken)]"
+                className="flex h-8 w-full items-center gap-2 rounded-control px-2 text-left text-[13.5px] text-ink hover:bg-[var(--sunken)]"
               >
                 <span className="flex-1 truncate">{file.name}</span>
-                <span className="shrink-0 text-[11px] text-faint">
+                <span className="shrink-0 text-[12px] text-faint">
                   {file.lastModified ? `${daysSince(file.lastModified)} дн.` : ''}
                 </span>
               </button>

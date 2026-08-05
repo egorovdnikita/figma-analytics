@@ -84,7 +84,7 @@ export function TrendsPanel({
 
   if (events.length === 0) {
     return (
-      <p className="rounded-card bg-surface p-6 text-center text-[13px] text-muted">
+      <p className="rounded-card bg-surface p-6 text-center text-[14px] text-muted">
         Нет данных за выбранный период. Ослабьте фильтры или запустите синхронизацию.
       </p>
     )
@@ -130,9 +130,9 @@ export function TrendsPanel({
           />
         }
         table={
-          <table className="w-full text-[12px]">
+          <table className="w-full text-[13px]">
             <thead>
-              <tr className="text-left text-[11px] text-faint">
+              <tr className="text-left text-[12px] text-faint">
                 <th className="pb-1.5 font-medium">Период</th>
                 <th className="pb-1.5 pl-2 text-right font-medium">Факт</th>
                 <th className="pb-1.5 pl-2 text-right font-medium">Среднее</th>
@@ -189,9 +189,9 @@ export function TrendsPanel({
             />
           }
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <thead>
-                <tr className="text-left text-[11px] text-faint">
+                <tr className="text-left text-[12px] text-faint">
                   <th className="pb-1.5 font-medium">Период</th>
                   <th className="pb-1.5 pl-2 text-right font-medium">Сейчас</th>
                   <th className="pb-1.5 pl-2 text-right font-medium">Год назад</th>
@@ -230,7 +230,7 @@ export function TrendsPanel({
           title="Накопленный объём"
           subtitle="как рос суммарный след команды"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {model.timeline.map((bucket, index) => (
                   <tr key={bucket.key} className="border-t border-line">
@@ -265,7 +265,7 @@ export function TrendsPanel({
         title="Календарь активности"
         subtitle="каждый день за последний год — сразу видны отпуска, авралы и мёртвые недели"
         table={
-          <table className="w-full text-[12px]">
+          <table className="w-full text-[13px]">
             <tbody>
               {model.calendar.cells
                 .filter((cell) => cell.count > 0)
@@ -291,7 +291,7 @@ export function TrendsPanel({
           title="Сезонность по месяцам"
           subtitle="год × месяц за всю историю"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {model.matrix.rows.map((row) => (
                   <tr key={row.year} className="border-t border-line">
@@ -312,7 +312,7 @@ export function TrendsPanel({
           title="Изменение по типам событий"
           subtitle={`текущий период ${PREVIOUS_LABEL[granularity]}`}
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {model.kindDeltas.map((row) => (
                   <tr key={row.kind} className="border-t border-line">
@@ -332,7 +332,7 @@ export function TrendsPanel({
               const positive = (row.delta ?? 0) >= 0
               return (
                 <div key={row.kind}>
-                  <div className="mb-1 flex items-baseline justify-between text-[12px]">
+                  <div className="mb-1 flex items-baseline justify-between text-[13px]">
                     <span className="flex items-center gap-1.5 text-ink">
                       <span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: EVENT_COLOR_VAR[row.kind] }} />
                       {EVENT_LABELS[row.kind]}
@@ -368,9 +368,9 @@ export function TrendsPanel({
         title="Кто поднимается и падает в рейтинге"
         subtitle="место участника по активности в каждом периоде — 1 сверху"
         table={
-          <table className="w-full text-[12px]">
+          <table className="w-full text-[13px]">
             <thead>
-              <tr className="text-left text-[11px] text-faint">
+              <tr className="text-left text-[12px] text-faint">
                 <th className="pb-1.5 font-medium">Участник</th>
                 {model.rank.buckets.map((label) => (
                   <th key={label} className="pb-1.5 pl-2 text-right font-medium">
@@ -395,7 +395,7 @@ export function TrendsPanel({
         }
       >
         {model.rank.series.length === 0 ? (
-          <p className="text-[12px] text-muted">Недостаточно данных</p>
+          <p className="text-[13px] text-muted">Недостаточно данных</p>
         ) : (
           <BumpChart
             series={model.rank.series}
@@ -410,7 +410,7 @@ export function TrendsPanel({
         title="Темп каждого участника"
         subtitle="одинаковый масштаб времени, разные люди — видно, кто разогнался, а кто затих"
         table={
-          <table className="w-full text-[12px]">
+          <table className="w-full text-[13px]">
             <tbody>
               {model.perPersonSeries.map((entry) => (
                 <tr key={entry.label} className="border-t border-line">

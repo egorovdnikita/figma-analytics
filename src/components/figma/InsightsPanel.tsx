@@ -116,7 +116,7 @@ export function InsightsPanel({
 
   if (events.length === 0) {
     return (
-      <p className="rounded-card bg-surface p-6 text-center text-[13px] text-muted">
+      <p className="rounded-card bg-surface p-6 text-center text-[14px] text-muted">
         Нет данных для выводов. Ослабьте фильтры или запустите синхронизацию.
       </p>
     )
@@ -128,7 +128,7 @@ export function InsightsPanel({
         title="Пульс пространства"
         subtitle="сводный индекс из пяти наблюдаемых признаков — каждый виден отдельно"
         table={
-          <table className="w-full text-[12px]">
+          <table className="w-full text-[13px]">
             <tbody>
               {model.health.factors.map((factor) => (
                 <tr key={factor.key} className="border-t border-line">
@@ -147,8 +147,8 @@ export function InsightsPanel({
       </ChartCard>
 
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-1 text-[13px] font-semibold text-ink">Что происходит</h3>
-        <p className="mb-3 text-[11px] text-muted">
+        <h3 className="mb-1 text-[14px] font-semibold text-ink">Что происходит</h3>
+        <p className="mb-3 text-[12px] text-muted">
           Выводы собраны автоматически по текущей выборке. Пороги настраиваются в разделе «Настройки».
         </p>
         <div className="grid grid-cols-2 gap-2">
@@ -163,7 +163,7 @@ export function InsightsPanel({
           title="Куда идёт активность"
           subtitle="продолжение линейного тренда на 4 периода с коридором в одно σ"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {model.forecastPoints.map((point) => (
                   <tr key={point.label} className="border-t border-line">
@@ -180,7 +180,7 @@ export function InsightsPanel({
           }
         >
           <ForecastChart points={model.forecastPoints} />
-          <p className="mt-2 text-[11px] leading-relaxed text-muted">
+          <p className="mt-2 text-[12px] leading-relaxed text-muted">
             Это экстраполяция уже наблюдаемого тренда, а не предсказание: на скачкообразных рядах коридор
             честно становится широким.
           </p>
@@ -190,7 +190,7 @@ export function InsightsPanel({
           title="Жизненный цикл файлов"
           subtitle="по давности последнего события"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {(Object.keys(FILE_STAGE_LABELS) as FileStage[]).map((stage) => (
                   <tr key={stage} className="border-t border-line">
@@ -211,7 +211,7 @@ export function InsightsPanel({
               color: STAGE_COLORS[stage],
             }))}
           />
-          <div className="mt-3 space-y-1 border-t border-line pt-3">
+          <div className="mt-3 space-y-1 rounded-control bg-[var(--sunken)] p-2">
             {model.lifecycle.rows
               .filter((row) => row.stage === 'dead' || row.stage === 'frozen')
               .slice(0, 5)
@@ -220,10 +220,10 @@ export function InsightsPanel({
                   key={row.fileKey}
                   type="button"
                   onClick={() => onOpenFile(row.fileKey, row.name)}
-                  className="flex h-7 w-full items-center gap-2 rounded-control px-2 text-left text-[12px] text-ink hover:bg-[var(--sunken)]"
+                  className="flex h-7 w-full items-center gap-2 rounded-control px-2 text-left text-[13px] text-ink hover:bg-[var(--sunken)]"
                 >
                   <span className="flex-1 truncate">{row.name}</span>
-                  <span className="shrink-0 text-[11px] text-faint">{row.days} дн.</span>
+                  <span className="shrink-0 text-[12px] text-faint">{row.days} дн.</span>
                 </button>
               ))}
           </div>
@@ -235,7 +235,7 @@ export function InsightsPanel({
           title="Как быстро отвечают"
           subtitle="распределение времени до первого ответа, в часах"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {model.responders.map((row) => (
                   <tr key={row.handle} className="border-t border-line">
@@ -256,8 +256,8 @@ export function InsightsPanel({
             color="var(--viz-3)"
           />
           {model.responders.length > 0 ? (
-            <div className="mt-3 border-t border-line pt-3">
-              <p className="mb-2 text-[11px] text-muted">Медиана времени до ответа по людям</p>
+            <div className="mt-3 rounded-control bg-[var(--sunken)] p-3">
+              <p className="mb-2 text-[12px] text-muted">Медиана времени до ответа по людям</p>
               <HBars
                 color="var(--viz-3)"
                 items={model.responders.slice(0, 6).map((row) => ({
@@ -274,9 +274,9 @@ export function InsightsPanel({
           title="Признаки переработок"
           subtitle="ночная работа, выходные и длинные серии без перерыва"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <thead>
-                <tr className="text-left text-[11px] text-faint">
+                <tr className="text-left text-[12px] text-faint">
                   <th className="pb-1.5 font-medium">Участник</th>
                   <th className="pb-1.5 pl-2 text-right font-medium">Ночью</th>
                   <th className="pb-1.5 pl-2 text-right font-medium">Выходные</th>
@@ -303,7 +303,7 @@ export function InsightsPanel({
           }
         >
           {model.burnout.length === 0 ? (
-            <p className="text-[12px] text-muted">Недостаточно данных</p>
+            <p className="text-[13px] text-muted">Недостаточно данных</p>
           ) : (
             <>
               <HBars
@@ -315,7 +315,7 @@ export function InsightsPanel({
                 }))}
                 max={100}
               />
-              <p className="mt-3 text-[11px] leading-relaxed text-muted">
+              <p className="mt-3 text-[12px] leading-relaxed text-muted">
                 Это индикатор для разговора, а не диагноз: высокая доля ночных правок может означать и другой
                 часовой пояс. Границы ночи и выходных задаются в настройках.
               </p>
@@ -328,7 +328,7 @@ export function InsightsPanel({
         title="Граф связей команды"
         subtitle="кто с кем пересекается в файлах — толщина линии равна числу общих файлов"
         table={
-          <table className="w-full text-[12px]">
+          <table className="w-full text-[13px]">
             <tbody>
               {model.graph.edges.slice(0, 20).map((edge) => (
                 <tr key={`${edge.source}|${edge.target}`} className="border-t border-line">
@@ -351,7 +351,7 @@ export function InsightsPanel({
         title="Удержание участников по когортам"
         subtitle="строка — месяц первого появления, столбец — сколько из них активны N месяцев спустя"
         table={
-          <table className="w-full text-[12px]">
+          <table className="w-full text-[13px]">
             <tbody>
               {model.cohorts.map((row) => (
                 <tr key={row.cohort} className="border-t border-line">
@@ -369,7 +369,7 @@ export function InsightsPanel({
         }
       >
         {model.cohorts.length === 0 ? (
-          <p className="text-[12px] text-muted">Недостаточно истории для когорт</p>
+          <p className="text-[13px] text-muted">Недостаточно истории для когорт</p>
         ) : (
           <CohortGrid rows={model.cohorts} />
         )}
@@ -391,14 +391,14 @@ function InsightCard({ insight }: { insight: Insight }) {
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
-          <h4 className="text-[12.5px] font-semibold text-ink">{insight.title}</h4>
+          <h4 className="text-[13.5px] font-semibold text-ink">{insight.title}</h4>
           {insight.metric ? (
-            <span className="shrink-0 text-[12px] font-semibold [font-variant-numeric:tabular-nums]" style={{ color: tone.fg }}>
+            <span className="shrink-0 text-[13px] font-semibold [font-variant-numeric:tabular-nums]" style={{ color: tone.fg }}>
               {insight.metric}
             </span>
           ) : null}
         </div>
-        <p className="mt-0.5 text-[11.5px] leading-relaxed text-muted">{insight.detail}</p>
+        <p className="mt-0.5 text-[12.5px] leading-relaxed text-muted">{insight.detail}</p>
       </div>
     </article>
   )

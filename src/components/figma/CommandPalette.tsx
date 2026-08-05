@@ -98,7 +98,7 @@ export function CommandPalette({
         aria-label="Быстрый переход"
         className="animate-pop relative flex max-h-[62vh] w-full max-w-[620px] flex-col overflow-hidden rounded-card bg-surface shadow-pop"
       >
-        <div className="flex items-center gap-2.5 border-b border-line px-4">
+        <div className="flex items-center gap-2.5 px-4">
           <AppIcon name="Search" size={16} className="shrink-0 text-faint" />
           <input
             ref={inputRef}
@@ -112,7 +112,7 @@ export function CommandPalette({
 
         <div ref={listRef} className="scroll-thin flex-1 overflow-y-auto p-2">
           {results.length === 0 ? (
-            <p className="p-6 text-center text-[13px] text-muted">Ничего не найдено</p>
+            <p className="p-6 text-center text-[14px] text-muted">Ничего не найдено</p>
           ) : (
             results.map((command, index) => {
               const showGroup = command.group !== lastGroup
@@ -120,7 +120,7 @@ export function CommandPalette({
               return (
                 <div key={command.id}>
                   {showGroup ? (
-                    <p className="px-2 pb-1 pt-3 text-[10.5px] font-semibold uppercase tracking-wide text-faint">
+                    <p className="px-2 pb-1 pt-3 text-[11.5px] font-semibold uppercase tracking-wide text-faint">
                       {command.group}
                     </p>
                   ) : null}
@@ -142,9 +142,9 @@ export function CommandPalette({
                     ) : command.icon ? (
                       <AppIcon name={command.icon} size={16} className="shrink-0 text-muted" />
                     ) : null}
-                    <span className="min-w-0 flex-1 truncate text-[13px] text-ink">{command.label}</span>
+                    <span className="min-w-0 flex-1 truncate text-[14px] text-ink">{command.label}</span>
                     {command.hint ? (
-                      <span className="shrink-0 truncate text-[11px] text-faint">{command.hint}</span>
+                      <span className="shrink-0 truncate text-[12px] text-faint">{command.hint}</span>
                     ) : null}
                   </button>
                 </div>
@@ -153,7 +153,7 @@ export function CommandPalette({
           )}
         </div>
 
-        <footer className="flex items-center gap-3 border-t border-line px-4 py-2 text-[10.5px] text-faint">
+        <footer className="flex items-center gap-3 bg-[var(--sunken)] px-4 py-2 text-[11.5px] text-faint">
           <span>↑↓ — выбор</span>
           <span>↵ — открыть</span>
           <span className="ml-auto">{results.length} результатов</span>

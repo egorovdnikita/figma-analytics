@@ -14,7 +14,7 @@ const KIND_LABELS: Record<'component' | 'component_set' | 'style', string> = {
 export function LibraryPanel({ teams }: { teams: FigmaTeamRef[] }) {
   if (teams.length === 0) {
     return (
-      <p className="rounded-card bg-surface p-6 text-center text-[13px] text-muted">
+      <p className="rounded-card bg-surface p-6 text-center text-[14px] text-muted">
         Добавьте команду, чтобы увидеть её опубликованную библиотеку.
       </p>
     )
@@ -54,8 +54,8 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
   if (summary === 'error') {
     return (
       <div className="rounded-card bg-surface p-4">
-        <h3 className="text-[13px] font-semibold text-ink">{team.label || team.id}</h3>
-        <p className="mt-1 text-[12px] text-muted">
+        <h3 className="text-[14px] font-semibold text-ink">{team.label || team.id}</h3>
+        <p className="mt-1 text-[13px] text-muted">
           Библиотека недоступна: у токена нет прав на library-эндпоинты этой команды либо в ней нет
           опубликованных файлов.
         </p>
@@ -68,8 +68,8 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
   if (total === 0) {
     return (
       <div className="rounded-card bg-surface p-4">
-        <h3 className="text-[13px] font-semibold text-ink">{team.label || team.id}</h3>
-        <p className="mt-1 text-[12px] text-muted">В команде нет опубликованной библиотеки.</p>
+        <h3 className="text-[14px] font-semibold text-ink">{team.label || team.id}</h3>
+        <p className="mt-1 text-[13px] text-muted">В команде нет опубликованной библиотеки.</p>
       </div>
     )
   }
@@ -79,22 +79,22 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
       <div className="viz flex items-center justify-between rounded-card bg-surface p-4">
         <div>
           <h3 className="text-[14px] font-semibold text-ink">{team.label || team.id}</h3>
-          <p className="mt-0.5 text-[11px] text-muted">
+          <p className="mt-0.5 text-[12px] text-muted">
             {summary.lastPublished ? `Публиковалась ${relativeTime(summary.lastPublished)}` : 'Дата публикации неизвестна'}
           </p>
         </div>
         <div className="flex gap-6 text-right">
           <div>
             <p className="text-[20px] font-bold leading-none text-ink">{summary.componentsCount}</p>
-            <p className="mt-1 text-[11px] text-muted">компонентов</p>
+            <p className="mt-1 text-[12px] text-muted">компонентов</p>
           </div>
           <div>
             <p className="text-[20px] font-bold leading-none text-ink">{summary.componentSetsCount}</p>
-            <p className="mt-1 text-[11px] text-muted">наборов</p>
+            <p className="mt-1 text-[12px] text-muted">наборов</p>
           </div>
           <div>
             <p className="text-[20px] font-bold leading-none text-ink">{summary.stylesCount}</p>
-            <p className="mt-1 text-[11px] text-muted">стилей</p>
+            <p className="mt-1 text-[12px] text-muted">стилей</p>
           </div>
         </div>
       </div>
@@ -104,7 +104,7 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
           title="Состав библиотеки"
           subtitle={`всего опубликовано: ${total}`}
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 <tr className="border-t border-line">
                   <td className="py-1.5 text-ink">Компоненты</td>
@@ -137,7 +137,7 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
           title="Кто ведёт дизайн-систему"
           subtitle="публикации по авторам"
           table={
-            <table className="w-full text-[12px]">
+            <table className="w-full text-[13px]">
               <tbody>
                 {summary.byAuthor.map((author) => (
                   <tr key={author.handle} className="border-t border-line">
@@ -159,16 +159,16 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
       </div>
 
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-3 text-[13px] font-semibold text-ink">Последние публикации</h3>
+        <h3 className="mb-3 text-[14px] font-semibold text-ink">Последние публикации</h3>
         <div className="space-y-1">
           {summary.recent.map((item) => (
             <div key={item.key} className="flex items-center gap-2.5 rounded-control px-2 py-1.5">
               <Avatar src={item.user.img_url} name={item.user.handle} size={22} />
-              <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink">{item.name}</span>
-              <span className="shrink-0 rounded-chip bg-[var(--sunken)] px-2 py-0.5 text-[11px] text-muted">
+              <span className="min-w-0 flex-1 truncate text-[13.5px] text-ink">{item.name}</span>
+              <span className="shrink-0 rounded-chip bg-[var(--sunken)] px-2 py-0.5 text-[12px] text-muted">
                 {KIND_LABELS[item.kind]}
               </span>
-              <span className="w-[120px] shrink-0 text-right text-[11px] text-faint">
+              <span className="w-[120px] shrink-0 text-right text-[12px] text-faint">
                 {relativeTime(item.updatedAt)}
               </span>
             </div>

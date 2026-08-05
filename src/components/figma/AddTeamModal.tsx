@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ipc, BoxUiError } from '@/lib/ipc'
 import type { FigmaTeamRef } from '@/types'
 import { Button, Field, Input, Modal, Spinner } from '@/components/ui'
-import { AppIcon } from '@/components/AppIcon'
+import { PlusGlyph } from '@/components/Glyphs'
 
 /** Из ссылки вида figma.com/files/team/1388.../all-projects достаём ID, чтобы
  * не заставлять выковыривать его из URL руками. */
@@ -70,13 +70,13 @@ export function AddTeamModal({
             Отмена
           </Button>
           <Button variant="primary" onClick={submit} disabled={busy || !teamId}>
-            {busy ? <Spinner /> : <AppIcon name="Plus" size={16} />}
+            {busy ? <Spinner /> : <PlusGlyph size={16} />}
             Добавить
           </Button>
         </>
       }
     >
-      <p className="mb-4 text-[13px] leading-relaxed text-muted">
+      <p className="mb-4 text-[14px] leading-relaxed text-muted">
         Figma не отдаёт список команд по токену — команду нужно указать один раз вручную. Вставьте
         ссылку на страницу команды или её ID.
       </p>
@@ -96,7 +96,7 @@ export function AddTeamModal({
         </Field>
 
         {teamId && teamId !== raw.trim() ? (
-          <p className="-mt-2 text-[12px] text-muted">
+          <p className="-mt-2 text-[13px] text-muted">
             Распознан ID: <span className="font-medium text-ink">{teamId}</span>
           </p>
         ) : null}
@@ -111,7 +111,7 @@ export function AddTeamModal({
         </Field>
 
         {error ? (
-          <p className="rounded-control bg-[var(--sunken)] px-3 py-2 text-[12px] text-[var(--danger)]">{error}</p>
+          <p className="rounded-control bg-[var(--sunken)] px-3 py-2 text-[13px] text-[var(--danger)]">{error}</p>
         ) : null}
       </div>
     </Modal>

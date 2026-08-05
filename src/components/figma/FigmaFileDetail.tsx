@@ -49,7 +49,7 @@ export function FigmaFileDetail({
         )}
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-[16px] font-semibold text-ink">{meta?.name ?? fallbackName}</h2>
-          <p className="mt-0.5 text-[12px] text-muted">
+          <p className="mt-0.5 text-[13px] text-muted">
             {meta ? (
               <>
                 Обновлён {relativeTime(meta.lastModified)} · роль: {meta.role}
@@ -104,7 +104,7 @@ function FileOverviewTab({ fileKey }: { fileKey: string }) {
   return (
     <div className="grid grid-cols-2 gap-3">
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-3 text-[13px] font-semibold text-ink">Последние сохранения</h3>
+        <h3 className="mb-3 text-[14px] font-semibold text-ink">Последние сохранения</h3>
         {versions === null ? (
           <Spinner className="h-4 w-4" />
         ) : (
@@ -112,8 +112,8 @@ function FileOverviewTab({ fileKey }: { fileKey: string }) {
             {versions.slice(0, 6).map((version) => (
               <div key={version.id} className="flex items-center gap-2.5">
                 <Avatar src={version.user.img_url} name={version.user.handle} size={22} />
-                <span className="flex-1 truncate text-[13px] text-ink">{version.user.handle}</span>
-                <span className="text-[11px] text-faint">{relativeTime(version.created_at)}</span>
+                <span className="flex-1 truncate text-[14px] text-ink">{version.user.handle}</span>
+                <span className="text-[12px] text-faint">{relativeTime(version.created_at)}</span>
               </div>
             ))}
           </div>
@@ -121,7 +121,7 @@ function FileOverviewTab({ fileKey }: { fileKey: string }) {
       </section>
 
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-3 text-[13px] font-semibold text-ink">Комментарии</h3>
+        <h3 className="mb-3 text-[14px] font-semibold text-ink">Комментарии</h3>
         {commentStats === null ? (
           <Spinner className="h-4 w-4" />
         ) : (
@@ -169,13 +169,13 @@ function VersionsTab({ fileKey }: { fileKey: string }) {
           <div key={version.id} className="flex items-center gap-3 rounded-control px-2 py-2 hover:bg-[var(--sunken)]">
             <Avatar src={version.user.img_url} name={version.user.handle} size={28} />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] text-ink">
+              <p className="truncate text-[14px] text-ink">
                 <span className="font-medium">{version.user.handle}</span>
                 {version.label ? <span className="text-muted"> · {version.label}</span> : null}
               </p>
-              <p className="text-[11px] text-faint">{relativeTime(version.created_at)}</p>
+              <p className="text-[12px] text-faint">{relativeTime(version.created_at)}</p>
             </div>
-            {daysBetween ? <span className="shrink-0 text-[11px] text-faint">+{daysBetween}</span> : null}
+            {daysBetween ? <span className="shrink-0 text-[12px] text-faint">+{daysBetween}</span> : null}
           </div>
         )
       })}
@@ -191,7 +191,7 @@ function VersionsTab({ fileKey }: { fileKey: string }) {
           </Button>
         </div>
       ) : items.length === 0 ? (
-        <p className="p-3 text-[12px] text-faint">Истории версий пока нет</p>
+        <p className="p-3 text-[13px] text-faint">Истории версий пока нет</p>
       ) : null}
     </section>
   )
@@ -233,7 +233,7 @@ function CommentsTab({ fileKey }: { fileKey: string }) {
       />
 
       {threads.length === 0 ? (
-        <p className="rounded-card bg-surface p-4 text-[12px] text-faint">
+        <p className="rounded-card bg-surface p-4 text-[13px] text-faint">
           {filter === 'open' ? 'Открытых обсуждений нет' : 'Комментариев пока нет'}
         </p>
       ) : (
@@ -242,12 +242,12 @@ function CommentsTab({ fileKey }: { fileKey: string }) {
             <div key={root.id} className="rounded-card bg-surface p-3">
               <CommentRow comment={root} />
               {root.resolved_at ? (
-                <p className="ml-9 mt-1 text-[11px] text-[var(--grass)]">
+                <p className="ml-9 mt-1 text-[12px] text-[var(--grass)]">
                   Решено за {humanDuration(root.created_at, root.resolved_at)}
                 </p>
               ) : null}
               {replies.length > 0 ? (
-                <div className="ml-9 mt-2 space-y-2 border-l border-line pl-3">
+                <div className="ml-9 mt-2 space-y-2 rounded-control bg-[var(--sunken)] p-2">
                   {replies.map((reply) => (
                     <CommentRow key={reply.id} comment={reply} compact />
                   ))}
@@ -267,17 +267,17 @@ function CommentRow({ comment, compact }: { comment: FigmaComment; compact?: boo
     <div className="flex gap-2.5">
       <Avatar src={comment.user.img_url} name={comment.user.handle} size={compact ? 22 : 26} />
       <div className="min-w-0 flex-1">
-        <p className="text-[13px] text-ink">
+        <p className="text-[14px] text-ink">
           <span className="font-medium">{comment.user.handle}</span>{' '}
-          <span className="text-[11px] text-faint">{relativeTime(comment.created_at)}</span>
+          <span className="text-[12px] text-faint">{relativeTime(comment.created_at)}</span>
         </p>
-        <p className="mt-0.5 whitespace-pre-wrap text-[13px] leading-relaxed text-ink">{comment.message}</p>
+        <p className="mt-0.5 whitespace-pre-wrap text-[14px] leading-relaxed text-ink">{comment.message}</p>
         {reactionGroups.length > 0 ? (
           <div className="mt-1.5 flex flex-wrap gap-1">
             {reactionGroups.map(([emoji, count]) => (
               <span
                 key={emoji}
-                className="inline-flex h-5 items-center gap-1 rounded-chip bg-[var(--sunken)] px-1.5 text-[11px] text-muted"
+                className="inline-flex h-5 items-center gap-1 rounded-chip bg-[var(--sunken)] px-1.5 text-[12px] text-muted"
               >
                 {emojiGlyph(emoji)} {count}
               </span>

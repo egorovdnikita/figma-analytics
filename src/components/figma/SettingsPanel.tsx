@@ -94,19 +94,19 @@ export function SettingsPanel({
   return (
     <div className="space-y-3">
       {notice ? (
-        <p className="rounded-card bg-surface p-3 text-[12px] text-ink">{notice}</p>
+        <p className="rounded-card bg-surface p-3 text-[13px] text-ink">{notice}</p>
       ) : null}
 
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-1 text-[13px] font-semibold text-ink">Подключение</h3>
-        <p className="mb-3 text-[11px] text-muted">
+        <h3 className="mb-1 text-[14px] font-semibold text-ink">Подключение</h3>
+        <p className="mb-3 text-[12px] text-muted">
           Токен хранится только на этом компьютере и шифруется средствами операционной системы.
         </p>
         <div className="flex items-center gap-3">
           <Avatar src={user.img_url} name={user.handle} size={36} />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] text-ink">{user.handle}</p>
-            <p className="truncate text-[11px] text-muted">{user.email}</p>
+            <p className="truncate text-[14px] text-ink">{user.handle}</p>
+            <p className="truncate text-[12px] text-muted">{user.email}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={onDisconnect}>
             <AppIcon name="LogOut" size={14} />
@@ -117,8 +117,8 @@ export function SettingsPanel({
 
       <div className="grid grid-cols-2 gap-3">
         <section className="rounded-card bg-surface p-4">
-          <h3 className="mb-1 text-[13px] font-semibold text-ink">Рабочий ритм команды</h3>
-          <p className="mb-4 text-[11px] leading-relaxed text-muted">
+          <h3 className="mb-1 text-[14px] font-semibold text-ink">Рабочий ритм команды</h3>
+          <p className="mb-4 text-[12px] leading-relaxed text-muted">
             От этих порогов зависят метрики «ночной работы», «работы в выходные» и фильтр «только рабочие часы».
           </p>
 
@@ -127,7 +127,7 @@ export function SettingsPanel({
               <Select
                 value={String(prefs.workdayStart)}
                 onChange={(event) => void patch({ workdayStart: Number(event.target.value) })}
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               >
                 {HOURS.map((hour) => (
                   <option key={hour} value={hour}>{`${String(hour).padStart(2, '0')}:00`}</option>
@@ -138,7 +138,7 @@ export function SettingsPanel({
               <Select
                 value={String(prefs.workdayEnd)}
                 onChange={(event) => void patch({ workdayEnd: Number(event.target.value) })}
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               >
                 {HOURS.map((hour) => (
                   <option key={hour} value={hour}>{`${String(hour).padStart(2, '0')}:00`}</option>
@@ -149,7 +149,7 @@ export function SettingsPanel({
               <Select
                 value={String(prefs.nightStart)}
                 onChange={(event) => void patch({ nightStart: Number(event.target.value) })}
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               >
                 {HOURS.map((hour) => (
                   <option key={hour} value={hour}>{`${String(hour).padStart(2, '0')}:00`}</option>
@@ -160,7 +160,7 @@ export function SettingsPanel({
               <Select
                 value={String(prefs.nightEnd)}
                 onChange={(event) => void patch({ nightEnd: Number(event.target.value) })}
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               >
                 {HOURS.map((hour) => (
                   <option key={hour} value={hour}>{`${String(hour).padStart(2, '0')}:00`}</option>
@@ -177,7 +177,7 @@ export function SettingsPanel({
                   key={day.value}
                   type="button"
                   onClick={() => toggleWeekend(day.value)}
-                  className={`h-8 w-11 rounded-control text-[12px] transition-colors ${
+                  className={`h-8 w-11 rounded-control text-[13px] transition-colors ${
                     prefs.weekendDays.includes(day.value)
                       ? 'bg-[var(--grass)] text-white'
                       : 'bg-[var(--sunken)] text-muted hover:text-ink'
@@ -192,8 +192,8 @@ export function SettingsPanel({
         </section>
 
         <section className="rounded-card bg-surface p-4">
-          <h3 className="mb-1 text-[13px] font-semibold text-ink">Графики и синхронизация</h3>
-          <p className="mb-4 text-[11px] leading-relaxed text-muted">
+          <h3 className="mb-1 text-[14px] font-semibold text-ink">Графики и синхронизация</h3>
+          <p className="mb-4 text-[12px] leading-relaxed text-muted">
             Сколько периодов показывать на таймлайнах и как глубоко копать историю при синхронизации.
           </p>
 
@@ -213,7 +213,7 @@ export function SettingsPanel({
                       timelineBuckets: { ...prefs.timelineBuckets, [key]: Number(event.target.value) || 1 },
                     })
                   }
-                  className="h-9 text-[12px]"
+                  className="h-9 text-[13px]"
                 />
               </Field>
             ))}
@@ -227,7 +227,7 @@ export function SettingsPanel({
                 max={2000}
                 value={prefs.syncDepthPages}
                 onChange={(event) => void patch({ syncDepthPages: Number(event.target.value) || 1 })}
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               />
             </Field>
             <Field label="Файлов параллельно" hint="больше — быстрее, но выше риск лимитов">
@@ -237,7 +237,7 @@ export function SettingsPanel({
                 max={12}
                 value={prefs.syncConcurrency}
                 onChange={(event) => void patch({ syncConcurrency: Number(event.target.value) || 1 })}
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               />
             </Field>
           </div>
@@ -246,8 +246,8 @@ export function SettingsPanel({
 
       <div className="grid grid-cols-2 gap-3">
         <section className="rounded-card bg-surface p-4">
-          <h3 className="mb-1 text-[13px] font-semibold text-ink">Интерфейс</h3>
-          <p className="mb-4 text-[11px] leading-relaxed text-muted">
+          <h3 className="mb-1 text-[14px] font-semibold text-ink">Интерфейс</h3>
+          <p className="mb-4 text-[12px] leading-relaxed text-muted">
             Плотность, стартовый раздел и режим отображения карточек.
           </p>
 
@@ -256,7 +256,7 @@ export function SettingsPanel({
               <Select
                 value={prefs.density}
                 onChange={(event) => void patch({ density: event.target.value as 'compact' | 'comfortable' })}
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               >
                 <option value="comfortable">Просторная</option>
                 <option value="compact">Компактная</option>
@@ -267,7 +267,7 @@ export function SettingsPanel({
               <Select
                 value={prefs.defaultSection}
                 onChange={(event) => void patch({ defaultSection: event.target.value })}
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               >
                 {sections.map((item) => (
                   <option key={item.value} value={item.value}>
@@ -286,8 +286,8 @@ export function SettingsPanel({
         </section>
 
         <section className="rounded-card bg-surface p-4">
-          <h3 className="mb-1 text-[13px] font-semibold text-ink">Пороги инсайтов</h3>
-          <p className="mb-4 text-[11px] leading-relaxed text-muted">
+          <h3 className="mb-1 text-[14px] font-semibold text-ink">Пороги инсайтов</h3>
+          <p className="mb-4 text-[12px] leading-relaxed text-muted">
             С какого момента наблюдение попадает в раздел «Инсайты» как отдельный вывод.
           </p>
 
@@ -306,7 +306,7 @@ export function SettingsPanel({
                     },
                   })
                 }
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               />
             </Field>
             <Field label="Без ответа, дней">
@@ -323,7 +323,7 @@ export function SettingsPanel({
                     },
                   })
                 }
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               />
             </Field>
             <Field label="Концентрация, %">
@@ -340,7 +340,7 @@ export function SettingsPanel({
                     },
                   })
                 }
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               />
             </Field>
             <Field label="Значимое изменение, %">
@@ -357,7 +357,7 @@ export function SettingsPanel({
                     },
                   })
                 }
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               />
             </Field>
             <Field label="Ночная работа, %">
@@ -374,7 +374,7 @@ export function SettingsPanel({
                     },
                   })
                 }
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               />
             </Field>
           </div>
@@ -382,7 +382,7 @@ export function SettingsPanel({
       </div>
 
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-3 text-[13px] font-semibold text-ink">Собранные данные</h3>
+        <h3 className="mb-3 text-[14px] font-semibold text-ink">Собранные данные</h3>
         {stats ? (
           <>
             <div className="grid grid-cols-6 gap-3">
@@ -393,7 +393,7 @@ export function SettingsPanel({
               <Stat label="Неполная история" value={String(stats.incompleteFiles)} />
               <Stat label="Размер кэша" value={`${(stats.bytes / 1024 / 1024).toFixed(1)} МБ`} />
             </div>
-            <p className="mt-3 text-[11px] leading-relaxed text-muted">
+            <p className="mt-3 text-[12px] leading-relaxed text-muted">
               История с {stats.oldestEvent ? new Date(stats.oldestEvent).toLocaleDateString('ru') : '—'} по{' '}
               {stats.newestEvent ? new Date(stats.newestEvent).toLocaleDateString('ru') : '—'}
               {stats.lastFetchedAt
@@ -403,7 +403,7 @@ export function SettingsPanel({
                 ? ` · у ${stats.incompleteFiles} файлов история обрезана потолком глубины — поднимите значение и синхронизируйте заново`
                 : ''}
             </p>
-            <p className="mt-1 truncate text-[11px] text-faint" title={stats.directory}>
+            <p className="mt-1 truncate text-[12px] text-faint" title={stats.directory}>
               {stats.directory}
             </p>
           </>
@@ -424,8 +424,8 @@ export function SettingsPanel({
       </section>
 
       <section className="rounded-card bg-surface p-4">
-        <h3 className="mb-1 text-[13px] font-semibold text-ink">Участники в аналитике</h3>
-        <p className="mb-3 text-[11px] text-muted">
+        <h3 className="mb-1 text-[14px] font-semibold text-ink">Участники в аналитике</h3>
+        <p className="mb-3 text-[12px] text-muted">
           Скрытые исключены из всех метрик раздела. Нажмите на карточку, чтобы переключить.
         </p>
         <div className="scroll-thin max-h-[280px] space-y-0.5 overflow-y-auto pr-1">
@@ -444,7 +444,7 @@ export function SettingsPanel({
               label={`${person.handle} · ${person.events.toLocaleString('ru')} событий`}
             />
           ))}
-          {directory.length === 0 ? <p className="text-[12px] text-muted">Нет данных</p> : null}
+          {directory.length === 0 ? <p className="text-[13px] text-muted">Нет данных</p> : null}
         </div>
       </section>
     </div>
@@ -454,7 +454,7 @@ export function SettingsPanel({
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[11px] text-muted">{label}</p>
+      <p className="text-[12px] text-muted">{label}</p>
       <p className="mt-0.5 text-[16px] font-semibold text-ink [font-variant-numeric:tabular-nums]">{value}</p>
     </div>
   )

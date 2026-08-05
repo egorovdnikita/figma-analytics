@@ -57,7 +57,7 @@ export function FigmaConnect({ onConnected }: { onConnected: (user: FigmaUser) =
               onKeyDown={(event) => event.key === 'Enter' && void submit()}
             />
           </Field>
-          {error ? <p className="mt-2 text-[12px] text-[var(--danger)]">{error}</p> : null}
+          {error ? <p className="mt-2 text-[13px] text-[var(--danger)]">{error}</p> : null}
         </div>
 
         <div className="mt-6 flex items-center gap-2">

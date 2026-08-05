@@ -1,8 +1,16 @@
 import { useMemo, useState } from 'react'
 import { format, subDays, subMonths, subYears, startOfYear } from 'date-fns'
-import type { FigmaEvent, FigmaEventKind, FigmaFilterPreset, FigmaTeamRef } from '@/types'
-import { Button, Checkbox, Input, Modal, Segmented, Select } from '@/components/ui'
+import type {
+  FigmaEvent,
+  FigmaEventKind,
+  FigmaFilterPreset,
+  FigmaSyncProgress,
+  FigmaTeamRef,
+} from '@/types'
+import { Button, Checkbox, Input, Modal, Segmented, Select, Spinner } from '@/components/ui'
 import { AppIcon } from '@/components/AppIcon'
+import { CrossGlyph } from '@/components/Glyphs'
+import { SyncProgressInline } from './FigmaWorkspace'
 import { cn } from '@/lib/cn'
 import {
   DEFAULT_FILTERS,
@@ -39,6 +47,9 @@ export function FilterBar({
   onDeletePreset,
   matchedCount,
   totalCount,
+  syncing,
+  onSync,
+  progress,
 }: {
   filters: FigmaFilters
   onChange: (next: FigmaFilters) => void
@@ -51,6 +62,9 @@ export function FilterBar({
   onDeletePreset: (id: string) => void
   matchedCount: number
   totalCount: number
+  syncing: boolean
+  onSync: () => void
+  progress: FigmaSyncProgress | null
 }) {
   const [open, setOpen] = useState(false)
   const [preset, setPreset] = useState('rolling')
@@ -101,68 +115,88 @@ export function FilterBar({
 
   return (
     <>
-      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-line px-4 py-2.5">
-        <Segmented
-          value={filters.granularity}
-          onChange={(value) => onChange({ ...filters, granularity: value as Granularity })}
-          options={GRANULARITY_OPTIONS}
-          className="bg-[var(--sunken)]"
-        />
+      <div className="mt-3 flex flex-wrap items-center gap-2 rounded-card bg-surface p-2">
+        <Button variant="soft" size="sm" className="ml-1" onClick={onSync} disabled={syncing}>
+          {syncing ? <Spinner className="h-4 w-4" /> : <AppIcon name="RefreshCw" size={16} />}
+          {syncing ? 'Синхронизация…' : 'Синхронизировать'}
+        </Button>
 
-        <div className="w-[190px]">
-          <Select value={preset} onChange={(event) => applyPreset(event.target.value)} className="h-8 text-[12px]">
-            {RANGE_PRESETS.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </Select>
-        </div>
+        {syncing && progress ? (
+          <SyncProgressInline progress={progress} />
+        ) : (
+          <>
+            <Segmented
+              value={filters.granularity}
+              onChange={(value) => onChange({ ...filters, granularity: value as Granularity })}
+              options={GRANULARITY_OPTIONS}
+              className="bg-[var(--sunken)]"
+            />
 
-        <span className="text-[11px] text-muted">
-          {filters.from || filters.to
-            ? `${filters.from ?? '…'} — ${filters.to ?? 'сегодня'}`
-            : `сравнение ${windowLabel}`}
-        </span>
+            <div className="w-[186px]">
+              <Select value={preset} onChange={(event) => applyPreset(event.target.value)} className="h-9 text-[14px]">
+                {RANGE_PRESETS.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
 
-        <span className="text-[11px] text-faint [font-variant-numeric:tabular-nums]">
-          {matchedCount.toLocaleString('ru')} из {totalCount.toLocaleString('ru')} событий
-        </span>
-
-        {presets.length > 0 ? (
-          <div className="w-[170px]">
-            <Select
-              value=""
-              onChange={(event) => {
-                const found = presets.find((item) => item.id === event.target.value)
-                if (found) onChange(found.filters as FigmaFilters)
-              }}
-              className="h-8 text-[12px]"
-            >
-              <option value="">Сохранённые наборы…</option>
-              {presets.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-        ) : null}
-
-        <div className="ml-auto flex items-center gap-2">
-          {filtersActive(filters) ? (
-            <Button variant="ghost" size="sm" onClick={() => { setPreset('rolling'); onChange({ ...DEFAULT_FILTERS, granularity: filters.granularity }) }}>
-              Сбросить
-            </Button>
-          ) : null}
-          <Button variant={activeCount > 0 ? 'soft' : 'ghost'} size="sm" onClick={() => setOpen(true)}>
-            <AppIcon name="AlignLeft" size={14} />
-            Фильтры
-            {activeCount > 0 ? (
-              <span className="ml-0.5 rounded-chip bg-[var(--grass)] px-1.5 text-[10px] text-white">{activeCount}</span>
+            {presets.length > 0 ? (
+              <div className="w-[168px]">
+                <Select
+                  value=""
+                  onChange={(event) => {
+                    const found = presets.find((item) => item.id === event.target.value)
+                    if (found) onChange(found.filters as FigmaFilters)
+                  }}
+                  className="h-9 text-[14px]"
+                >
+                  <option value="">Наборы…</option>
+                  {presets.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </Select>
+              </div>
             ) : null}
-          </Button>
-        </div>
+
+            <span className="text-[13px] text-muted">
+              {filters.from || filters.to
+                ? `${filters.from ?? '…'} — ${filters.to ?? 'сегодня'}`
+                : `сравнение ${windowLabel}`}
+            </span>
+
+            <span className="text-[13px] text-faint [font-variant-numeric:tabular-nums]">
+              {matchedCount.toLocaleString('ru')} из {totalCount.toLocaleString('ru')}
+            </span>
+
+            <div className="ml-auto flex items-center gap-2">
+              {filtersActive(filters) ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setPreset('rolling')
+                    onChange({ ...DEFAULT_FILTERS, granularity: filters.granularity })
+                  }}
+                >
+                  Сбросить
+                </Button>
+              ) : null}
+              <Button variant={activeCount > 0 ? 'soft' : 'ghost'} size="sm" onClick={() => setOpen(true)}>
+                <AppIcon name="AlignLeft" size={16} />
+                Фильтры
+                {activeCount > 0 ? (
+                  <span className="ml-0.5 rounded-chip bg-[var(--grass)] px-1.5 text-[12px] text-white">
+                    {activeCount}
+                  </span>
+                ) : null}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
 
       <Modal
@@ -189,30 +223,30 @@ export function FilterBar({
       >
         <div className="space-y-5 pb-2">
           <section>
-            <h4 className="mb-2 text-[12px] font-semibold text-ink">Произвольный период</h4>
+            <h4 className="mb-2 text-[13px] font-semibold text-ink">Произвольный период</h4>
             <div className="flex items-center gap-2">
               <Input
                 type="date"
                 value={filters.from ?? ''}
                 onChange={(event) => onChange({ ...filters, from: event.target.value || null })}
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               />
-              <span className="text-[12px] text-muted">—</span>
+              <span className="text-[13px] text-muted">—</span>
               <Input
                 type="date"
                 value={filters.to ?? ''}
                 onChange={(event) => onChange({ ...filters, to: event.target.value || null })}
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               />
             </div>
-            <p className="mt-1.5 text-[11px] text-muted">
+            <p className="mt-1.5 text-[12px] text-muted">
               Пусто — используется скользящее окно выбранной гранулярности.
             </p>
           </section>
 
           <section>
-            <h4 className="mb-2 text-[12px] font-semibold text-ink">Сохранённые наборы</h4>
-            <p className="mb-2 text-[11px] text-muted">
+            <h4 className="mb-2 text-[13px] font-semibold text-ink">Сохранённые наборы</h4>
+            <p className="mb-2 text-[12px] text-muted">
               Текущая комбинация фильтров сохраняется под именем и остаётся доступной после перезапуска.
             </p>
             <div className="flex items-center gap-2">
@@ -220,7 +254,7 @@ export function FilterBar({
                 value={presetName}
                 onChange={(event) => setPresetName(event.target.value)}
                 placeholder="Название набора"
-                className="h-9 text-[12px]"
+                className="h-9 text-[13px]"
               />
               <Button
                 variant="soft"
@@ -239,7 +273,7 @@ export function FilterBar({
                 {presets.map((item) => (
                   <span
                     key={item.id}
-                    className="flex h-7 items-center gap-1.5 rounded-chip bg-[var(--sunken)] px-2.5 text-[12px] text-muted"
+                    className="flex h-7 items-center gap-1.5 rounded-chip bg-[var(--sunken)] px-2.5 text-[13px] text-muted"
                   >
                     <button type="button" onClick={() => onChange(item.filters as FigmaFilters)} className="hover:text-ink">
                       {item.name}
@@ -250,7 +284,7 @@ export function FilterBar({
                       className="text-faint hover:text-ink"
                       aria-label={`Удалить набор ${item.name}`}
                     >
-                      <AppIcon name="X" size={11} />
+                      <CrossGlyph size={12} />
                     </button>
                   </span>
                 ))}
@@ -259,7 +293,7 @@ export function FilterBar({
           </section>
 
           <section>
-            <h4 className="mb-2 text-[12px] font-semibold text-ink">Типы событий</h4>
+            <h4 className="mb-2 text-[13px] font-semibold text-ink">Типы событий</h4>
             <div className="flex flex-wrap gap-1.5">
               {EVENT_KINDS.map((kind) => (
                 <button
@@ -267,7 +301,7 @@ export function FilterBar({
                   type="button"
                   onClick={() => toggleKind(kind)}
                   className={cn(
-                    'flex h-7 items-center gap-1.5 rounded-chip px-2.5 text-[12px] transition-colors',
+                    'flex h-7 items-center gap-1.5 rounded-chip px-2.5 text-[13px] transition-colors',
                     filters.kinds.includes(kind)
                       ? 'bg-[var(--sunken)] text-ink'
                       : 'text-faint hover:text-muted',
@@ -282,7 +316,7 @@ export function FilterBar({
           </section>
 
           <section>
-            <h4 className="mb-2 text-[12px] font-semibold text-ink">Режим работы</h4>
+            <h4 className="mb-2 text-[13px] font-semibold text-ink">Режим работы</h4>
             <div className="space-y-1">
               <Checkbox
                 checked={filters.workdaysOnly}
@@ -299,7 +333,7 @@ export function FilterBar({
 
           {teams.length > 1 ? (
             <section>
-              <h4 className="mb-2 text-[12px] font-semibold text-ink">
+              <h4 className="mb-2 text-[13px] font-semibold text-ink">
                 Команды {filters.teams.length > 0 ? `(${filters.teams.length})` : ''}
               </h4>
               <div className="space-y-0.5">
@@ -316,7 +350,7 @@ export function FilterBar({
           ) : null}
 
           <section>
-            <h4 className="mb-2 text-[12px] font-semibold text-ink">
+            <h4 className="mb-2 text-[13px] font-semibold text-ink">
               Проекты {filters.projects.length > 0 ? `(${filters.projects.length})` : ''}
             </h4>
             <div className="scroll-thin max-h-[180px] space-y-0.5 overflow-y-auto pr-2">
@@ -328,12 +362,12 @@ export function FilterBar({
                   label={project.name}
                 />
               ))}
-              {projects.length === 0 ? <p className="text-[12px] text-muted">Нет данных</p> : null}
+              {projects.length === 0 ? <p className="text-[13px] text-muted">Нет данных</p> : null}
             </div>
           </section>
 
           <section>
-            <h4 className="mb-2 text-[12px] font-semibold text-ink">
+            <h4 className="mb-2 text-[13px] font-semibold text-ink">
               Участники {filters.people.length > 0 ? `(${filters.people.length})` : ''}
             </h4>
             <div className="scroll-thin max-h-[220px] space-y-0.5 overflow-y-auto pr-2">
@@ -345,7 +379,7 @@ export function FilterBar({
                   label={`${person.handle} · ${person.count}`}
                 />
               ))}
-              {people.length === 0 ? <p className="text-[12px] text-muted">Нет данных</p> : null}
+              {people.length === 0 ? <p className="text-[13px] text-muted">Нет данных</p> : null}
             </div>
           </section>
         </div>

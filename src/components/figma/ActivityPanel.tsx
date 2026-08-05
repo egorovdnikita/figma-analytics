@@ -56,7 +56,7 @@ export function ActivityPanel({
             type="button"
             onClick={() => toggle(kind)}
             className={cn(
-              'flex h-7 items-center gap-1.5 rounded-chip px-2.5 text-[12px] transition-colors',
+              'flex h-7 items-center gap-1.5 rounded-chip px-2.5 text-[13px] transition-colors',
               kinds.has(kind) ? 'bg-[var(--sunken)] text-ink' : 'text-faint hover:text-muted',
             )}
             aria-pressed={kinds.has(kind)}
@@ -73,13 +73,13 @@ export function ActivityPanel({
               setLimit(PAGE)
             }}
             placeholder="Поиск по автору, файлу, тексту…"
-            className="h-8 text-[12px]"
+            className="h-8 text-[13px]"
           />
         </div>
       </div>
 
       <div className="rounded-card bg-surface p-2">
-        <p className="px-2 py-1.5 text-[11px] text-muted">
+        <p className="px-2 py-1.5 text-[12px] text-muted">
           {filtered.length.toLocaleString('ru')} событий · показано {visible.length.toLocaleString('ru')}
         </p>
 
@@ -102,21 +102,21 @@ export function ActivityPanel({
                   <span className="h-[22px] w-[22px] shrink-0 rounded-full bg-[var(--sunken)]" aria-hidden />
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="text-[12.5px] text-ink">
+                  <p className="text-[13.5px] text-ink">
                     <span className="font-medium">{event.handle || 'Система'}</span>{' '}
                     <span className="text-muted">{describe(event)}</span>
                   </p>
                   {event.message ? (
-                    <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-muted">{event.message}</p>
+                    <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-muted">{event.message}</p>
                   ) : null}
-                  <p className="mt-0.5 text-[11px] text-faint">
+                  <p className="mt-0.5 text-[12px] text-faint">
                     {event.fileName}
                     {event.projectName ? ` · ${event.projectName}` : ''}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-[11px] text-muted">{format(new Date(event.ts), 'd MMM, HH:mm', { locale: ru })}</p>
-                  <p className="text-[11px] text-faint">{relativeTime(event.ts)}</p>
+                  <p className="text-[12px] text-muted">{format(new Date(event.ts), 'd MMM, HH:mm', { locale: ru })}</p>
+                  <p className="text-[12px] text-faint">{relativeTime(event.ts)}</p>
                 </div>
               </button>
             </li>
@@ -128,7 +128,7 @@ export function ActivityPanel({
             <button
               type="button"
               onClick={() => setLimit((v) => v + PAGE)}
-              className="h-8 rounded-control px-3 text-[12px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
+              className="h-8 rounded-control px-3 text-[13px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
             >
               Показать ещё {Math.min(PAGE, filtered.length - visible.length)}
             </button>
@@ -136,7 +136,7 @@ export function ActivityPanel({
         ) : null}
 
         {filtered.length === 0 ? (
-          <p className="p-6 text-center text-[13px] text-muted">Ничего не найдено</p>
+          <p className="p-6 text-center text-[14px] text-muted">Ничего не найдено</p>
         ) : null}
       </div>
     </div>

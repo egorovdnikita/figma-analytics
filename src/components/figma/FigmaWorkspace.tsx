@@ -8,8 +8,9 @@ import type {
   FigmaUser,
 } from '@/types'
 import { ipc, BoxUiError } from '@/lib/ipc'
-import { Avatar, Button, Spinner } from '@/components/ui'
+import { Button, Spinner } from '@/components/ui'
 import { AppIcon } from '@/components/AppIcon'
+import { CheckGlyph, PlusGlyph } from '@/components/Glyphs'
 import { cn } from '@/lib/cn'
 import {
   AnalyticsPrefs,
@@ -252,27 +253,10 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
   const showFilters = !selectedFile && section !== 'settings' && section !== 'library'
   const isPinned = selectedFile ? (prefs?.pinnedFiles ?? []).some((item) => item.key === selectedFile.key) : false
 
+  const sectionTitle = SECTIONS.find((item) => item.value === section)?.label ?? ''
+
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="drag-region flex h-9 shrink-0 items-center gap-2 px-3">
-        <span className="no-drag flex items-center gap-2 text-[12px] text-muted">
-          <Avatar src={user.img_url} name={user.handle} size={20} />
-          {user.handle}
-        </span>
-        <span className="ml-auto" />
-        {syncError ? (
-          <span className="no-drag max-w-[320px] truncate text-[11px] text-[var(--danger)]" title={syncError}>
-            {syncError}
-          </span>
-        ) : null}
-        <Button variant="ghost" size="sm" className="no-drag" onClick={runSync} disabled={syncing}>
-          {syncing ? <Spinner className="h-3.5 w-3.5" /> : <AppIcon name="RefreshCw" size={14} />}
-          {syncing ? 'Синхронизация…' : 'Синхронизировать'}
-        </Button>
-      </div>
-
-      {syncing && progress ? <SyncBar progress={progress} /> : null}
-
       <div className="flex min-h-0 flex-1">
         <FigmaSidebar
           sections={SECTIONS}
@@ -293,40 +277,65 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
         />
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          {showFilters ? (
-            <FilterBar
-              filters={filters}
-              onChange={setFilters}
-              events={events}
-              teams={teams}
-              windowLabel={WINDOW_LABEL[filters.granularity]}
-              presets={prefs?.filterPresets ?? []}
-              onSavePreset={(name) => void savePreset(name)}
-              onDeletePreset={(id) => void deletePreset(id)}
-              matchedCount={scopedEvents.length}
-              totalCount={events.length}
-            />
-          ) : null}
+          <header className="shrink-0 px-4 pt-3">
+            <div className="drag-region flex h-11 items-center justify-between gap-4">
+              <h1 className="truncate text-[28px] font-bold lowercase leading-none tracking-tight text-ink">
+                {selectedFile ? selectedFile.name : sectionTitle}
+              </h1>
+              <div className="no-drag flex items-center gap-2">
+                {syncError ? (
+                  <span className="max-w-[280px] truncate text-[12px] text-[var(--danger)]" title={syncError}>
+                    {syncError}
+                  </span>
+                ) : null}
+                <span className="hidden text-[12px] text-faint md:inline">
+                  {events.length > 0 ? `${events.length.toLocaleString('ru')} событий` : ''}
+                </span>
+              </div>
+            </div>
+
+            {showFilters ? (
+              <FilterBar
+                filters={filters}
+                onChange={setFilters}
+                events={events}
+                teams={teams}
+                windowLabel={WINDOW_LABEL[filters.granularity]}
+                presets={prefs?.filterPresets ?? []}
+                onSavePreset={(name) => void savePreset(name)}
+                onDeletePreset={(id) => void deletePreset(id)}
+                matchedCount={scopedEvents.length}
+                totalCount={events.length}
+                syncing={syncing}
+                onSync={runSync}
+                progress={progress}
+              />
+            ) : (
+              <div className="mt-3 flex items-center gap-2 rounded-card bg-surface p-2">
+                <Button variant="soft" size="sm" className="ml-1" onClick={runSync} disabled={syncing}>
+                  {syncing ? <Spinner className="h-4 w-4" /> : <AppIcon name="RefreshCw" size={16} />}
+                  {syncing ? 'Синхронизация…' : 'Синхронизировать'}
+                </Button>
+                {syncing && progress ? <SyncProgressInline progress={progress} /> : null}
+              </div>
+            )}
+          </header>
 
           <VizPrefsProvider tablesByDefault={prefs?.tablesByDefault ?? false}>
-          <div className={cn('scroll-thin min-h-0 flex-1 overflow-y-auto', dense ? 'p-2' : 'p-4')}>
+          <main className={cn('scroll-thin min-h-0 flex-1 overflow-y-auto p-4', dense ? 'pt-2' : 'pt-3')}>
             {selectedFile ? (
               <div className={dense ? 'space-y-2' : 'space-y-3'}>
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedFile(null)}
-                    className="flex h-8 items-center gap-1.5 rounded-control px-2 text-[12px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
-                  >
-                    <AppIcon name="ChevronLeft" size={14} />
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedFile(null)}>
+                    <AppIcon name="ChevronLeft" size={16} />
                     Назад к аналитике
-                  </button>
+                  </Button>
                   <Button
                     variant={isPinned ? 'soft' : 'ghost'}
                     size="sm"
                     onClick={() => void togglePin(selectedFile.key, selectedFile.name)}
                   >
-                    <AppIcon name={isPinned ? 'Check' : 'Plus'} size={14} />
+                    {isPinned ? <CheckGlyph size={16} /> : <PlusGlyph size={16} />}
                     {isPinned ? 'Закреплён' : 'Закрепить'}
                   </Button>
                 </div>
@@ -391,7 +400,7 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
                 teams={filters.teams.length === 0 ? teams : teams.filter((team) => filters.teams.includes(team.id))}
               />
             )}
-          </div>
+          </main>
           </VizPrefsProvider>
         </div>
       </div>
@@ -401,7 +410,9 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
   )
 }
 
-function SyncBar({ progress }: { progress: FigmaSyncProgress }) {
+/** Прогресс синхронизации внутри панели инструментов — отдельной полосы,
+ * сдвигающей весь контент вниз, больше нет. */
+export function SyncProgressInline({ progress }: { progress: FigmaSyncProgress }) {
   const phase =
     progress.phase === 'projects'
       ? 'Проекты'
@@ -413,20 +424,19 @@ function SyncBar({ progress }: { progress: FigmaSyncProgress }) {
   const percent = progress.total > 0 ? (progress.done / progress.total) * 100 : 0
 
   return (
-    <div className="shrink-0 border-b border-line px-4 py-2">
-      <div className="flex items-center gap-2 text-[11px] text-muted">
-        <span className="font-medium text-ink">{phase}</span>
-        <span>
-          {progress.done} / {progress.total}
-        </span>
-        <span className="min-w-0 flex-1 truncate">{progress.current}</span>
-      </div>
-      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-[var(--sunken)]">
+    <div className="flex min-w-0 flex-1 items-center gap-2.5">
+      <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-[var(--sunken)]">
         <div
           className="h-full rounded-full bg-[var(--grass)] transition-[width] duration-300"
           style={{ width: `${percent}%` }}
         />
       </div>
+      <span className="shrink-0 text-[12px] text-muted [font-variant-numeric:tabular-nums]">
+        {phase} {progress.done}/{progress.total}
+      </span>
+      <span className="hidden min-w-0 max-w-[220px] truncate text-[12px] text-faint lg:block">
+        {progress.current}
+      </span>
     </div>
   )
 }

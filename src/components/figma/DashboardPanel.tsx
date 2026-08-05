@@ -215,7 +215,7 @@ export function DashboardPanel({
                   key={file.key}
                   type="button"
                   onClick={() => onOpenFile(file.key, file.label)}
-                  className="rounded-chip bg-[var(--sunken)] px-2 py-1 text-[11px] text-muted hover:text-ink"
+                  className="rounded-chip bg-[var(--sunken)] px-2 py-1 text-[12px] text-muted hover:text-ink"
                 >
                   Открыть: {file.label}
                 </button>
@@ -247,7 +247,7 @@ export function DashboardPanel({
           }
         >
           {model.topPeople.length === 0 ? (
-            <p className="text-[12px] text-muted">За период активности не было</p>
+            <p className="text-[13px] text-muted">За период активности не было</p>
           ) : (
             <HBars items={model.topPeople} color="var(--viz-5)" />
           )}
@@ -293,9 +293,9 @@ export function DashboardPanel({
 
 function SimpleTable({ head, rows }: { head: string[]; rows: string[][] }) {
   return (
-    <table className="w-full text-[12px]">
+    <table className="w-full text-[13px]">
       <thead>
-        <tr className="text-left text-[11px] text-faint">
+        <tr className="text-left text-[12px] text-faint">
           {head.map((cell, i) => (
             <th key={cell} className={i === 0 ? 'pb-1.5 font-medium' : 'pb-1.5 pl-2 text-right font-medium'}>
               {cell}

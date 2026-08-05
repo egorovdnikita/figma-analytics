@@ -84,8 +84,8 @@ export function ChartCard({
     <section className={cn('viz rounded-card bg-surface p-4', className)}>
       <header className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-[13px] font-semibold text-ink">{title}</h3>
-          {subtitle ? <p className="mt-0.5 text-[11px] text-muted">{subtitle}</p> : null}
+          <h3 className="text-[14px] font-semibold text-ink">{title}</h3>
+          {subtitle ? <p className="mt-0.5 text-[12px] text-muted">{subtitle}</p> : null}
         </div>
         <div className="flex shrink-0 items-center gap-1">
           {action}
@@ -93,7 +93,7 @@ export function ChartCard({
             <button
               type="button"
               onClick={() => setShowTable((v) => !v)}
-              className="h-6 rounded-chip px-2 text-[11px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
+              className="h-7 rounded-chip px-2.5 text-[12px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
               aria-pressed={showTable}
             >
               {showTable ? 'График' : 'Таблица'}
@@ -117,7 +117,7 @@ export function Legend({ items }: { items: { label: string; color: string }[] })
   return (
     <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
       {items.map((item) => (
-        <li key={item.label} className="flex items-center gap-1.5 text-[11px] text-muted">
+        <li key={item.label} className="flex items-center gap-1.5 text-[12px] text-muted">
           <span className="h-2.5 w-2.5 shrink-0 rounded-[3px]" style={{ background: item.color }} aria-hidden />
           {item.label}
         </li>
@@ -139,7 +139,7 @@ function Tooltip({ state, width }: { state: TooltipState | null; width: number }
   const flip = state.x > width * 0.6
   return (
     <div
-      className="pointer-events-none absolute z-10 min-w-[120px] rounded-control bg-[var(--ink)] px-2.5 py-1.5 text-[11px] leading-snug text-[var(--canvas)] shadow-pop"
+      className="pointer-events-none absolute z-10 min-w-[120px] rounded-control bg-[var(--ink)] px-2.5 py-1.5 text-[12px] leading-snug text-[var(--canvas)] shadow-pop"
       style={{
         left: flip ? undefined : state.x + 12,
         right: flip ? width - state.x + 12 : undefined,
@@ -490,7 +490,7 @@ export function HBars({
     <div className="space-y-2">
       {items.map((item) => (
         <div key={item.label} className="flex items-center gap-3">
-          <span className="w-[38%] shrink-0 truncate text-[12px] text-ink" title={item.label}>
+          <span className="w-[38%] shrink-0 truncate text-[13px] text-ink" title={item.label}>
             {item.label}
           </span>
           <div className="relative h-3 flex-1 overflow-hidden rounded-[4px] bg-[var(--sunken)]">
@@ -500,7 +500,7 @@ export function HBars({
               title={item.hint}
             />
           </div>
-          <span className="w-12 shrink-0 text-right text-[12px] text-muted [font-variant-numeric:tabular-nums]">
+          <span className="w-12 shrink-0 text-right text-[13px] text-muted [font-variant-numeric:tabular-nums]">
             {formatValue(item.value)}
           </span>
         </div>
@@ -639,7 +639,7 @@ export function Donut({
       </svg>
       <ul className="min-w-0 flex-1 space-y-1.5">
         {segments.map((segment) => (
-          <li key={segment.label} className="flex items-center gap-2 text-[12px]">
+          <li key={segment.label} className="flex items-center gap-2 text-[13px]">
             <span className="h-2.5 w-2.5 shrink-0 rounded-[3px]" style={{ background: segment.color }} />
             <span className="min-w-0 flex-1 truncate text-ink">{segment.label}</span>
             <span className="shrink-0 text-muted [font-variant-numeric:tabular-nums]">
@@ -692,14 +692,14 @@ export function StatTile({
 
   return (
     <div className="viz rounded-card bg-surface p-4">
-      <p className="text-[12px] text-muted">{label}</p>
+      <p className="text-[13px] text-muted">{label}</p>
       <div className="mt-1 flex items-end justify-between gap-2">
-        <p className="text-[24px] font-bold leading-none text-ink">{value}</p>
+        <p className="text-[28px] font-bold leading-none text-ink">{value}</p>
         {spark && spark.length > 1 ? <Sparkline values={spark} /> : null}
       </div>
       {hasDelta ? (
         <p
-          className="mt-1.5 flex items-center gap-1 text-[11px]"
+          className="mt-1.5 flex items-center gap-1 text-[12px]"
           style={{ color: positive ? 'var(--viz-good)' : negative ? 'var(--viz-bad)' : 'var(--muted)' }}
         >
           <span aria-hidden>{(delta as number) > 0 ? '▲' : (delta as number) < 0 ? '▼' : '■'}</span>
@@ -707,9 +707,9 @@ export function StatTile({
           {(delta as number).toFixed(0)}% {deltaLabel}
         </p>
       ) : delta === null ? (
-        <p className="mt-1.5 text-[11px] text-muted">нет данных за прошлый период</p>
+        <p className="mt-1.5 text-[12px] text-muted">нет данных за прошлый период</p>
       ) : hint ? (
-        <p className="mt-1.5 text-[11px] text-muted">{hint}</p>
+        <p className="mt-1.5 text-[12px] text-muted">{hint}</p>
       ) : null}
     </div>
   )
@@ -731,7 +731,7 @@ export function ComparisonBars({
     <div className="space-y-3">
       {items.map((item) => (
         <div key={item.label}>
-          <div className="mb-1 flex items-baseline justify-between text-[12px]">
+          <div className="mb-1 flex items-baseline justify-between text-[13px]">
             <span className="text-ink">{item.label}</span>
             <span className="text-muted [font-variant-numeric:tabular-nums]">
               {item.current} / {item.previous}
@@ -1071,7 +1071,7 @@ export function ScatterPlot({
       ) : (
         <div style={{ height }} />
       )}
-      <p className="mt-1 text-[10px] text-muted">
+      <p className="mt-1 text-[11px] text-muted">
         по горизонтали — {xLabel}, по вертикали — {yLabel}
       </p>
       <Tooltip state={tooltip} width={width} />
@@ -1092,11 +1092,11 @@ export function SmallMultiples({
     <div className="grid grid-cols-2 gap-x-4 gap-y-2">
       {items.map((item) => (
         <div key={item.label} className="flex items-center gap-2">
-          <span className="w-[38%] shrink-0 truncate text-[11.5px] text-ink" title={item.label}>
+          <span className="w-[38%] shrink-0 truncate text-[12.5px] text-ink" title={item.label}>
             {item.label}
           </span>
           <Sparkline values={item.values} color={color} width={96} height={24} />
-          <span className="ml-auto text-[11px] text-muted [font-variant-numeric:tabular-nums]">{item.total}</span>
+          <span className="ml-auto text-[12px] text-muted [font-variant-numeric:tabular-nums]">{item.total}</span>
         </div>
       ))}
     </div>
@@ -1254,7 +1254,7 @@ export function HealthRing({
       <ul className="min-w-0 flex-1 space-y-2">
         {factors.map((factor) => (
           <li key={factor.key}>
-            <div className="mb-1 flex items-baseline justify-between gap-2 text-[12px]">
+            <div className="mb-1 flex items-baseline justify-between gap-2 text-[13px]">
               <span className="truncate text-ink">{factor.label}</span>
               <span className="shrink-0 text-muted [font-variant-numeric:tabular-nums]">
                 {Math.round(factor.score)}
@@ -1270,7 +1270,7 @@ export function HealthRing({
                 }}
               />
             </div>
-            <p className="mt-0.5 truncate text-[10.5px] text-faint" title={factor.detail}>
+            <p className="mt-0.5 truncate text-[11.5px] text-faint" title={factor.detail}>
               {factor.detail}
             </p>
           </li>
@@ -1299,7 +1299,7 @@ export function Histogram({
   const [tooltip, setTooltip] = useState<TooltipState | null>(null)
 
   if (values.length === 0) {
-    return <p className="text-[12px] text-muted">Недостаточно данных</p>
+    return <p className="text-[13px] text-muted">Недостаточно данных</p>
   }
 
   const max = Math.max(...values)
@@ -1524,10 +1524,10 @@ export function CohortGrid({
           <div className="space-y-1">
             {rows.map((row) => (
               <div key={row.cohort} className="flex items-center gap-1">
-                <span className="w-[64px] shrink-0 text-[10.5px] text-ink [font-variant-numeric:tabular-nums]">
+                <span className="w-[64px] shrink-0 text-[11.5px] text-ink [font-variant-numeric:tabular-nums]">
                   {row.cohort}
                 </span>
-                <span className="w-[36px] shrink-0 text-right text-[10.5px] text-muted [font-variant-numeric:tabular-nums]">
+                <span className="w-[36px] shrink-0 text-right text-[11.5px] text-muted [font-variant-numeric:tabular-nums]">
                   {row.size}
                 </span>
                 {row.cells.slice(0, months).map((cell, index) => (
@@ -1577,7 +1577,7 @@ export function NetworkGraph({
   const [tooltip, setTooltip] = useState<TooltipState | null>(null)
 
   if (nodes.length === 0) {
-    return <p className="text-[12px] text-muted">Недостаточно данных для графа</p>
+    return <p className="text-[13px] text-muted">Недостаточно данных для графа</p>
   }
 
   // Раскладка по кругу: детерминированная и читаемая, в отличие от
@@ -1676,7 +1676,7 @@ export function StageFunnel({
     <div className="space-y-2">
       {stages.map((stage) => (
         <div key={stage.label}>
-          <div className="mb-1 flex items-baseline justify-between text-[12px]">
+          <div className="mb-1 flex items-baseline justify-between text-[13px]">
             <span className="flex items-center gap-1.5 text-ink">
               <span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: stage.color }} />
               {stage.label}
