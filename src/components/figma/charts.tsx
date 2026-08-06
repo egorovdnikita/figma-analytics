@@ -687,30 +687,141 @@ export function StatTile({
   hint?: string
 }) {
   const hasDelta = delta !== undefined && delta !== null && Number.isFinite(delta)
-  const positive = hasDelta && (invertDelta ? (delta as number) < 0 : (delta as number) > 0)
-  const negative = hasDelta && (invertDelta ? (delta as number) > 0 : (delta as number) < 0)
+  const value_ = delta as number
+  const positive = hasDelta && (invertDelta ? value_ < 0 : value_ > 0)
+  const negative = hasDelta && (invertDelta ? value_ > 0 : value_ < 0)
+  const tone = positive ? 'var(--viz-good)' : negative ? 'var(--viz-bad)' : 'var(--muted)'
 
   return (
-    <div className="viz rounded-card bg-surface p-4">
+    <div className="viz group relative overflow-hidden rounded-card bg-surface p-4 transition-shadow hover:shadow-pop">
       <p className="text-[13px] text-muted">{label}</p>
-      <div className="mt-1 flex items-end justify-between gap-2">
+
+      <div className="mt-1.5 flex items-end justify-between gap-3">
         <p className="font-display display-lg text-ink">{value}</p>
-        {spark && spark.length > 1 ? <Sparkline values={spark} /> : null}
+        {spark && spark.length > 1 ? (
+          <Sparkline values={spark} color={hasDelta ? tone : 'var(--viz-1)'} width={84} height={28} />
+        ) : null}
       </div>
+
       {hasDelta ? (
-        <p
-          className="mt-1.5 flex items-center gap-1 text-[12px]"
-          style={{ color: positive ? 'var(--viz-good)' : negative ? 'var(--viz-bad)' : 'var(--muted)' }}
-        >
-          <span aria-hidden>{(delta as number) > 0 ? '▲' : (delta as number) < 0 ? '▼' : '■'}</span>
-          {(delta as number) > 0 ? '+' : ''}
-          {(delta as number).toFixed(0)}% {deltaLabel}
-        </p>
+        <div className="mt-2 flex items-center gap-1.5">
+          {/* Дельта — бейдж, а не строка текста: так она читается как отдельная
+              величина и не сливается с подписью периода. */}
+          <span
+            className="inline-flex h-[22px] shrink-0 items-center gap-1 rounded-chip px-2 text-[12px] font-medium [font-variant-numeric:tabular-nums]"
+            style={{ color: tone, background: `color-mix(in srgb, ${tone} 12%, transparent)` }}
+          >
+            <ArrowGlyph up={value_ > 0} flat={value_ === 0} />
+            {value_ > 0 ? '+' : ''}
+            {value_.toFixed(0)}%
+          </span>
+          {deltaLabel ? <span className="truncate text-[12px] text-faint">{deltaLabel}</span> : null}
+        </div>
       ) : delta === null ? (
-        <p className="mt-1.5 text-[12px] text-muted">Нет данных за прошлый период</p>
+        <p className="mt-2 text-[12px] text-faint">Нет данных за прошлый период</p>
       ) : hint ? (
-        <p className="mt-1.5 text-[12px] text-muted">{hint}</p>
+        <p className="mt-2 text-[12px] text-faint">{hint}</p>
       ) : null}
+    </div>
+  )
+}
+
+/** Стрелка направления. Треугольники из шрифта (▲▼) сидят на разной высоте и
+    прыгают между платформами — рисуем свою. */
+function ArrowGlyph({ up, flat }: { up: boolean; flat: boolean }) {
+  if (flat) {
+    return (
+      <svg viewBox="0 0 10 10" className="h-2.5 w-2.5" aria-hidden>
+        <path d="M2 5h6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      </svg>
+    )
+  }
+  return (
+    <svg viewBox="0 0 10 10" className="h-2.5 w-2.5" aria-hidden>
+      <path
+        d={up ? 'M5 8V2.5M2.5 5L5 2.5 7.5 5' : 'M5 2v5.5M2.5 5L5 7.5 7.5 5'}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+/* ---------- состояния загрузки и пустоты ---------- */
+
+/** Скелетон формы контента вместо крутящегося индикатора: экран не «прыгает»,
+    когда данные приезжают, потому что каркас уже занимает нужное место. */
+export function Skeleton({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return <div className={cn('animate-pulse rounded-control bg-[var(--sunken)]', className)} style={style} />
+}
+
+export function StatTileSkeleton() {
+  return (
+    <div className="viz rounded-card bg-surface p-4">
+      <Skeleton className="h-3.5 w-24" />
+      <div className="mt-2.5 flex items-end justify-between gap-3">
+        <Skeleton className="h-[30px] w-16" />
+        <Skeleton className="h-6 w-20" />
+      </div>
+      <Skeleton className="mt-2.5 h-[22px] w-28 rounded-chip" />
+    </div>
+  )
+}
+
+export function ChartCardSkeleton({ height = 200 }: { height?: number }) {
+  return (
+    <div className="viz rounded-card bg-surface p-4">
+      <Skeleton className="h-4 w-40" />
+      <Skeleton className="mt-1.5 h-3 w-56" />
+      <Skeleton className="mt-4 w-full" style={{ height }} />
+    </div>
+  )
+}
+
+export function DashboardSkeleton({ tiles = 8 }: { tiles?: number }) {
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-4 gap-3">
+        {Array.from({ length: tiles }, (_, index) => (
+          <StatTileSkeleton key={index} />
+        ))}
+      </div>
+      <ChartCardSkeleton />
+      <div className="grid grid-cols-2 gap-3">
+        <ChartCardSkeleton height={170} />
+        <ChartCardSkeleton height={170} />
+      </div>
+    </div>
+  )
+}
+
+/** Пустое состояние с понятным следующим шагом, а не одной серой строкой. */
+export function EmptyBlock({
+  icon,
+  title,
+  description,
+  action,
+}: {
+  icon?: ReactNode
+  title: string
+  description?: string
+  action?: ReactNode
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-2.5 rounded-card bg-surface px-6 py-12 text-center">
+      {icon ? (
+        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--sunken)] text-faint">
+          {icon}
+        </span>
+      ) : null}
+      <p className="text-[14px] font-semibold text-ink">{title}</p>
+      {description ? (
+        <p className="max-w-[380px] text-[13px] leading-relaxed text-muted">{description}</p>
+      ) : null}
+      {action ? <div className="mt-1">{action}</div> : null}
     </div>
   )
 }

@@ -3,7 +3,7 @@ import type { FigmaEvent, FigmaFileIndexEntry } from '@/types'
 import { Input } from '@/components/ui'
 import { AppIcon } from '@/components/AppIcon'
 import { Granularity, compareWindows, deltaPercent } from './analytics'
-import { ChartCard, HBars } from './charts'
+import { ChartCard, EmptyBlock, HBars } from './charts'
 import { daysSince, relativeTime } from './utils'
 import { cn } from '@/lib/cn'
 
@@ -72,9 +72,11 @@ export function FilesPanel({
 
   if (files.length === 0) {
     return (
-      <p className="rounded-card bg-surface p-6 text-center text-[14px] text-muted">
-        Файлов в кэше нет. Запустите синхронизацию, чтобы собрать пространство.
-      </p>
+      <EmptyBlock
+        icon={<AppIcon name="CalendarDays" size={22} />}
+        title="Файлов нет"
+        description="Запустите синхронизацию, чтобы собрать пространство."
+      />
     )
   }
 

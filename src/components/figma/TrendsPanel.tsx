@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { AppIcon } from '@/components/AppIcon'
 import type { FigmaEvent } from '@/types'
 import {
   EVENT_COLOR_VAR,
@@ -18,17 +19,7 @@ import {
   yearMonthMatrix,
   yearOverYear,
 } from './analytics'
-import {
-  BumpChart,
-  CalendarHeatmap,
-  ChartCard,
-  DualLine,
-  Legend,
-  LineChart,
-  SmallMultiples,
-  StatTile,
-  YearMonthGrid,
-} from './charts'
+import { BumpChart, CalendarHeatmap, ChartCard, DualLine, EmptyBlock, Legend, LineChart, SmallMultiples, StatTile, YearMonthGrid } from './charts'
 
 const SERIES_COLORS = ['var(--viz-1)', 'var(--viz-2)', 'var(--viz-3)', 'var(--viz-4)', 'var(--viz-5)']
 
@@ -84,9 +75,11 @@ export function TrendsPanel({
 
   if (events.length === 0) {
     return (
-      <p className="rounded-card bg-surface p-6 text-center text-[14px] text-muted">
-        Нет данных за выбранный период. Ослабьте фильтры или запустите синхронизацию.
-      </p>
+      <EmptyBlock
+        icon={<AppIcon name="ArrowRight" size={22} />}
+        title="Нет данных за период"
+        description="Ослабьте фильтры или запустите синхронизацию."
+      />
     )
   }
 

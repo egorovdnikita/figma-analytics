@@ -1,3 +1,4 @@
+import { AppIcon } from '@/components/AppIcon'
 import { useEffect, useMemo, useState } from 'react'
 import type { FigmaDirectoryPerson, FigmaEvent } from '@/types'
 import { ipc } from '@/lib/ipc'
@@ -22,7 +23,7 @@ import {
   perPersonStats,
   weekHourMatrix,
 } from './analytics'
-import { ChartCard, Donut, HBars, Heatmap, Legend, LineChart, StackedBars, StatTile } from './charts'
+import { ChartCard, Donut, EmptyBlock, HBars, Heatmap, Legend, LineChart, StackedBars, StatTile } from './charts'
 import { relativeTime } from './utils'
 import { cn } from '@/lib/cn'
 
@@ -95,9 +96,11 @@ export function PeoplePanel({
 
   if (allTime.length === 0) {
     return (
-      <p className="rounded-card bg-surface p-6 text-center text-[14px] text-muted">
-        Данных об участниках нет. Запустите синхронизацию, чтобы собрать историю пространства.
-      </p>
+      <EmptyBlock
+        icon={<AppIcon name="Users" size={22} />}
+        title="Участников не найдено"
+        description="Запустите синхронизацию, чтобы собрать историю пространства."
+      />
     )
   }
 

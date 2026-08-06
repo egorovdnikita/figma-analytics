@@ -26,7 +26,7 @@ import {
 import { FilterBar } from './FilterBar'
 import { FigmaSidebar, type SectionItem } from './FigmaSidebar'
 import { CommandPalette, type Command } from './CommandPalette'
-import { VizPrefsProvider } from './charts'
+import { DashboardSkeleton, EmptyBlock, VizPrefsProvider } from './charts'
 import { FigmaFileDetail } from './FigmaFileDetail'
 import { DashboardPanel } from './DashboardPanel'
 import { InsightsPanel } from './InsightsPanel'
@@ -345,9 +345,7 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
                 />
               </div>
             ) : loading ? (
-              <div className="flex h-full items-center justify-center">
-                <Spinner className="h-5 w-5" />
-              </div>
+              <DashboardSkeleton />
             ) : section === 'settings' ? (
               <SettingsPanel
                 user={user}
@@ -449,20 +447,23 @@ function EmptyState({
   hasTeams: boolean
 }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-      <AppIcon name="RefreshCw" size={28} className="text-faint" />
-      <p className="max-w-[380px] text-[13px] leading-relaxed text-muted">
-        {hasTeams
-          ? 'Данных ещё нет. Запустите синхронизацию — приложение обойдёт все проекты и файлы команды и соберёт историю версий, обсуждений и реакций.'
-          : 'Сначала добавьте команду в сайдбаре слева, затем запустите синхронизацию.'}
-      </p>
-      {hasTeams ? (
-        <Button variant="primary" onClick={onSync} disabled={syncing}>
-          {syncing ? <Spinner /> : <AppIcon name="RefreshCw" size={16} />}
-          Синхронизировать пространство
-        </Button>
-      ) : null}
-    </div>
+    <EmptyBlock
+      icon={<AppIcon name="RefreshCw" size={22} />}
+      title={hasTeams ? 'Данных ещё нет' : 'Начните с команды'}
+      description={
+        hasTeams
+          ? 'Синхронизация обойдёт все проекты и файлы команды и соберёт историю версий, обсуждений и реакций.'
+          : 'Добавьте команду в панели слева, затем запустите синхронизацию.'
+      }
+      action={
+        hasTeams ? (
+          <Button variant="primary" onClick={onSync} disabled={syncing}>
+            {syncing ? <Spinner /> : <AppIcon name="RefreshCw" size={16} />}
+            Синхронизировать пространство
+          </Button>
+        ) : null
+      }
+    />
   )
 }
 

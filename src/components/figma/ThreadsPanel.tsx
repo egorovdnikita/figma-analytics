@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { AppIcon } from '@/components/AppIcon'
 import type { FigmaEvent } from '@/types'
 import { Avatar, Input, Segmented } from '@/components/ui'
 import {
@@ -12,7 +13,7 @@ import {
   mean,
   percentile,
 } from './analytics'
-import { ChartCard, Donut, HBars, LineChart, ScatterPlot, StatTile } from './charts'
+import { ChartCard, Donut, EmptyBlock, HBars, LineChart, ScatterPlot, StatTile } from './charts'
 import { emojiGlyph, formatDurationMs, relativeTime } from './utils'
 
 type Filter = 'all' | 'open' | 'unanswered' | 'resolved'
@@ -134,9 +135,11 @@ export function ThreadsPanel({
 
   if (model.threads.length === 0) {
     return (
-      <p className="rounded-card bg-surface p-6 text-center text-[14px] text-muted">
-        Обсуждений в выборке нет. Ослабьте фильтры или запустите синхронизацию.
-      </p>
+      <EmptyBlock
+        icon={<AppIcon name="MessageSquare" size={22} />}
+        title="Обсуждений нет"
+        description="В выборке не нашлось ни одной ветки. Ослабьте фильтры или запустите синхронизацию."
+      />
     )
   }
 

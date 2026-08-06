@@ -26,16 +26,7 @@ import {
   responseTimeByPerson,
   retentionCohorts,
 } from './analytics'
-import {
-  ChartCard,
-  CohortGrid,
-  ForecastChart,
-  HBars,
-  HealthRing,
-  Histogram,
-  NetworkGraph,
-  StageFunnel,
-} from './charts'
+import { ChartCard, CohortGrid, EmptyBlock, ForecastChart, HBars, HealthRing, Histogram, NetworkGraph, StageFunnel } from './charts'
 import { formatDurationMs } from './utils'
 
 const TONE_STYLE: Record<InsightTone, { bg: string; fg: string; icon: React.ComponentProps<typeof AppIcon>['name'] }> = {
@@ -116,9 +107,11 @@ export function InsightsPanel({
 
   if (events.length === 0) {
     return (
-      <p className="rounded-card bg-surface p-6 text-center text-[14px] text-muted">
-        Нет данных для выводов. Ослабьте фильтры или запустите синхронизацию.
-      </p>
+      <EmptyBlock
+        icon={<AppIcon name="Bell" size={22} />}
+        title="Выводов пока нет"
+        description="В текущей выборке недостаточно событий. Ослабьте фильтры или запустите синхронизацию."
+      />
     )
   }
 

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { ipc } from '@/lib/ipc'
 import type { FigmaLibrarySummary, FigmaTeamRef } from '@/types'
 import { Avatar, Spinner } from '@/components/ui'
-import { ChartCard, Donut, HBars } from './charts'
+import { AppIcon } from '@/components/AppIcon'
+import { ChartCard, Donut, EmptyBlock, HBars } from './charts'
 import { relativeTime } from './utils'
 
 const KIND_LABELS: Record<'component' | 'component_set' | 'style', string> = {
@@ -14,9 +15,11 @@ const KIND_LABELS: Record<'component' | 'component_set' | 'style', string> = {
 export function LibraryPanel({ teams }: { teams: FigmaTeamRef[] }) {
   if (teams.length === 0) {
     return (
-      <p className="rounded-card bg-surface p-6 text-center text-[14px] text-muted">
-        Добавьте команду, чтобы увидеть её опубликованную библиотеку.
-      </p>
+      <EmptyBlock
+        icon={<AppIcon name="ShieldCheck" size={22} />}
+        title="Библиотека недоступна"
+        description="Добавьте команду, чтобы увидеть её опубликованную библиотеку."
+      />
     )
   }
 
