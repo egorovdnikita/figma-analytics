@@ -271,7 +271,7 @@ export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisc
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <header className="shrink-0 px-4 pt-3">
             <div className="drag-region flex h-11 items-center justify-between gap-4">
-              <h1 className="truncate text-[28px] font-medium leading-none tracking-tight text-ink">
+              <h1 className="truncate text-[28px] font-bold leading-none tracking-tight text-ink">
                 {selectedFile ? selectedFile.name : sectionTitle}
               </h1>
               <div className="no-drag flex shrink-0 items-center gap-2">

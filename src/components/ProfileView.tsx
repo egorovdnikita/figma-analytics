@@ -50,7 +50,7 @@ export function ProfileView() {
           <div className="flex items-center gap-4">
             <Avatar src={profile?.picture} name={profile?.name} size={64} />
             <div className="min-w-0">
-              <h2 className="truncate text-[24px] font-medium leading-tight text-ink">
+              <h2 className="truncate text-[24px] font-bold leading-tight text-ink">
                 {profile?.name ?? 'Аккаунт не подключён'}
               </h2>
               <p className="truncate text-[14px] text-muted">{profile?.email}</p>

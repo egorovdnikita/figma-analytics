@@ -246,18 +246,19 @@ body {
   transform: translateY(0.055em);
 }
 
-/* Кегли: коробка остаётся прежней, растёт только рисунок цифр. */
+/* Кегли. Коробка фиксирована на каждом шаге, поэтому карточки одного типа
+   всегда одной высоты — меняется только рисунок цифр. */
 .display-sm {
-  --display-size: 26px;
-  --display-box: 20px;
+  --display-size: 32px;
+  --display-box: 23px;
 }
 .display-md {
-  --display-size: 32px;
-  --display-box: 24px;
+  --display-size: 40px;
+  --display-box: 29px;
 }
 .display-lg {
-  --display-size: 40px;
-  --display-box: 30px;
+  --display-size: 50px;
+  --display-box: 36px;
 }
 
 /* Мягкий край прокручиваемой области. Классы вешает useScrollEdges — только

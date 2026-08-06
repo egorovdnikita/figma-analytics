@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useLayoutEffect,
   useRef,
   useState,
@@ -139,7 +140,7 @@ function Tooltip({ state, width }: { state: TooltipState | null; width: number }
   const flip = state.x > width * 0.6
   return (
     <div
-      className="pointer-events-none absolute z-10 min-w-[120px] rounded-control bg-[var(--ink)] px-2.5 py-1.5 text-[12px] leading-snug text-[var(--canvas)] shadow-pop"
+      className="pointer-events-none absolute z-10 min-w-[128px] rounded-[10px] bg-[var(--ink)] px-3 py-2 text-[12px] leading-relaxed text-[var(--canvas)] shadow-pop"
       style={{
         left: flip ? undefined : state.x + 12,
         right: flip ? width - state.x + 12 : undefined,
@@ -220,6 +221,7 @@ export function LineChart({
   const { ref, width } = useMeasure<HTMLDivElement>()
   const [tooltip, setTooltip] = useState<TooltipState | null>(null)
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const areaGradientId = useId()
 
   const points = series[0]?.points ?? []
   const count = points.length
@@ -283,8 +285,9 @@ export function LineChart({
                 y2={yAt(tick)}
                 stroke="var(--viz-grid)"
                 strokeWidth={1}
+                opacity={tick === 0 ? 1 : 0.55}
               />
-              <text x={gutter - 6} y={yAt(tick) + 3.5} textAnchor="end" className="fill-[var(--viz-muted)] text-[10px] [font-variant-numeric:tabular-nums]">
+              <text x={gutter - 8} y={yAt(tick) + 3.5} textAnchor="end" className="fill-[var(--viz-muted)] text-[10px] [font-variant-numeric:tabular-nums]">
                 {formatValue(tick)}
               </text>
             </g>
@@ -299,7 +302,19 @@ export function LineChart({
                   `L${xAt(count - 1)},${PAD_TOP + plotH}`,
                   'Z',
                 ].join(' ')
-                return <path d={d} fill={s.color} opacity={0.1} />
+                // Градиент, гаснущий к базовой линии: заливка поддерживает линию,
+                // но не спорит с ней по весу, как ровный процент прозрачности.
+                return (
+                  <>
+                    <defs>
+                      <linearGradient id={areaGradientId} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={s.color} stopOpacity={0.28} />
+                        <stop offset="100%" stopColor={s.color} stopOpacity={0.02} />
+                      </linearGradient>
+                    </defs>
+                    <path d={d} fill={`url(#${areaGradientId})`} />
+                  </>
+                )
               })()
             : null}
 
@@ -326,15 +341,23 @@ export function LineChart({
                 strokeWidth={1}
               />
               {series.map((s) => (
-                <circle
-                  key={s.name}
-                  cx={xAt(activeIndex)}
-                  cy={yAt(s.points[activeIndex]?.value ?? 0)}
-                  r={4}
-                  fill={s.color}
-                  stroke="var(--viz-surface)"
-                  strokeWidth={2}
-                />
+                <g key={s.name}>
+                  <circle
+                    cx={xAt(activeIndex)}
+                    cy={yAt(s.points[activeIndex]?.value ?? 0)}
+                    r={9}
+                    fill={s.color}
+                    opacity={0.16}
+                  />
+                  <circle
+                    cx={xAt(activeIndex)}
+                    cy={yAt(s.points[activeIndex]?.value ?? 0)}
+                    r={4.5}
+                    fill={s.color}
+                    stroke="var(--viz-surface)"
+                    strokeWidth={2.5}
+                  />
+                </g>
               ))}
             </>
           ) : null}
@@ -394,8 +417,16 @@ export function StackedBars({
         <svg width={width} height={height} role="img">
           {ticks.map((tick) => (
             <g key={tick}>
-              <line x1={gutter} x2={width - 8} y1={PAD_TOP + plotH - (tick / top) * plotH} y2={PAD_TOP + plotH - (tick / top) * plotH} stroke="var(--viz-grid)" strokeWidth={1} />
-              <text x={gutter - 6} y={PAD_TOP + plotH - (tick / top) * plotH + 3.5} textAnchor="end" className="fill-[var(--viz-muted)] text-[10px] [font-variant-numeric:tabular-nums]">
+              <line
+                x1={gutter}
+                x2={width - 8}
+                y1={PAD_TOP + plotH - (tick / top) * plotH}
+                y2={PAD_TOP + plotH - (tick / top) * plotH}
+                stroke="var(--viz-grid)"
+                strokeWidth={1}
+                opacity={tick === 0 ? 1 : 0.55}
+              />
+              <text x={gutter - 8} y={PAD_TOP + plotH - (tick / top) * plotH + 3.5} textAnchor="end" className="fill-[var(--viz-muted)] text-[10px] [font-variant-numeric:tabular-nums]">
                 {formatCompact(tick)}
               </text>
             </g>
@@ -436,8 +467,17 @@ export function StackedBars({
                   setTooltip(null)
                 }}
               >
-                {/* прозрачная зона наведения шире самого столбца */}
-                <rect x={gutter + i * band} y={PAD_TOP} width={band} height={plotH} fill="transparent" />
+                {/* Зона наведения шире столбца; под курсором она мягко
+                    подсвечивается, чтобы было видно, какой период читается. */}
+                <rect
+                  x={gutter + i * band}
+                  y={PAD_TOP}
+                  width={band}
+                  height={plotH}
+                  rx={6}
+                  fill={hover === i ? 'var(--viz-grid)' : 'transparent'}
+                  opacity={hover === i ? 0.5 : 1}
+                />
                 {segments.map(({ s, value }, segIndex) => {
                   const rawH = (value / top) * plotH
                   const h = Math.max(1, rawH - (segIndex === segments.length - 1 ? 0 : GAP))
@@ -448,7 +488,7 @@ export function StackedBars({
                       key={s.name}
                       d={isTop ? columnPath(x, cursorY, barW, h) : `M${x},${cursorY} h${barW} v${h} h${-barW} Z`}
                       fill={s.color}
-                      opacity={hover === null || hover === i ? 1 : 0.45}
+                      opacity={hover === null || hover === i ? 1 : 0.32}
                     />
                   )
                 })}
@@ -540,11 +580,11 @@ export function Heatmap({
         {rows.map((row, rowIndex) => (
           <div key={row} className="flex items-center gap-1">
             <span className="w-6 shrink-0 text-[10px] text-muted">{row}</span>
-            <div className="flex flex-1 gap-[2px]">
+            <div className="flex flex-1 gap-[3px]">
               {grid[rowIndex].map((value, hour) => (
                 <div
                   key={hour}
-                  className="h-4 flex-1 rounded-[2px]"
+                  className="h-[18px] flex-1 rounded-[4px] transition-transform hover:scale-[1.12]"
                   style={{ background: stepColor(value) }}
                   onMouseEnter={(event) => {
                     const parent = (event.currentTarget.offsetParent as HTMLElement) ?? null
@@ -614,7 +654,7 @@ export function Donut({
             d={arc(segment.value)}
             fill={segment.color}
             stroke="var(--viz-surface)"
-            strokeWidth={2}
+            strokeWidth={3}
             onMouseEnter={(event) => {
               const rect = (event.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect()
               setTooltip({
@@ -628,7 +668,7 @@ export function Donut({
         ))}
         {centerValue ? (
           <>
-            <text x={radius} y={radius - 2} textAnchor="middle" className="fill-[var(--ink)] text-[26px] [font-family:var(--font-display)]">
+            <text x={radius} y={radius - 2} textAnchor="middle" className="fill-[var(--ink)] text-[32px] [font-family:var(--font-display)]">
               {centerValue}
             </text>
             <text x={radius} y={radius + 14} textAnchor="middle" className="fill-[var(--viz-muted)] text-[10px]">
@@ -656,13 +696,31 @@ export function Donut({
 /* ---------- спарклайн и плитка показателя ---------- */
 
 export function Sparkline({ values, color = 'var(--viz-1)', width = 72, height = 22 }: { values: number[]; color?: string; width?: number; height?: number }) {
+  const gradientId = useId()
   if (values.length < 2) return <div style={{ width, height }} />
+
   const max = Math.max(...values, 1)
+  const min = Math.min(...values, 0)
+  const span = max - min || 1
   const step = width / (values.length - 1)
-  const d = values.map((value, i) => `${i === 0 ? 'M' : 'L'}${i * step},${height - (value / max) * (height - 3) - 1.5}`).join(' ')
+  const yAt = (value: number) => height - ((value - min) / span) * (height - 5) - 2.5
+  const line = values.map((value, i) => `${i === 0 ? 'M' : 'L'}${i * step},${yAt(value)}`).join(' ')
+  const area = `${line} L${width},${height} L0,${height} Z`
+  const lastX = (values.length - 1) * step
+  const lastY = yAt(values[values.length - 1])
+
   return (
-    <svg width={width} height={height} aria-hidden className="shrink-0">
-      <path d={d} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <svg width={width} height={height} aria-hidden className="shrink-0 overflow-visible">
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.24} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <path d={area} fill={`url(#${gradientId})`} />
+      <path d={line} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      {/* Точка на последнем значении — глаз сразу находит «сейчас». */}
+      <circle cx={lastX} cy={lastY} r={2.75} fill={color} stroke="var(--viz-surface)" strokeWidth={2} />
     </svg>
   )
 }
@@ -693,10 +751,10 @@ export function StatTile({
   const tone = positive ? 'var(--viz-good)' : negative ? 'var(--viz-bad)' : 'var(--muted)'
 
   return (
-    <div className="viz group relative overflow-hidden rounded-card bg-surface p-4 transition-shadow hover:shadow-pop">
+    <div className="viz relative overflow-hidden rounded-card bg-surface p-4">
       <p className="text-[13px] text-muted">{label}</p>
 
-      <div className="mt-1.5 flex items-end justify-between gap-3">
+      <div className="mt-2 flex items-end justify-between gap-3">
         <p className="font-display display-lg text-ink">{value}</p>
         {spark && spark.length > 1 ? (
           <Sparkline values={spark} color={hasDelta ? tone : 'var(--viz-1)'} width={84} height={28} />
@@ -704,7 +762,7 @@ export function StatTile({
       </div>
 
       {hasDelta ? (
-        <div className="mt-2 flex items-center gap-1.5">
+        <div className="mt-3.5 flex items-center gap-1.5">
           {/* Дельта — бейдж, а не строка текста: так она читается как отдельная
               величина и не сливается с подписью периода. */}
           <span
@@ -718,9 +776,9 @@ export function StatTile({
           {deltaLabel ? <span className="truncate text-[12px] text-faint">{deltaLabel}</span> : null}
         </div>
       ) : delta === null ? (
-        <p className="mt-2 text-[12px] text-faint">Нет данных за прошлый период</p>
+        <p className="mt-3.5 text-[12px] text-faint">Нет данных за прошлый период</p>
       ) : hint ? (
-        <p className="mt-2 text-[12px] text-faint">{hint}</p>
+        <p className="mt-3.5 text-[12px] text-faint">{hint}</p>
       ) : null}
     </div>
   )
@@ -762,11 +820,11 @@ export function StatTileSkeleton() {
   return (
     <div className="viz rounded-card bg-surface p-4">
       <Skeleton className="h-3.5 w-24" />
-      <div className="mt-2.5 flex items-end justify-between gap-3">
-        <Skeleton className="h-[30px] w-16" />
-        <Skeleton className="h-6 w-20" />
+      <div className="mt-2 flex items-end justify-between gap-3">
+        <Skeleton className="h-9 w-20" />
+        <Skeleton className="h-7 w-20" />
       </div>
-      <Skeleton className="mt-2.5 h-[22px] w-28 rounded-chip" />
+      <Skeleton className="mt-3.5 h-[22px] w-28 rounded-chip" />
     </div>
   )
 }
@@ -941,7 +999,7 @@ export function CalendarHeatmap({
             {visible.map((_, index) => {
               const label = monthLabels.find((entry) => entry.index === index)
               return (
-                <span key={index} className="w-[11px] shrink-0 text-[9px] text-muted">
+                <span key={index} className="w-[12px] shrink-0 text-[9px] text-muted">
                   {label ? label.label : ''}
                 </span>
               )
@@ -951,7 +1009,7 @@ export function CalendarHeatmap({
           <div className="flex gap-[3px]">
             <div className="flex w-6 shrink-0 flex-col gap-[3px] text-[9px] text-muted">
               {['Пн', '', 'Ср', '', 'Пт', '', 'Вс'].map((label, index) => (
-                <span key={index} className="h-[11px] leading-[11px]">
+                <span key={index} className="h-[12px] leading-[12px]">
                   {label}
                 </span>
               ))}
@@ -962,7 +1020,7 @@ export function CalendarHeatmap({
                 {col.map((cell, rowIndex) => (
                   <div
                     key={rowIndex}
-                    className="h-[11px] w-[11px] shrink-0 rounded-[2px]"
+                    className="h-[12px] w-[12px] shrink-0 rounded-[3px]"
                     style={{ background: cell ? step(cell.count) : 'transparent' }}
                     onMouseEnter={(event) => {
                       if (!cell) return
@@ -1255,7 +1313,7 @@ export function YearMonthGrid({
             {row.months.map((value, month) => (
               <div
                 key={month}
-                className="h-6 flex-1 rounded-[3px]"
+                className="h-7 flex-1 rounded-[5px]"
                 style={{ background: step(value) }}
                 onMouseEnter={(event) => {
                   const parent = event.currentTarget.closest('.relative') as HTMLElement | null
@@ -1346,7 +1404,7 @@ export function HealthRing({
           x={radius}
           y={radius - 2}
           textAnchor="middle"
-          className="fill-[var(--ink)] text-[36px] [font-family:var(--font-display)]"
+          className="fill-[var(--ink)] text-[44px] [font-family:var(--font-display)]"
           transform={`rotate(90 ${radius} ${radius})`}
         >
           {Math.round(score)}
@@ -1644,7 +1702,7 @@ export function CohortGrid({
                 {row.cells.slice(0, months).map((cell, index) => (
                   <div
                     key={index}
-                    className="h-6 flex-1 rounded-[3px]"
+                    className="h-7 flex-1 rounded-[5px]"
                     style={{ background: step(cell) }}
                     onMouseEnter={(event) => {
                       if (cell === null) return
