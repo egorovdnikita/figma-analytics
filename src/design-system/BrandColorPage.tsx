@@ -16,7 +16,7 @@ export function BrandColorPage({ mode }: { mode: BrandMode }) {
       <p style={{ font: '400 13px/1.6 var(--font-body)', color: 'var(--muted)', marginBottom: 20 }}>
         Box UI | Tokens — коллекция <code>Color</code>: 10 hue-режимов (переключатель выбора
         акцентного цвета продукта). Реально по режиму меняются только 5 токенов пространства{' '}
-        <code>colors/brand/*</code> — Box UI использует режим <code>Violet</code>, он совпадает
+        <code>colors/brand/*</code> — Figma Analytics использует режим <code>Violet</code>, он совпадает
         с <code>--grass</code> в <code>src/index.css</code>. Остальные 38 токенов ниже
         (neutral/informative/positive/warning/negative/white/black) не зависят от режима.
       </p>

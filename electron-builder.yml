@@ -1,5 +1,5 @@
-appId: com.boxui.desktop
-productName: Box UI
+appId: com.figmaanalytics.desktop
+productName: Figma Analytics
 copyright: © 2026 Nikita Egorov
 directories:
   output: release
@@ -25,7 +25,7 @@ mac:
   gatekeeperAssess: false
 
 dmg:
-  title: Box UI ${version}
+  title: Figma Analytics ${version}
   contents:
     - x: 140
       y: 190
@@ -46,7 +46,7 @@ nsis:
   perMachine: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
-  shortcutName: Box UI
+  shortcutName: Figma Analytics
 
 linux:
   icon: build/icon.png

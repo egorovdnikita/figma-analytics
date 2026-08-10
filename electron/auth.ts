@@ -35,7 +35,7 @@ const base64url = (buf: Buffer) =>
   buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 
 const RESULT_PAGE = (title: string, text: string) => `<!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><title>Box UI</title>
+<html lang="ru"><head><meta charset="utf-8"><title>Figma Analytics</title>
 <style>
   body{margin:0;height:100vh;display:grid;place-items:center;background:#f0f0ee;
        font:16px/1.5 -apple-system,Segoe UI,system-ui,sans-serif;color:#16171a}
@@ -127,12 +127,12 @@ function startServer(expectedState: string): Promise<{ port: number; waiter: Pro
       const state = url.searchParams.get('state')
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
       if (error || !code || state !== expectedState) {
-        res.end(RESULT_PAGE('Не удалось войти', 'Вернитесь в Box UI и попробуйте ещё раз.'))
+        res.end(RESULT_PAGE('Не удалось войти', 'Вернитесь в Figma Analytics и попробуйте ещё раз.'))
         finish()
         rejectCode(new AuthError(error ?? 'INVALID_STATE', 'Некорректный ответ Google'))
         return
       }
-      res.end(RESULT_PAGE('Готово', 'Аккаунт подключён. Можно вернуться в Box UI.'))
+      res.end(RESULT_PAGE('Готово', 'Аккаунт подключён. Можно вернуться в Figma Analytics.'))
       finish()
       resolveCode(code)
     })

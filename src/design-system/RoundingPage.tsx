@@ -6,7 +6,7 @@ export function RoundingPage() {
       <p style={{ font: '400 13px/1.6 var(--font-body)', color: 'var(--muted)', marginBottom: 20 }}>
         Box UI | Tokens — коллекция <code>Rounding</code>: 11 семантических ступеней ×
         3 режима плотности (<code>Low</code>/<code>Medium</code>/<code>Hight</code> — так они
-        названы в самом Figma-файле). Это отдельная шкала от собственных радиусов Box UI
+        названы в самом Figma-файле). Это отдельная шкала от собственных радиусов Figma Analytics
         (<code>--radius-chip/control/card/full</code>, см. страницу «Обзор»): показана здесь
         как есть, без переноса в приложение.
       </p>

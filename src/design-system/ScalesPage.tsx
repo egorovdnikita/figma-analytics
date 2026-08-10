@@ -96,7 +96,7 @@ export function ScalesPage() {
         </div>
       </Section>
 
-      <Section title="Typography — font-weight" description="9 ступеней, из них Box UI/Figma-компоненты используют medium (500) и semibold (600).">
+      <Section title="Typography — font-weight" description="9 ступеней, из них компоненты приложения используют medium (500) и semibold (600).">
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
           {FONT_WEIGHT_SCALE.map((w) => (
             <div key={w.name} style={{ font: `${w.value} 15px/1.4 var(--font-body)`, color: 'var(--ink)' }}>

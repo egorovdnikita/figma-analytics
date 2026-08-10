@@ -264,7 +264,7 @@ export function ProfileView() {
 
         <Card title="О приложении">
           <div className="grid gap-2 sm:grid-cols-2">
-            <Meta label="Box UI" value={appInfo?.version ?? '—'} />
+            <Meta label="Figma Analytics" value={appInfo?.version ?? '—'} />
             <Meta label="Платформа" value={`${appInfo?.platform ?? ''} ${appInfo?.arch ?? ''}`} />
             <Meta label="Electron / Chromium" value={`${appInfo?.electron ?? ''} / ${appInfo?.chrome ?? ''}`} />
             <Meta
@@ -299,7 +299,7 @@ export function ProfileView() {
         }
       >
         <p className="pb-4 text-[14px] leading-relaxed text-muted">
-          Box UI удалит сохранённые токены и отзовёт разрешение на стороне Google. Данные календаря
+          Figma Analytics удалит сохранённые токены и отзовёт разрешение на стороне Google. Данные календаря
           останутся в Google без изменений — приложение просто потеряет к ним доступ.
         </p>
       </Modal>

@@ -1,6 +1,7 @@
-# Box UI
+# Figma Analytics
 
-Десктопное приложение для macOS и Windows — личный «цифровой мозг». Первый модуль MVP:
+Десктопное приложение для macOS и Windows — личный «цифровой мозг». Основной модуль:
+аналитика Figma (файлы, активность команды, тренды, библиотека компонентов). Рядом —
 Google Календарь целиком внутри собственного интерфейса.
 
 Стек: Electron 31 · React 18 · TypeScript · Vite · Tailwind CSS v3.
@@ -42,12 +43,12 @@ Google Календарь целиком внутри собственного �
 Соберите его локально (см. ниже) или возьмите артефакты из вкладки **Actions** в GitHub —
 workflow `build` собирает `.dmg` для macOS и `.exe` для Windows.
 
-**macOS.** Откройте `.dmg`, перетащите Box UI в Applications. Сборка не подписана Apple ID,
+**macOS.** Откройте `.dmg`, перетащите Figma Analytics в Applications. Сборка не подписана Apple ID,
 поэтому при первом запуске: правый клик по приложению → **Открыть** → **Открыть**.
 Если macOS всё равно блокирует: Системные настройки → Конфиденциальность и безопасность →
 «Всё равно открыть».
 
-**Windows.** Запустите `Box UI Setup x.y.z.exe`. SmartScreen покажет предупреждение о неизвестном
+**Windows.** Запустите `Figma Analytics Setup x.y.z.exe`. SmartScreen покажет предупреждение о неизвестном
 издателе: **Подробнее** → **Выполнить в любом случае**.
 
 ### Вариант 2 — из исходников
@@ -55,8 +56,8 @@ workflow `build` собирает `.dmg` для macOS и `.exe` для Windows.
 Нужен Node.js 20+ и npm.
 
 ```bash
-git clone https://github.com/egorovdnikita/box-ui.git
-cd box-ui
+git clone https://github.com/egorovdnikita/figma-analytics.git
+cd figma-analytics
 npm install
 npm run dev
 ```
@@ -88,7 +89,7 @@ GOOGLE_CLIENT_SECRET=GOCSPX-...
 ```
 
 Дальше в приложении — **Войти через Google**. Откроется системный браузер, после подтверждения
-вкладка сообщит «Готово», и можно возвращаться в Box UI.
+вкладка сообщит «Готово», и можно возвращаться в Figma Analytics.
 
 ---
 
@@ -164,7 +165,7 @@ npm run build-storybook  # статическая сборка в storybook-stat
 ```
 
 После включения GitHub Pages (Settings → Pages → Source: **GitHub Actions**) актуальная версия
-доступна на **https://egorovdnikita.github.io/box-ui/** — деплоится автоматически при пуше
+доступна на **https://egorovdnikita.github.io/figma-analytics/** — деплоится автоматически при пуше
 в `main` через [`.github/workflows/storybook.yml`](.github/workflows/storybook.yml).
 
 - Токены (цвет, скругления, тени, типографика): `src/index.css`, `tailwind.config.ts`,

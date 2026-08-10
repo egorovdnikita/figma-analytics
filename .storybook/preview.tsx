@@ -59,7 +59,7 @@ const preview: Preview = {
   },
   globalTypes: {
     theme: {
-      description: 'Тема Box UI',
+      description: 'Тема Figma Analytics',
       toolbar: {
         title: 'Тема',
         icon: 'mirror',

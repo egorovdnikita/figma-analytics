@@ -164,7 +164,7 @@ export function TypeScaleTokens() {
                 lineHeight: 1.2,
               }}
             >
-              Box UI
+              Figma Analytics
             </span>
             <span style={{ font: '400 12px/1.4 var(--ds-font)', color: 'var(--muted)' }}>
               {row.usage}

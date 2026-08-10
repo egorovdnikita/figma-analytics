@@ -25,7 +25,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v4
         with:
-          name: box-ui-${{ matrix.os }}
+          name: figma-analytics-${{ matrix.os }}
           path: |
             release/*.dmg
             release/*.exe

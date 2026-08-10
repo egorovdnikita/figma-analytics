@@ -9,7 +9,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Box UI | Tokens — коллекция Color, 10 hue-режимов. Box UI использует Violet.',
+        component: 'Box UI | Tokens — коллекция Color, 10 hue-режимов. Figma Analytics использует Violet.',
       },
     },
   },

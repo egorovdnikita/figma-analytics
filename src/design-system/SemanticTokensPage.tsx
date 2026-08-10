@@ -65,7 +65,7 @@ export function SemanticTokensPage() {
         пять пространств имён (background, content, border, control, interactive), каждый
         токен — алиас на примитив. Значения здесь — то, что задано в самом Figma-файле
         (например, sentiment/primary там ссылается на blue), а не то, что реально используется
-        в приложении — Box UI переопределяет акцент на violet через отдельную коллекцию
+        в приложении — Figma Analytics переопределяет акцент на violet через отдельную коллекцию
         «Color» (см. страницу «Обзор»).
       </p>
       {SEMANTIC_GROUPS.map((group) => (

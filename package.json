@@ -1,8 +1,8 @@
 {
-  "name": "box-ui",
-  "productName": "Box UI",
+  "name": "figma-analytics",
+  "productName": "Figma Analytics",
   "version": "0.1.0",
-  "description": "Box UI — десктопное приложение-«цифровой мозг». MVP: Google Календарь.",
+  "description": "Figma Analytics — десктопное приложение для аналитики Figma: файлы, активность команды, тренды и библиотека компонентов.",
   "author": "Nikita Egorov",
   "license": "MIT",
   "private": true,

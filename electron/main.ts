@@ -56,15 +56,15 @@ function buildMenu() {
     ...(isMac
       ? ([
           {
-            label: 'Box UI',
+            label: 'Figma Analytics',
             submenu: [
-              { role: 'about', label: 'О Box UI' },
+              { role: 'about', label: 'О Figma Analytics' },
               { type: 'separator' },
-              { role: 'hide', label: 'Скрыть Box UI' },
+              { role: 'hide', label: 'Скрыть Figma Analytics' },
               { role: 'hideOthers', label: 'Скрыть остальные' },
               { role: 'unhide', label: 'Показать все' },
               { type: 'separator' },
-              { role: 'quit', label: 'Выйти из Box UI' },
+              { role: 'quit', label: 'Выйти из Figma Analytics' },
             ],
           },
         ] as Electron.MenuItemConstructorOptions[])

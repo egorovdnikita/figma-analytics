@@ -7,7 +7,7 @@ import { AppIcon } from '@/components/AppIcon'
 function Brand() {
   return (
     <div className="mb-8">
-      <span className="text-[24px] font-semibold tracking-tight text-ink">Box UI</span>
+      <span className="text-[24px] font-semibold tracking-tight text-ink">Figma Analytics</span>
     </div>
   )
 }
@@ -46,7 +46,7 @@ export function SetupScreen() {
         подключите свой OAuth-клиент
       </h1>
       <p className="mt-2 text-[14px] leading-relaxed text-muted">
-        Box UI работает напрямую с вашим аккаунтом Google — без промежуточного сервера. Нужны
+        Figma Analytics работает напрямую с вашим аккаунтом Google — без промежуточного сервера. Нужны
         Client&nbsp;ID и Client&nbsp;Secret десктопного OAuth-клиента. Они хранятся только на этом
         компьютере.
       </p>
@@ -104,7 +104,7 @@ export function SignInScreen() {
         ваш цифровой мозг начинается с календаря
       </h1>
       <p className="mt-3 text-[14px] leading-relaxed text-muted">
-        Подключите аккаунт Google — Box UI покажет все ваши календари, события и участников, и
+        Подключите аккаунт Google — Figma Analytics покажет все ваши календари, события и участников, и
         позволит их менять прямо отсюда.
       </p>
 

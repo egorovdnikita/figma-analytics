@@ -46,7 +46,7 @@ export function TypographyPage({ mode }: { mode: FontFamilyMode }) {
                 flex: 1,
               }}
             >
-              Box UI
+              Figma Analytics
             </span>
             <span style={{ width: 200, flexShrink: 0, font: '400 11px/1.4 var(--font-body)', color: 'var(--faint)', textAlign: 'right' }}>
               {step.desktop.fontSize}/{step.desktop.lineHeight}/{step.desktop.letterSpacing}
