@@ -456,6 +456,9 @@ export interface FigmaFileCache {
   projectName?: string
   teamId?: string
   teamName?: string
+  /** last_modified файла на момент последней выкачки истории: пока он не
+   * изменился, перечитывать версии незачем — новых сохранений не было. */
+  lastModified?: string
   /** true — вся история версий выкачана до конца (курсор исчерпан). */
   versionsComplete?: boolean
 }
@@ -480,10 +483,38 @@ const emptyFigmaCache: FigmaCacheShape = {
   libraryByTeam: {},
 }
 
+/* Кэш живёт в памяти, а на диск сбрасывается отложенно. Синхронизация трогает
+ * его дважды на каждый файл, и при разборе/сериализации 11 МБ JSON на каждое
+ * обращение она упиралась не в сеть, а в диск — время росло квадратично от
+ * объёма уже собранной истории. Main-процесс однопоточный и единственный
+ * владелец кэша, так что работа с общим объектом в памяти безопасна. */
+
+let memoryCache: FigmaCacheShape | null = null
+let flushTimer: NodeJS.Timeout | null = null
+
+const FLUSH_DELAY_MS = 2000
+
 export function readFigmaCache(): FigmaCacheShape {
-  return readJson<FigmaCacheShape>(FIGMA_CACHE_FILE, emptyFigmaCache)
+  if (!memoryCache) memoryCache = readJson<FigmaCacheShape>(FIGMA_CACHE_FILE, emptyFigmaCache)
+  return memoryCache
+}
+
+/** Немедленная запись — на выходе из приложения и по окончании синхронизации. */
+export function flushFigmaCache() {
+  if (flushTimer) {
+    clearTimeout(flushTimer)
+    flushTimer = null
+  }
+  if (memoryCache) writeJson(FIGMA_CACHE_FILE, memoryCache)
 }
 
 export function writeFigmaCache(cache: FigmaCacheShape) {
-  writeJson(FIGMA_CACHE_FILE, cache)
+  memoryCache = cache
+  if (flushTimer) return
+  flushTimer = setTimeout(() => {
+    flushTimer = null
+    if (memoryCache) writeJson(FIGMA_CACHE_FILE, memoryCache)
+  }, FLUSH_DELAY_MS)
+  // Таймер не должен держать процесс живым дольше нужного.
+  flushTimer.unref?.()
 }

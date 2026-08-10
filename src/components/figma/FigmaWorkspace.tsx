@@ -3,6 +3,8 @@ import type {
   FigmaEvent,
   FigmaFileIndexEntry,
   FigmaPrefs,
+  FigmaSyncFailure,
+  FigmaSyncFailureReason,
   FigmaSyncProgress,
   FigmaTeamRef,
   FigmaUser,
@@ -149,9 +151,7 @@ export function FigmaWorkspace({
     setSyncError(null)
     try {
       const result = await ipc.figmaSync()
-      if (result.errors.length > 0) {
-        setSyncError(`${result.errors.length} источников не прочитано: ${result.errors[0]}`)
-      }
+      if (result.errors.length > 0) setSyncError(describeSyncErrors(result.errors))
       await reload()
     } catch (error) {
       setSyncError(error instanceof BoxUiError ? error.message : 'Синхронизация не удалась')
@@ -413,6 +413,27 @@ export function FigmaWorkspace({
   )
 }
 
+/** Причина отказа важнее имени файла: «упёрлись в лимит Figma» и «нет доступа»
+ * требуют разных действий, а список файлов в строку всё равно не влезает. */
+const FAILURE_LABELS: Record<FigmaSyncFailureReason, string> = {
+  'rate-limit': 'Figma ограничила частоту запросов — повторите синхронизацию позже',
+  forbidden: 'нет доступа с этим токеном',
+  missing: 'файлы удалены или перемещены',
+  unauthorized: 'токен больше не действует',
+  unknown: 'неизвестная ошибка',
+}
+
+export function describeSyncErrors(errors: FigmaSyncFailure[]): string {
+  const counts = new Map<FigmaSyncFailureReason, number>()
+  for (const failure of errors) counts.set(failure.reason, (counts.get(failure.reason) ?? 0) + 1)
+
+  const parts = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([reason, count]) => `${count} — ${FAILURE_LABELS[reason]}`)
+
+  return `Не прочитано файлов: ${errors.length}. ${parts.join('; ')}`
+}
+
 /** Прогресс синхронизации внутри панели инструментов — отдельной полосы,
  * сдвигающей весь контент вниз, больше нет. */
 export function SyncProgressInline({ progress }: { progress: FigmaSyncProgress }) {
@@ -438,7 +459,9 @@ export function SyncProgressInline({ progress }: { progress: FigmaSyncProgress }
         {phase} {progress.done}/{progress.total}
       </span>
       <span className="hidden min-w-0 max-w-[220px] truncate text-[12px] text-faint lg:block">
-        {progress.current}
+        {progress.rateLimitMs > 0
+          ? `Лимит Figma — ждём ${Math.ceil(progress.rateLimitMs / 1000)} с`
+          : progress.current}
       </span>
     </div>
   )

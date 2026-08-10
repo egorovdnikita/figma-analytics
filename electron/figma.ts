@@ -10,22 +10,94 @@ export class FigmaApiError extends Error {
   }
 }
 
-/** Простой бэкофф на 429 — у Figma нет заголовка Retry-After на всех тарифах,
- * поэтому ждём с экспоненциальным ростом вместо мгновенного повтора. */
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+/* ---------- общий ограничитель запросов ----------
+ * Лимит Figma считается на аккаунт, а не на соединение, поэтому тормозить
+ * нужно все запросы разом. Раньше бэкофф был локальным: воркер, поймавший 429,
+ * ждал, а остальные продолжали долбить тот же лимит — в итоге на глубокой
+ * выкачке истории 429 получали все и синк заканчивался сотней «непрочитанных»
+ * файлов. Теперь выдача слотов на запрос общая: между запросами держим паузу,
+ * а полученный 429 останавливает всю очередь до конца кулдауна.
+ */
+
+/** Пауза между любыми двумя запросами: подбирается на ходу. Свой лимит Figma
+ * не публикует и считает его по стоимости endpoint'а, поэтому единственный
+ * честный способ попасть в темп — замедляться на 429 и потихоньку ускоряться,
+ * пока их нет. Постоянно влетать в лимит и ждать снятия дороже, чем сразу
+ * идти чуть медленнее. */
+const MIN_INTERVAL_MS = 120
+const MAX_INTERVAL_MS = 2000
+/** Через столько удачных запросов подряд пробуем ускориться. */
+const SPEEDUP_AFTER_OK = 20
+/** Потолок ожидания после 429, если Figma не прислала Retry-After. */
+const MAX_COOLDOWN_MS = 60_000
+
+let queue: Promise<void> = Promise.resolve()
+let cooldownUntil = 0
+let interval = MIN_INTERVAL_MS
+let okStreak = 0
+
+function slowDown() {
+  okStreak = 0
+  interval = Math.min(MAX_INTERVAL_MS, Math.round(interval * 1.5))
+}
+
+function speedUp() {
+  okStreak += 1
+  if (okStreak < SPEEDUP_AFTER_OK) return
+  okStreak = 0
+  interval = Math.max(MIN_INTERVAL_MS, Math.round(interval / 1.25))
+}
+
+/** Ждёт своей очереди: сначала общий кулдаун, затем интервал между запросами. */
+function reserveSlot(): Promise<void> {
+  const ticket = queue.then(async () => {
+    for (;;) {
+      const wait = cooldownUntil - Date.now()
+      if (wait <= 0) break
+      await sleep(wait)
+    }
+    await sleep(interval)
+  })
+  queue = ticket.catch(() => {})
+  return ticket
+}
+
+function startCooldown(ms: number) {
+  cooldownUntil = Math.max(cooldownUntil, Date.now() + Math.min(ms, MAX_COOLDOWN_MS))
+}
+
+/** Сколько сейчас ждать очередь — рендерер показывает это в прогрессе синка. */
+export function rateLimitDelayMs(): number {
+  return Math.max(0, cooldownUntil - Date.now())
+}
+
+/* Ретраев на 429 больше, чем на 5xx: упереться в лимит на середине синка
+ * дороже, чем подождать. Ожидание общее, так что повторы не множат нагрузку. */
+const MAX_ATTEMPTS_RATE_LIMIT = 10
+const MAX_ATTEMPTS_SERVER = 6
+
 async function api<T>(pathname: string, attempt = 0): Promise<T> {
   const token = getFigmaToken()
   if (!token) throw new FigmaApiError(401, 'Figma не подключена: не задан personal access token')
+
+  await reserveSlot()
 
   const res = await fetch(pathname.startsWith('http') ? pathname : `${BASE}${pathname}`, {
     headers: { 'X-Figma-Token': token },
   })
 
-  // Глубокая выкачка истории делает тысячи запросов, поэтому ждём дольше и
-  // настойчивее: упереться в 429 на середине синка дороже, чем потерять минуту.
-  if ((res.status === 429 || res.status >= 500) && attempt < 6) {
+  const limit = res.status === 429
+  if (limit) slowDown()
+  else if (res.ok) speedUp()
+
+  if ((limit || res.status >= 500) && attempt < (limit ? MAX_ATTEMPTS_RATE_LIMIT : MAX_ATTEMPTS_SERVER)) {
     const retryAfter = Number(res.headers.get('retry-after'))
-    const wait = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 800 * 2 ** attempt
-    await new Promise((resolve) => setTimeout(resolve, Math.min(wait, 30_000)))
+    const wait =
+      Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 1000 * 2 ** attempt
+    if (limit) startCooldown(wait)
+    else await sleep(Math.min(wait, 30_000))
     return api<T>(pathname, attempt + 1)
   }
   if (!res.ok) {

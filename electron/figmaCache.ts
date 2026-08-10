@@ -6,6 +6,7 @@ import {
   getFigmaHiddenUsers,
   getFigmaPrefs,
   getFigmaTeams,
+  flushFigmaCache,
   readFigmaCache,
   saveFigmaHiddenUsers,
   saveFigmaTeams,
@@ -194,13 +195,25 @@ export interface SyncProgress {
   done: number
   total: number
   current: string
+  /** Сколько ещё ждать снятия лимита Figma: синк на этом месте не завис, а
+   * стоит в общей очереди — без этого «очень долго» выглядит как зависание. */
+  rateLimitMs: number
+}
+
+export type SyncFailureReason = 'rate-limit' | 'forbidden' | 'missing' | 'unauthorized' | 'unknown'
+
+export interface SyncFailure {
+  file: string
+  reason: SyncFailureReason
 }
 
 export interface SyncResult {
   files: number
+  /** Файлы, у которых история не менялась и не перечитывалась. */
+  skipped: number
   versions: number
   comments: number
-  errors: string[]
+  errors: SyncFailure[]
   finishedAt: number
 }
 
@@ -223,10 +236,10 @@ async function pooled<T>(items: T[], size: number, worker: (item: T, index: numb
 export async function syncAll(onProgress: (progress: SyncProgress) => void): Promise<SyncResult> {
   const teams = getFigmaTeams()
   const prefs = getFigmaPrefs()
-  const errors: string[] = []
+  const errors: SyncFailure[] = []
 
   // 1. Проекты по каждой команде
-  onProgress({ phase: 'projects', done: 0, total: teams.length, current: '' })
+  onProgress({ phase: 'projects', done: 0, total: teams.length, current: '', rateLimitMs: 0 })
   const projects: Array<{ teamId: string; teamName: string; id: string; name: string }> = []
   for (const [index, team] of teams.entries()) {
     try {
@@ -238,16 +251,23 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
       cache.projectsByTeam[team.id] = data.projects
       writeFigmaCache(cache)
     } catch (error) {
-      errors.push(`Команда ${team.label || team.id}: ${(error as Error).message}`)
+      errors.push({ file: `Команда ${team.label || team.id}`, reason: failureReason(error) })
     }
-    onProgress({ phase: 'projects', done: index + 1, total: teams.length, current: team.label || team.id })
+    onProgress({
+      phase: 'projects',
+      done: index + 1,
+      total: teams.length,
+      current: team.label || team.id,
+      rateLimitMs: figma.rateLimitDelayMs(),
+    })
   }
 
   // 2. Файлы по каждому проекту
-  onProgress({ phase: 'files', done: 0, total: projects.length, current: '' })
+  onProgress({ phase: 'files', done: 0, total: projects.length, current: '', rateLimitMs: 0 })
   const files: Array<{
     key: string
     name: string
+    lastModified: string
     projectId: string
     projectName: string
     teamId: string
@@ -263,6 +283,7 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
         files.push({
           key: file.key,
           name: file.name,
+          lastModified: file.last_modified,
           projectId: project.id,
           projectName: project.name,
           teamId: project.teamId,
@@ -270,32 +291,58 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
         })
       }
     } catch (error) {
-      errors.push(`Проект ${project.name}: ${(error as Error).message}`)
+      errors.push({ file: `Проект ${project.name}`, reason: failureReason(error) })
     }
-    onProgress({ phase: 'files', done: index + 1, total: projects.length, current: project.name })
+    onProgress({
+      phase: 'files',
+      done: index + 1,
+      total: projects.length,
+      current: project.name,
+      rateLimitMs: figma.rateLimitDelayMs(),
+    })
   }
 
   // 3. История версий + комментарии по каждому файлу
   let processed = 0
   let versionCount = 0
   let commentCount = 0
-  onProgress({ phase: 'history', done: 0, total: files.length, current: '' })
+  onProgress({ phase: 'history', done: 0, total: files.length, current: '', rateLimitMs: 0 })
+
+  let skipped = 0
 
   await pooled(files, prefs.syncConcurrency, async (file) => {
     try {
       const before = readFigmaCache().files[file.key]
+
+      // История версий меняется только вместе с last_modified файла. Если он
+      // тот же, а история уже выкачана до конца, версии не трогаем: это самая
+      // дорогая часть синка (страница на 30 версий, десятки страниц на файл).
+      const versionsUnchanged =
+        Boolean(before?.versionsComplete) &&
+        Boolean(before?.lastModified) &&
+        before?.lastModified === file.lastModified
+
+      if (versionsUnchanged) skipped += 1
+
       const [versions, comments] = await Promise.all([
-        fetchVersionHistory(
-          file.key,
-          (before?.versions ?? []) as figma.FigmaVersion[],
-          Boolean(before?.versionsComplete),
-          prefs.syncDepthPages,
-        ),
+        versionsUnchanged
+          ? Promise.resolve({
+              items: (before?.versions ?? []) as figma.FigmaVersion[],
+              nextCursor: null,
+              complete: true,
+            })
+          : fetchVersionHistory(
+              file.key,
+              (before?.versions ?? []) as figma.FigmaVersion[],
+              Boolean(before?.versionsComplete),
+              prefs.syncDepthPages,
+            ),
+        // Комментарии тянем всегда: обсуждение не меняет last_modified файла.
         figma.getFileComments(file.key).then((r) => r.comments),
       ])
 
-      // Кэш читаем/пишем прямо здесь: параллельные воркеры не должны затирать
-      // записи друг друга целым снимком, поэтому правим только свой ключ.
+      // Кэш держится в памяти, поэтому правим свою запись прямо здесь: воркеры
+      // работают с одним объектом и не затирают друг друга целым снимком.
       const cache = readFigmaCache()
       const entry = cache.files[file.key] ?? emptyFileCache()
       entry.versions = versions.items
@@ -304,6 +351,7 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
       entry.comments = comments
       entry.fetchedAt = Date.now()
       entry.fileName = file.name
+      entry.lastModified = file.lastModified
       entry.projectId = file.projectId
       entry.projectName = file.projectName
       entry.teamId = file.teamId
@@ -315,14 +363,41 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
       versionCount += versions.items.length
       commentCount += comments.length
     } catch (error) {
-      errors.push(`Файл ${file.name}: ${(error as Error).message}`)
+      errors.push({ file: file.name, reason: failureReason(error) })
     }
     processed += 1
-    onProgress({ phase: 'history', done: processed, total: files.length, current: file.name })
+    onProgress({
+      phase: 'history',
+      done: processed,
+      total: files.length,
+      current: file.name,
+      rateLimitMs: figma.rateLimitDelayMs(),
+    })
   })
 
-  onProgress({ phase: 'done', done: files.length, total: files.length, current: '' })
-  return { files: files.length, versions: versionCount, comments: commentCount, errors, finishedAt: Date.now() }
+  // Синк закончился — снимок должен оказаться на диске сразу, не по таймеру.
+  flushFigmaCache()
+
+  onProgress({ phase: 'done', done: files.length, total: files.length, current: '', rateLimitMs: 0 })
+  return {
+    files: files.length,
+    skipped,
+    versions: versionCount,
+    comments: commentCount,
+    errors,
+    finishedAt: Date.now(),
+  }
+}
+
+/** Человеческая причина отказа: рендереру нужен не текст от Figma, а понимание,
+ * что делать дальше. */
+function failureReason(error: unknown): SyncFailureReason {
+  const status = (error as { status?: number }).status
+  if (status === 429) return 'rate-limit'
+  if (status === 403) return 'forbidden'
+  if (status === 404) return 'missing'
+  if (status === 401) return 'unauthorized'
+  return 'unknown'
 }
 
 /** Догружает историю версий поверх уже сохранённой.
@@ -574,6 +649,7 @@ export function cacheStats(): CacheStats {
  * иначе после очистки пришлось бы заново подключать аккаунт. */
 export function clearCache() {
   writeFigmaCache({ projectsByTeam: {}, filesByProject: {}, files: {}, libraryByTeam: {} })
+  flushFigmaCache() // очистка должна доехать до диска сразу, а не по таймеру
   return true
 }
 

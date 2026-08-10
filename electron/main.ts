@@ -2,7 +2,7 @@ import { app, BrowserWindow, Menu, nativeTheme, session, shell } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
 import { registerIpc } from './ipc'
-import { getSettings } from './store'
+import { flushFigmaCache, getSettings } from './store'
 
 process.env.APP_ROOT = path.join(__dirname, '..')
 
@@ -187,6 +187,10 @@ if (!app.requestSingleInstanceLock()) {
     })
   })
 }
+
+// Кэш пишется на диск отложенно — перед выходом дожимаем последний снимок,
+// иначе результат синхронизации мог бы не доехать.
+app.on('before-quit', () => flushFigmaCache())
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()

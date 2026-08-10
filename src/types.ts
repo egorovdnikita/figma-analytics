@@ -281,13 +281,28 @@ export interface FigmaSyncProgress {
   done: number
   total: number
   current: string
+  /** Сколько ещё ждать снятия лимита Figma — 0, если очередь идёт свободно. */
+  rateLimitMs: number
+}
+
+export type FigmaSyncFailureReason =
+  | 'rate-limit'
+  | 'forbidden'
+  | 'missing'
+  | 'unauthorized'
+  | 'unknown'
+
+export interface FigmaSyncFailure {
+  file: string
+  reason: FigmaSyncFailureReason
 }
 
 export interface FigmaSyncResult {
   files: number
+  skipped: number
   versions: number
   comments: number
-  errors: string[]
+  errors: FigmaSyncFailure[]
   finishedAt: number
 }
 
