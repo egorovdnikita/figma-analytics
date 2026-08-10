@@ -84,12 +84,12 @@ export function AddTeamModal({
       <div className="space-y-4">
         <Field
           label="Ссылка или ID команды"
-          hint="Например: https://www.figma.com/files/team/1388097712646785131/all-projects"
+          hint="Например: https://www.figma.com/files/team/000000000000000000/all-projects"
         >
           <Input
             value={raw}
             onChange={(event) => setRaw(event.target.value)}
-            placeholder="figma.com/files/team/… или 1388097712646785131"
+            placeholder="figma.com/files/team/… или 000000000000000000"
             autoFocus
             onKeyDown={(event) => event.key === 'Enter' && void submit()}
           />
