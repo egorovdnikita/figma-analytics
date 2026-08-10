@@ -1,9 +1,56 @@
 import { app, BrowserWindow, Menu, nativeTheme, session, shell } from 'electron'
+import fs from 'node:fs'
 import path from 'node:path'
 import { registerIpc } from './ipc'
 import { getSettings } from './store'
 
 process.env.APP_ROOT = path.join(__dirname, '..')
+
+/*
+ * Каталог данных прибит к постоянному имени. По умолчанию Electron берёт его
+ * из productName, поэтому переименование приложения уводило бы токен, команды
+ * и кэш в новый пустой каталог — со стороны это выглядит как «после пересборки
+ * всё сбросилось». Имя ниже менять нельзя, даже если поменяется название
+ * приложения.
+ */
+const DATA_DIR_NAME = 'Figma Analytics'
+/** Каталоги прежних имён приложения — переносим данные один раз. */
+const LEGACY_DATA_DIR_NAMES = ['Box UI']
+/** Переносим только свои файлы; кэши Chromium восстановятся сами. */
+const OWN_DATA_FILES = [
+  'settings.json',
+  'credentials.json',
+  'session.bin',
+  'secret.key',
+  'figma-token.json',
+  'figma-token.bin',
+  'figma-user.json',
+  'figma-settings.json',
+  'figma-cache.json',
+]
+
+function adoptLegacyData(dataDir: string) {
+  for (const legacyName of LEGACY_DATA_DIR_NAMES) {
+    const legacyDir = path.join(app.getPath('appData'), legacyName)
+    if (legacyDir === dataDir || !fs.existsSync(legacyDir)) continue
+    for (const file of OWN_DATA_FILES) {
+      const from = path.join(legacyDir, file)
+      const to = path.join(dataDir, file)
+      // Ничего не перетираем: если файл уже есть в новом каталоге, он новее.
+      if (!fs.existsSync(from) || fs.existsSync(to)) continue
+      try {
+        fs.copyFileSync(from, to)
+      } catch {
+        /* файл занят или недоступен — не повод падать на старте */
+      }
+    }
+  }
+}
+
+const dataDir = path.join(app.getPath('appData'), DATA_DIR_NAME)
+fs.mkdirSync(dataDir, { recursive: true })
+app.setPath('userData', dataDir)
+adoptLegacyData(dataDir)
 
 const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL
 const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')

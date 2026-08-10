@@ -9,13 +9,16 @@ import {
   FigmaPrefs,
   clearCredentials,
   clearFigmaToken,
+  clearFigmaUser,
   getCredentials,
   getFigmaPrefs,
   getFigmaToken,
+  getFigmaUser,
   getSettings,
   saveCredentials,
   saveFigmaPrefs,
   saveFigmaToken,
+  saveFigmaUser,
   saveSettings,
   storageInfo,
 } from './store'
@@ -109,14 +112,48 @@ export function registerIpc(getWindow: () => BrowserWindow | null) {
   })
 
   /* Figma */
+
+  /** Токен отзывается только самим Figma: 401/403 — единственный ответ, после
+   * которого сохранённый токен считается негодным. Сетевая ошибка, 429 или 5xx
+   * ничего не говорят о токене, и ронять из-за них подключение нельзя. */
+  const tokenRejected = (error: unknown) => {
+    const status = (error as { status?: number }).status
+    return status === 401 || status === 403
+  }
+
   handle('figma:status', async () => {
     const token = getFigmaToken()
     if (!token) return { connected: false, user: null }
+
+    // Профиль уже известен — открываемся сразу, без похода в сеть. Проверку
+    // токена делаем в фоне: если Figma его отозвала, следующий запуск покажет
+    // экран подключения, а текущая сессия сообщит об этом ошибкой запроса.
+    const cached = getFigmaUser()
+    if (cached) {
+      void figma
+        .verifyToken()
+        .then((user) => saveFigmaUser(user))
+        .catch((error) => {
+          if (!tokenRejected(error)) return
+          clearFigmaToken()
+          clearFigmaUser()
+        })
+      return { connected: true, user: cached }
+    }
+
     try {
       const user = await figma.verifyToken()
+      saveFigmaUser(user)
       return { connected: true, user }
-    } catch {
-      return { connected: false, user: null }
+    } catch (error) {
+      if (tokenRejected(error)) {
+        clearFigmaToken()
+        clearFigmaUser()
+        return { connected: false, user: null }
+      }
+      // Токен на месте, но проверить его сейчас нельзя (нет сети, лимит API).
+      // Пускаем в приложение: данные читаются из локального кэша.
+      return { connected: true, user: null }
     }
   })
   handle('figma:setToken', async (token: string) => {
@@ -125,14 +162,20 @@ export function registerIpc(getWindow: () => BrowserWindow | null) {
     saveFigmaToken(trimmed) // сохраняем до проверки, verifyToken читает токен из store
     try {
       const user = await figma.verifyToken()
+      saveFigmaUser(user)
       return user
     } catch (error) {
-      clearFigmaToken()
+      // Не стираем токен из-за обрыва сети — иначе его пришлось бы вводить снова.
+      if (tokenRejected(error)) {
+        clearFigmaToken()
+        clearFigmaUser()
+      }
       throw error
     }
   })
   handle('figma:clearToken', () => {
     clearFigmaToken()
+    clearFigmaUser()
     return true
   })
 

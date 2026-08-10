@@ -61,7 +61,14 @@ const SECTIONS: SectionItem<Section>[] = [
   { value: 'settings', label: 'Настройки', icon: 'KeyRound', group: 'Данные' },
 ]
 
-export function FigmaWorkspace({ user, onDisconnect }: { user: FigmaUser; onDisconnect: () => void }) {
+export function FigmaWorkspace({
+  user,
+  onDisconnect,
+}: {
+  /** null — токен сохранён, но профиль ещё не подтверждён (нет сети, лимит API). */
+  user: FigmaUser | null
+  onDisconnect: () => void
+}) {
   const [section, setSection] = useState<Section>('insights')
   const [selectedFile, setSelectedFile] = useState<{ key: string; name: string } | null>(null)
   const [filters, setFilters] = useState<FigmaFilters>(DEFAULT_FILTERS)

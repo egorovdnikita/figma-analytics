@@ -47,5 +47,5 @@ export function FigmaScreen() {
     return <FigmaConnect onConnected={(nextUser) => { setUser(nextUser); setStatus('connected') }} />
   }
 
-  return <FigmaWorkspace user={user!} onDisconnect={disconnect} />
+  return <FigmaWorkspace user={user} onDisconnect={disconnect} />
 }

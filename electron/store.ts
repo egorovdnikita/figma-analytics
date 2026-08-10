@@ -1,4 +1,5 @@
 import { app, safeStorage } from 'electron'
+import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -65,6 +66,85 @@ function readJson<T>(name: string, fallback: T): T {
 function writeJson(name: string, value: unknown) {
   fs.mkdirSync(app.getPath('userData'), { recursive: true })
   fs.writeFileSync(filePath(name), JSON.stringify(value, null, 2), 'utf8')
+}
+
+/* ---------- локальное шифрование секретов ----------
+ * safeStorage держит ключ в связке ключей macOS, а доступ к записи связки
+ * привязан к подписи приложения. Мы подписываем ad-hoc (без Apple Developer
+ * ID), поэтому каждая пересборка даёт новую подпись — старый шифротекст после
+ * неё не расшифровывается, и токен «пропадает». Плюс имя записи в связке
+ * зависит от имени приложения, так что переименование ломает её тоже.
+ *
+ * Поэтому секреты приложения шифруются ключом, который лежит рядом в каталоге
+ * данных (0600). Это защита от случайного подглядывания в файл, а не от того,
+ * кто уже получил доступ к домашнему каталогу: ключ лежит рядом с данными.
+ * Зато секрет переживает пересборки и переименования — ради этого и сделано.
+ */
+
+const KEY_FILE = 'secret.key'
+
+interface SealedBox {
+  v: 1
+  iv: string
+  tag: string
+  data: string
+}
+
+function localKey(): Buffer {
+  try {
+    const existing = fs.readFileSync(filePath(KEY_FILE))
+    if (existing.length === 32) return existing
+  } catch {
+    /* ключа ещё нет — создаём ниже */
+  }
+  const key = crypto.randomBytes(32)
+  fs.mkdirSync(app.getPath('userData'), { recursive: true })
+  fs.writeFileSync(filePath(KEY_FILE), key, { mode: 0o600 })
+  return key
+}
+
+function seal(plain: string): SealedBox {
+  const iv = crypto.randomBytes(12)
+  const cipher = crypto.createCipheriv('aes-256-gcm', localKey(), iv)
+  const data = Buffer.concat([cipher.update(plain, 'utf8'), cipher.final()])
+  return {
+    v: 1,
+    iv: iv.toString('base64'),
+    tag: cipher.getAuthTag().toString('base64'),
+    data: data.toString('base64'),
+  }
+}
+
+function unseal(box: SealedBox | null): string | null {
+  if (!box || box.v !== 1 || !box.iv || !box.tag || !box.data) return null
+  try {
+    const decipher = crypto.createDecipheriv('aes-256-gcm', localKey(), Buffer.from(box.iv, 'base64'))
+    decipher.setAuthTag(Buffer.from(box.tag, 'base64'))
+    const plain = Buffer.concat([decipher.update(Buffer.from(box.data, 'base64')), decipher.final()])
+    return plain.toString('utf8')
+  } catch {
+    return null
+  }
+}
+
+function readSealed(name: string): string | null {
+  try {
+    return unseal(JSON.parse(fs.readFileSync(filePath(name), 'utf8')) as SealedBox)
+  } catch {
+    return null
+  }
+}
+
+function writeSealed(name: string, plain: string) {
+  writeJson(name, seal(plain))
+}
+
+function removeFile(name: string) {
+  try {
+    fs.rmSync(filePath(name))
+  } catch {
+    /* уже удалено */
+  }
 }
 
 /* ---------- settings ---------- */
@@ -148,34 +228,81 @@ export function storageInfo() {
   }
 }
 
-/* ---------- Figma: токен (шифруется через safeStorage) ---------- */
+/* ---------- Figma: токен ----------
+ * Хранится в figma-token.json (см. «локальное шифрование секретов»): вводится
+ * один раз и переживает пересборку приложения. figma-token.bin — старый формат
+ * на safeStorage; читаем его один раз, если связка ключей ещё отдаёт данные,
+ * и сразу переписываем в новый формат.
+ */
 
-const FIGMA_TOKEN_FILE = 'figma-token.bin'
+const FIGMA_TOKEN_FILE = 'figma-token.json'
+const FIGMA_TOKEN_LEGACY_FILE = 'figma-token.bin'
+
+function readLegacyFigmaToken(): string | null {
+  try {
+    const raw = fs.readFileSync(filePath(FIGMA_TOKEN_LEGACY_FILE))
+    const token = safeStorage.isEncryptionAvailable()
+      ? safeStorage.decryptString(raw)
+      : raw.toString('utf8')
+    return token.trim() || null
+  } catch {
+    // Подпись приложения или его имя изменились — связка ключей больше не
+    // отдаёт ключ. Восстановить нечего, токен вводится заново.
+    return null
+  }
+}
 
 export function getFigmaToken(): string | null {
+  const token = readSealed(FIGMA_TOKEN_FILE)
+  if (token) return token
+
+  const legacy = readLegacyFigmaToken()
+  if (legacy) {
+    saveFigmaToken(legacy)
+    removeFile(FIGMA_TOKEN_LEGACY_FILE)
+    return legacy
+  }
+  return null
+}
+
+export function saveFigmaToken(token: string) {
+  writeSealed(FIGMA_TOKEN_FILE, token.trim())
+}
+
+export function clearFigmaToken() {
+  removeFile(FIGMA_TOKEN_FILE)
+  removeFile(FIGMA_TOKEN_LEGACY_FILE)
+}
+
+/* ---------- Figma: профиль подключённого аккаунта ----------
+ * Кэшируем ответ /me, чтобы запуск не зависел от сети: без кэша любая сетевая
+ * ошибка на старте выглядела бы как «токена нет» и приложение снова просило
+ * бы ключ. */
+
+const FIGMA_USER_FILE = 'figma-user.json'
+
+export interface StoredFigmaUser {
+  id: string
+  email: string
+  handle: string
+  img_url: string
+}
+
+export function getFigmaUser(): StoredFigmaUser | null {
   try {
-    const raw = fs.readFileSync(filePath(FIGMA_TOKEN_FILE))
-    return safeStorage.isEncryptionAvailable() ? safeStorage.decryptString(raw) : raw.toString('utf8')
+    const user = JSON.parse(fs.readFileSync(filePath(FIGMA_USER_FILE), 'utf8')) as StoredFigmaUser
+    return user?.handle ? user : null
   } catch {
     return null
   }
 }
 
-export function saveFigmaToken(token: string) {
-  fs.mkdirSync(app.getPath('userData'), { recursive: true })
-  const trimmed = token.trim()
-  const buf = safeStorage.isEncryptionAvailable()
-    ? safeStorage.encryptString(trimmed)
-    : Buffer.from(trimmed, 'utf8')
-  fs.writeFileSync(filePath(FIGMA_TOKEN_FILE), buf)
+export function saveFigmaUser(user: StoredFigmaUser) {
+  writeJson(FIGMA_USER_FILE, user)
 }
 
-export function clearFigmaToken() {
-  try {
-    fs.rmSync(filePath(FIGMA_TOKEN_FILE))
-  } catch {
-    /* уже удалено */
-  }
+export function clearFigmaUser() {
+  removeFile(FIGMA_USER_FILE)
 }
 
 /* ---------- Figma: отслеживаемые команды (Figma API не даёт список команд токена) ---------- */

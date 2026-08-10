@@ -23,7 +23,8 @@ export function SettingsPanel({
   onDataChanged,
   onDisconnect,
 }: {
-  user: FigmaUser
+  /** null — токен есть, но профиль ещё не подтверждён (нет сети, лимит API). */
+  user: FigmaUser | null
   sections: { value: string; label: string }[]
   onDataChanged: () => void
   onDisconnect: () => void
@@ -100,13 +101,16 @@ export function SettingsPanel({
       <section className="rounded-card bg-surface p-4">
         <h3 className="mb-1 text-[14px] font-semibold text-ink">Подключение</h3>
         <p className="mb-3 text-[12px] text-muted">
-          Токен хранится только на этом компьютере и шифруется средствами операционной системы.
+          Токен хранится только на этом компьютере в зашифрованном виде и переживает обновления
+          приложения — вводить его повторно не нужно.
         </p>
         <div className="flex items-center gap-3">
-          <Avatar src={user.img_url} name={user.handle} size={36} />
+          <Avatar src={user?.img_url} name={user?.handle} size={36} />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[14px] text-ink">{user.handle}</p>
-            <p className="truncate text-[12px] text-muted">{user.email}</p>
+            <p className="truncate text-[14px] text-ink">{user?.handle ?? 'Аккаунт Figma'}</p>
+            <p className="truncate text-[12px] text-muted">
+              {user?.email ?? 'Профиль не проверен — нет связи с Figma'}
+            </p>
           </div>
           <Button variant="ghost" size="sm" onClick={onDisconnect}>
             <AppIcon name="LogOut" size={14} />
