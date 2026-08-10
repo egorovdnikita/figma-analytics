@@ -133,7 +133,7 @@ npm run dev
 в Figma — можно вставить ссылку целиком:
 
 ```
-https://www.figma.com/files/team/1388097712646785131/all-projects
+https://www.figma.com/files/team/all-projects
 ```
 
 После этого — **Синхронизировать пространство** (кнопка в разделе или `⌘K`). Первый проход
@@ -160,7 +160,7 @@ cp .env.example .env
 ```
 
 ```
-GOOGLE_CLIENT_ID=...apps.googleusercontent.com
+GOOGLE_CLIENT_ID...
 GOOGLE_CLIENT_SECRET=GOCSPX-...
 ```
 
