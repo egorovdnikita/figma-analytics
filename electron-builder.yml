@@ -11,9 +11,12 @@ files:
 asar: true
 afterPack: build/afterPack.cjs
 
+# Своей иконки у приложения нет — берётся стандартная иконка Electron.
+# Чтобы вернуть свою: положить icon.png в build/ (electron-builder подхватит
+# её из buildResources сам, строка icon: не нужна).
+
 mac:
   category: public.app-category.productivity
-  icon: build/icon.png
   target:
     - target: dmg
       arch: [arm64, x64]
@@ -36,7 +39,6 @@ dmg:
       path: /Applications
 
 win:
-  icon: build/icon.ico
   target:
     - target: nsis
       arch: [x64, arm64]
@@ -49,7 +51,6 @@ nsis:
   shortcutName: Figma Analytics
 
 linux:
-  icon: build/icon.png
   category: Office
   target:
     - AppImage
