@@ -292,8 +292,11 @@ export type FigmaSyncFailureReason =
   | 'unauthorized'
   | 'unknown'
 
+export type FigmaSyncFailureScope = 'team' | 'project' | 'file'
+
 export interface FigmaSyncFailure {
-  file: string
+  scope: FigmaSyncFailureScope
+  name: string
   reason: FigmaSyncFailureReason
 }
 

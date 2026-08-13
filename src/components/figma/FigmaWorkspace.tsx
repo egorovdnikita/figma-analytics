@@ -5,6 +5,7 @@ import type {
   FigmaPrefs,
   FigmaSyncFailure,
   FigmaSyncFailureReason,
+  FigmaSyncFailureScope,
   FigmaSyncProgress,
   FigmaTeamRef,
   FigmaUser,
@@ -87,6 +88,7 @@ export function FigmaWorkspace({
   const [syncing, setSyncing] = useState(false)
   const [progress, setProgress] = useState<FigmaSyncProgress | null>(null)
   const [syncError, setSyncError] = useState<string | null>(null)
+  const [syncErrorDetails, setSyncErrorDetails] = useState<string | null>(null)
 
   const reload = useCallback(async () => {
     const [nextTeams, nextEvents, nextFiles, nextPrefs] = await Promise.all([
@@ -149,9 +151,13 @@ export function FigmaWorkspace({
   const runSync = async () => {
     setSyncing(true)
     setSyncError(null)
+    setSyncErrorDetails(null)
     try {
       const result = await ipc.figmaSync()
-      if (result.errors.length > 0) setSyncError(describeSyncErrors(result.errors))
+      if (result.errors.length > 0) {
+        setSyncError(describeSyncErrors(result.errors))
+        setSyncErrorDetails(listSyncErrors(result.errors))
+      }
       await reload()
     } catch (error) {
       setSyncError(error instanceof BoxUiError ? error.message : 'Синхронизация не удалась')
@@ -283,7 +289,10 @@ export function FigmaWorkspace({
               </h1>
               <div className="no-drag flex shrink-0 items-center gap-2">
                 {syncError ? (
-                  <span className="max-w-[240px] truncate text-[12px] text-[var(--danger)]" title={syncError}>
+                  <span
+                    className="max-w-[240px] cursor-help truncate text-[12px] text-[var(--danger)]"
+                    title={syncErrorDetails ?? syncError}
+                  >
                     {syncError}
                   </span>
                 ) : null}
@@ -413,25 +422,64 @@ export function FigmaWorkspace({
   )
 }
 
-/** Причина отказа важнее имени файла: «упёрлись в лимит Figma» и «нет доступа»
- * требуют разных действий, а список файлов в строку всё равно не влезает. */
+/** Причина отказа объясняет, что делать: «упёрлись в лимит Figma» и «нет
+ * доступа» требуют разных действий. */
 const FAILURE_LABELS: Record<FigmaSyncFailureReason, string> = {
   'rate-limit': 'Figma ограничила частоту запросов — повторите синхронизацию позже',
   forbidden: 'нет доступа с этим токеном',
-  missing: 'файлы удалены или перемещены',
+  missing: 'удалено или перемещено',
   unauthorized: 'токен больше не действует',
   unknown: 'неизвестная ошибка',
 }
 
+const SCOPE_LABELS: Record<FigmaSyncFailureScope, [string, string, string]> = {
+  team: ['команда', 'команды', 'команд'],
+  project: ['проект', 'проекта', 'проектов'],
+  file: ['файл', 'файла', 'файлов'],
+}
+
+const SCOPE_PREFIX: Record<FigmaSyncFailureScope, string> = {
+  team: 'Команда',
+  project: 'Проект',
+  file: 'Файл',
+}
+
+const SCOPE_ORDER: FigmaSyncFailureScope[] = ['team', 'project', 'file']
+
+function plural(count: number, forms: [string, string, string]) {
+  const mod100 = count % 100
+  const mod10 = count % 10
+  if (mod100 >= 11 && mod100 <= 14) return forms[2]
+  if (mod10 === 1) return forms[0]
+  if (mod10 >= 2 && mod10 <= 4) return forms[1]
+  return forms[2]
+}
+
+/** Строка в шапке: сколько и чего именно не прочиталось. Имена не влезают —
+ * они уходят в подсказку, см. listSyncErrors. */
 export function describeSyncErrors(errors: FigmaSyncFailure[]): string {
-  const counts = new Map<FigmaSyncFailureReason, number>()
-  for (const failure of errors) counts.set(failure.reason, (counts.get(failure.reason) ?? 0) + 1)
+  const counts = new Map<FigmaSyncFailureScope, number>()
+  for (const failure of errors) counts.set(failure.scope, (counts.get(failure.scope) ?? 0) + 1)
 
-  const parts = [...counts.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([reason, count]) => `${count} — ${FAILURE_LABELS[reason]}`)
+  const parts = SCOPE_ORDER.filter((scope) => counts.has(scope)).map((scope) => {
+    const count = counts.get(scope) as number
+    return `${count} ${plural(count, SCOPE_LABELS[scope])}`
+  })
 
-  return `Не прочитано файлов: ${errors.length}. ${parts.join('; ')}`
+  return `Не прочитано: ${parts.join(', ')}`
+}
+
+const DETAIL_LIMIT = 12
+
+/** Подсказка: что именно не прочиталось и почему — иначе дыру в данных не найти. */
+export function listSyncErrors(errors: FigmaSyncFailure[]): string {
+  const lines = errors
+    .slice(0, DETAIL_LIMIT)
+    .map((failure) => `${SCOPE_PREFIX[failure.scope]} «${failure.name}» — ${FAILURE_LABELS[failure.reason]}`)
+
+  const rest = errors.length - lines.length
+  if (rest > 0) lines.push(`…и ещё ${rest}`)
+  return lines.join('\n')
 }
 
 /** Прогресс синхронизации внутри панели инструментов — отдельной полосы,

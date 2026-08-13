@@ -238,8 +238,14 @@ export interface SyncProgress {
 
 export type SyncFailureReason = 'rate-limit' | 'forbidden' | 'missing' | 'unauthorized' | 'unknown'
 
+/** Что именно не прочиталось: команда, проект или файл. Без этого сообщение
+ * в интерфейсе врёт («не прочитано файлов», когда упал проект) и не даёт понять,
+ * где в данных дыра. */
+export type SyncFailureScope = 'team' | 'project' | 'file'
+
 export interface SyncFailure {
-  file: string
+  scope: SyncFailureScope
+  name: string
   reason: SyncFailureReason
 }
 
@@ -287,7 +293,7 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
       cache.projectsByTeam[team.id] = data.projects
       writeFigmaCache(cache)
     } catch (error) {
-      errors.push({ file: `Команда ${team.label || team.id}`, reason: failureReason(error) })
+      errors.push({ scope: 'team', name: team.label || team.id, reason: failureReason(error) })
     }
     onProgress({
       phase: 'projects',
@@ -327,7 +333,7 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
         })
       }
     } catch (error) {
-      errors.push({ file: `Проект ${project.name}`, reason: failureReason(error) })
+      errors.push({ scope: 'project', name: project.name, reason: failureReason(error) })
     }
     onProgress({
       phase: 'files',
@@ -399,7 +405,7 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
       versionCount += versions.items.length
       commentCount += comments.length
     } catch (error) {
-      errors.push({ file: file.name, reason: failureReason(error) })
+      errors.push({ scope: 'file', name: file.name, reason: failureReason(error) })
     }
     processed += 1
     onProgress({
