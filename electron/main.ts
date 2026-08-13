@@ -2,6 +2,7 @@ import { app, BrowserWindow, Menu, nativeTheme, session, shell } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
 import { registerIpc } from './ipc'
+import { pruneCache } from './figmaCache'
 import { flushFigmaCache, getSettings } from './store'
 
 process.env.APP_ROOT = path.join(__dirname, '..')
@@ -178,6 +179,8 @@ if (!app.requestSingleInstanceLock()) {
       })
     }
     nativeTheme.themeSource = getSettings().theme
+    // Кэш мог пережить отключение команды в прошлом запуске — подчищаем до окна.
+    pruneCache()
     registerIpc(() => win)
     buildMenu()
     createWindow()

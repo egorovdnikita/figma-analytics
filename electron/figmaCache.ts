@@ -48,7 +48,43 @@ export async function addTeam(id: string, label: string): Promise<FigmaTeamRef[]
 }
 
 export function removeTeam(id: string): FigmaTeamRef[] {
-  return saveFigmaTeams(getFigmaTeams().filter((team) => team.id !== id))
+  const next = saveFigmaTeams(getFigmaTeams().filter((team) => team.id !== id))
+  pruneCache(next)
+  return next
+}
+
+/** Выкидывает из кэша всё, что не принадлежит ни одной подключённой команде.
+ *
+ * Убрать команду из списка мало: её проекты остаются в списках, а файлы
+ * продолжают давать события в аналитику. Сюда же попадают записи, осевшие после
+ * ручного открытия карточки файла — у них нет команды, и при следующем открытии
+ * они всё равно перезапросятся. */
+export function pruneCache(teams: FigmaTeamRef[] = getFigmaTeams()) {
+  const allowed = new Set(teams.map((team) => team.id))
+  const cache = readFigmaCache()
+  const keptProjects = new Set<string>()
+  let removed = 0
+
+  for (const [teamId, projects] of Object.entries(cache.projectsByTeam)) {
+    if (allowed.has(teamId)) {
+      for (const project of projects as figma.FigmaProject[]) keptProjects.add(project.id)
+    } else {
+      delete cache.projectsByTeam[teamId]
+      removed += 1
+    }
+  }
+  for (const projectId of Object.keys(cache.filesByProject)) {
+    if (!keptProjects.has(projectId)) delete cache.filesByProject[projectId]
+  }
+  for (const [key, entry] of Object.entries(cache.files)) {
+    if (!entry.teamId || !allowed.has(entry.teamId)) {
+      delete cache.files[key]
+      removed += 1
+    }
+  }
+
+  if (removed > 0) writeFigmaCache(cache)
+  return removed
 }
 
 export function listTeams(): FigmaTeamRef[] {
