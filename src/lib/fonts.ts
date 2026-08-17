@@ -1,7 +1,7 @@
 import type { FontVariant } from '@/types'
 
 /**
- * Box UI | Tokens — Typography (модальность font-family/heading, font-family/body).
+ * Figma Analytics | Tokens — Typography (модальность font-family/heading, font-family/body).
  * "Inter Display" не распространяется как отдельное семейство на Google Fonts/Fontsource —
  * приближаем его вариативным Inter (та же семья, opsz-ось встроена в файл).
  */

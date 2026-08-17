@@ -8,7 +8,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Box UI | Primitives — сырая палитра, источник для всех семантических токенов.',
+        component: 'Figma Analytics | Primitives — сырая палитра, источник для всех семантических токенов.',
       },
     },
   },

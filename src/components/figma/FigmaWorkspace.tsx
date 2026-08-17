@@ -10,7 +10,7 @@ import type {
   FigmaTeamRef,
   FigmaUser,
 } from '@/types'
-import { ipc, BoxUiError } from '@/lib/ipc'
+import { ipc, IpcError } from '@/lib/ipc'
 import { Button, Spinner } from '@/components/ui'
 import { AppIcon } from '@/components/AppIcon'
 import { CheckGlyph, PlusGlyph } from '@/components/Glyphs'
@@ -160,7 +160,7 @@ export function FigmaWorkspace({
       }
       await reload()
     } catch (error) {
-      setSyncError(error instanceof BoxUiError ? error.message : 'Синхронизация не удалась')
+      setSyncError(error instanceof IpcError ? error.message : 'Синхронизация не удалась')
     } finally {
       setSyncing(false)
       setProgress(null)

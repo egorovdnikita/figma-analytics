@@ -9,7 +9,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Box UI | Tokens — коллекция Typography (режимы шрифта) + Grid (Desktop/Mobile).',
+        component: 'Figma Analytics | Tokens — коллекция Typography (режимы шрифта) + Grid (Desktop/Mobile).',
       },
     },
   },

@@ -96,11 +96,11 @@ interface RawApi {
 
 declare global {
   interface Window {
-    boxui: RawApi
+    figmaAnalytics: RawApi
   }
 }
 
-export class BoxUiError extends Error {
+export class IpcError extends Error {
   code: string
   constructor(code: string, message: string) {
     super(message)
@@ -110,11 +110,11 @@ export class BoxUiError extends Error {
 
 async function unwrap<T>(promise: Promise<Envelope<T>>): Promise<T> {
   const result = await promise
-  if (!result.ok) throw new BoxUiError(result.error.code, result.error.message)
+  if (!result.ok) throw new IpcError(result.error.code, result.error.message)
   return result.data
 }
 
-const raw = () => window.boxui
+const raw = () => window.figmaAnalytics
 
 export const ipc = {
   authState: () => unwrap(raw().auth.state()),

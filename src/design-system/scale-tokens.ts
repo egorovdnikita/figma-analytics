@@ -1,4 +1,4 @@
-// Box UI | Primitives — коллекции Spacing, Rounding, Size, Opacity, Typography (mode: Value),
+// Figma Analytics | Primitives — коллекции Spacing, Rounding, Size, Opacity, Typography (mode: Value),
 // сгенерировано из Figma-переменных. Это сырые шкалы, компоненты их не используют напрямую.
 
 export const SPACING_SCALE: number[] = [

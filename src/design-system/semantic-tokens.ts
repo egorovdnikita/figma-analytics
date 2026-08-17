@@ -1,4 +1,4 @@
-// Box UI | Tokens — коллекция Mode (Light/Dark), сгенерировано из Figma-переменных.
+// Figma Analytics | Tokens — коллекция Mode (Light/Dark), сгенерировано из Figma-переменных.
 export interface SemanticToken { name: string; light: string; dark: string; lightPrimitive: string; darkPrimitive: string }
 export interface SemanticGroup { namespace: string; tokens: SemanticToken[] }
 

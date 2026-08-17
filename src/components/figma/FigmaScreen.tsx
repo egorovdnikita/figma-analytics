@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ipc, BoxUiError } from '@/lib/ipc'
+import { ipc, IpcError } from '@/lib/ipc'
 import type { FigmaUser } from '@/types'
 import { Spinner } from '@/components/ui'
 import { FigmaConnect } from './FigmaConnect'
@@ -29,7 +29,7 @@ export function FigmaScreen() {
     try {
       await ipc.figmaClearToken()
     } catch (error) {
-      if (!(error instanceof BoxUiError)) throw error
+      if (!(error instanceof IpcError)) throw error
     }
     setUser(null)
     setStatus('disconnected')

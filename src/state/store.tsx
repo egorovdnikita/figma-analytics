@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { addDays } from 'date-fns'
-import { ipc, BoxUiError } from '@/lib/ipc'
+import { ipc, IpcError } from '@/lib/ipc'
 import { rangeFor } from '@/lib/date'
 import type {
   AppInfo,
@@ -173,7 +173,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         .then(setGoogleSettings)
         .catch(() => undefined)
     } catch (error) {
-      if ((error as BoxUiError).code === 'REAUTH_REQUIRED') {
+      if ((error as IpcError).code === 'REAUTH_REQUIRED') {
         setAuthenticated(false)
         setNotice({ kind: 'error', text: 'Сессия истекла. Войдите заново.' })
         return
@@ -394,7 +394,7 @@ export function useApp() {
 }
 
 function describe(error: unknown) {
-  if (error instanceof BoxUiError) {
+  if (error instanceof IpcError) {
     switch (error.code) {
       case 'NO_CREDENTIALS':
         return 'Не заданы Client ID и Client Secret'

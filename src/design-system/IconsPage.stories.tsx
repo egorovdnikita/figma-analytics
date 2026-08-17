@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Box UI | Icons (Solar) — 30 иконок приложения, 6 стилей из Figma-коллекции Icon. ' +
+          'Figma Analytics | Icons (Solar) — 30 иконок приложения, 6 стилей из Figma-коллекции Icon. ' +
           'Переключите style в Controls, чтобы посмотреть остальные 5 вариаций.',
       },
     },

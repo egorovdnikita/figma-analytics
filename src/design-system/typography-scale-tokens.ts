@@ -1,4 +1,4 @@
-// Box UI | Tokens — коллекция Typography (режимы шрифта: Inter/Inter Display/Inter
+// Figma Analytics | Tokens — коллекция Typography (режимы шрифта: Inter/Inter Display/Inter
 // Tight/Inter Variable) + коллекция Grid (режимы Desktop/Mobile), сгенерировано из
 // Figma-переменных. Числовая шкала (font-size/line-height/letter-spacing) одна и та же
 // во всех 4 режимах шрифта — режим влияет только на font-family. Брейкпоинт (Desktop/

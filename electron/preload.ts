@@ -81,6 +81,6 @@ const api = {
   },
 }
 
-contextBridge.exposeInMainWorld('boxui', api)
+contextBridge.exposeInMainWorld('figmaAnalytics', api)
 
-export type BoxUiApi = typeof api
+export type AppBridgeApi = typeof api

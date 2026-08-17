@@ -12,8 +12,8 @@ export interface ColorToken {
   description: string
 }
 
-// Значения синхронизированы с Figma: Box UI | Tokens (Mode: Light/Dark) для
-// canvas/surface/ink/muted/faint, Box UI | Primitives → violet для grass/lilac.
+// Значения синхронизированы с Figma: Figma Analytics | Tokens (Mode: Light/Dark) для
+// canvas/surface/ink/muted/faint, Figma Analytics | Primitives → violet для grass/lilac.
 export const colorTokens: ColorToken[] = [
   { name: 'canvas', cssVar: '--canvas', light: '#f5f5f5', dark: '#0a0a0a', description: 'Фон окна приложения, под карточками (background/base/primary)' },
   { name: 'surface', cssVar: '--surface', light: '#ffffff', dark: '#171717', description: 'Фон карточек, модальных окон, полей ввода (background/base/secondary)' },
@@ -67,8 +67,8 @@ export interface TypeScaleToken {
   usage: string
 }
 
-// Значения сверены с Figma: Box UI | Primitives → Typography (font-size/*) и
-// Box UI | Tokens → Typography (caption/body/heading/display). Используются только шаги,
+// Значения сверены с Figma: Figma Analytics | Primitives → Typography (font-size/*) и
+// Figma Analytics | Tokens → Typography (caption/body/heading/display). Используются только шаги,
 // присутствующие в примитивной шкале — 11/13/15/17/19/22/26 в приложении больше не встречаются.
 export const typeScale: TypeScaleToken[] = [
   { size: 10, usage: 'Служебные пометки ("весь день")' },

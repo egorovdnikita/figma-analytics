@@ -6,7 +6,7 @@ import type { IconStyle } from '@/types'
 addCollection(solarIcons)
 
 /**
- * Box UI | Icons (Solar) — соответствие имён из lucide-react слагам в наборе Solar.
+ * Figma Analytics | Icons (Solar) — соответствие имён из lucide-react слагам в наборе Solar.
  * Источник: https://www.figma.com/design/9pupgeWag4Ssc7jdAYvXMt (коллекция Icon, 6 модов).
  */
 const ICON_MAP = {

@@ -1,4 +1,4 @@
-// Box UI | Primitives (Палитра) — сгенерировано из Figma-переменных, коллекция Color Palette.
+// Figma Analytics | Primitives (Палитра) — сгенерировано из Figma-переменных, коллекция Color Palette.
 export interface PrimitiveStep { step: string; hex: string }
 export interface PrimitiveHue { name: string; solid: PrimitiveStep[]; alpha: PrimitiveStep[] }
 

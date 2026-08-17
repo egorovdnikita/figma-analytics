@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ipc, BoxUiError } from '@/lib/ipc'
+import { ipc, IpcError } from '@/lib/ipc'
 import type { FigmaTeamRef } from '@/types'
 import { Button, Field, Input, Modal, Spinner } from '@/components/ui'
 import { PlusGlyph } from '@/components/Glyphs'
@@ -52,7 +52,7 @@ export function AddTeamModal({
       reset()
       onAdded(next)
     } catch (err) {
-      setError(err instanceof BoxUiError ? err.message : 'Не удалось добавить команду')
+      setError(err instanceof IpcError ? err.message : 'Не удалось добавить команду')
     } finally {
       setBusy(false)
     }

@@ -46,7 +46,7 @@ export function PalettePage() {
   return (
     <div style={{ ['--font-body' as string]: "Inter Variable, sans-serif" }}>
       <p style={{ font: '400 13px/1.6 var(--font-body)', color: 'var(--muted)', marginBottom: 20 }}>
-        Box UI | Primitives — коллекция <code>Color Palette</code>: 18 оттенков × 19 ступеней
+        Figma Analytics | Primitives — коллекция <code>Color Palette</code>: 18 оттенков × 19 ступеней
         solid (50–950) + 12 ступеней alpha, плюс отдельные alpha-рамки чёрного и белого.
         Наведите на свотч, чтобы увидеть шаг и hex. Это сырые примитивы — компоненты их
         напрямую не используют, только через семантические токены (см. «Семантика (Figma)»).

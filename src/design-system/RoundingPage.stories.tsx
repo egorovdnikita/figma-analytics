@@ -8,7 +8,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Box UI | Tokens — коллекция Rounding, режимы плотности Low/Medium/Hight.',
+        component: 'Figma Analytics | Tokens — коллекция Rounding, режимы плотности Low/Medium/Hight.',
       },
     },
   },

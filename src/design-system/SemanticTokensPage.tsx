@@ -61,7 +61,7 @@ export function SemanticTokensPage() {
   return (
     <div>
       <p style={{ font: '400 13px/1.6 var(--font-body)', color: 'var(--muted)', marginBottom: 16 }}>
-        Box UI | Tokens — коллекция <code>Mode</code> (Light/Dark), как показано в Figma:
+        Figma Analytics | Tokens — коллекция <code>Mode</code> (Light/Dark), как показано в Figma:
         пять пространств имён (background, content, border, control, interactive), каждый
         токен — алиас на примитив. Значения здесь — то, что задано в самом Figma-файле
         (например, sentiment/primary там ссылается на blue), а не то, что реально используется

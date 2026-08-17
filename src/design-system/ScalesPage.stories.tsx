@@ -8,7 +8,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Box UI | Primitives — Spacing, Rounding, Size, Opacity, Typography.',
+        component: 'Figma Analytics | Primitives — Spacing, Rounding, Size, Opacity, Typography.',
       },
     },
   },

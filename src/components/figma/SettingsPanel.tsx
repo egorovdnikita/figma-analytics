@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ipc, BoxUiError } from '@/lib/ipc'
+import { ipc, IpcError } from '@/lib/ipc'
 import type { FigmaCacheStats, FigmaDirectoryPerson, FigmaPrefs, FigmaUser } from '@/types'
 import { Avatar, Button, Checkbox, Field, Input, Select, Spinner } from '@/components/ui'
 import { AppIcon } from '@/components/AppIcon'
@@ -64,7 +64,7 @@ export function SettingsPanel({
       const result = await ipc.figmaExportCsv()
       setNotice(result.saved ? `Выгружено: ${result.path}` : 'Выгрузка отменена')
     } catch (error) {
-      setNotice(error instanceof BoxUiError ? error.message : 'Не удалось выгрузить')
+      setNotice(error instanceof IpcError ? error.message : 'Не удалось выгрузить')
     } finally {
       setBusy(false)
     }

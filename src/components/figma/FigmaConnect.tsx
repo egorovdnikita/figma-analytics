@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ipc, BoxUiError } from '@/lib/ipc'
+import { ipc, IpcError } from '@/lib/ipc'
 import type { FigmaUser } from '@/types'
 import { Button, Field, Input, Spinner } from '@/components/ui'
 import { AppIcon } from '@/components/AppIcon'
@@ -21,7 +21,7 @@ export function FigmaConnect({ onConnected }: { onConnected: (user: FigmaUser) =
       const user = await ipc.figmaSetToken(token)
       onConnected(user)
     } catch (err) {
-      setError(err instanceof BoxUiError ? err.message : 'Не удалось подключиться')
+      setError(err instanceof IpcError ? err.message : 'Не удалось подключиться')
     } finally {
       setBusy(false)
     }

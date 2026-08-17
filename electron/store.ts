@@ -163,8 +163,8 @@ export function saveSettings(patch: Partial<AppSettings>): AppSettings {
 
 export function getCredentials(): Credentials {
   const fromBuild: Credentials = {
-    clientId: process.env.BOXUI_GOOGLE_CLIENT_ID || '',
-    clientSecret: process.env.BOXUI_GOOGLE_CLIENT_SECRET || '',
+    clientId: process.env.APP_GOOGLE_CLIENT_ID || '',
+    clientSecret: process.env.APP_GOOGLE_CLIENT_SECRET || '',
   }
   const stored = readJson<Credentials>('credentials.json', { clientId: '', clientSecret: '' })
   return {

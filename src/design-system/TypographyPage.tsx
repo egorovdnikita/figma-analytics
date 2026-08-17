@@ -14,7 +14,7 @@ export function TypographyPage({ mode }: { mode: FontFamilyMode }) {
   return (
     <div style={{ ['--ds-font' as string]: fontFamily }}>
       <p style={{ font: '400 13px/1.6 var(--font-body)', color: 'var(--muted)', marginBottom: 20 }}>
-        Box UI | Tokens — коллекция <code>Typography</code> (4 режима шрифта: Inter, Inter
+        Figma Analytics | Tokens — коллекция <code>Typography</code> (4 режима шрифта: Inter, Inter
         Display, Inter Tight, Inter Variable — числовая шкала одна и та же, режим меняет
         только <code>font-family</code>) + коллекция <code>Grid</code> (брейкпоинты
         Desktop/Mobile — переопределяют размеры display/heading, body и caption не меняются).

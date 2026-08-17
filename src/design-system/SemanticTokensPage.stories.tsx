@@ -8,7 +8,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Box UI | Tokens — коллекция Mode (Light/Dark) в точности как в Figma.',
+        component: 'Figma Analytics | Tokens — коллекция Mode (Light/Dark) в точности как в Figma.',
       },
     },
   },

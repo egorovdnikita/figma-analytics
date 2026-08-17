@@ -13,7 +13,7 @@
 }
 
 :root {
-  /* background/base/primary, background/base/secondary (Box UI | Tokens, Mode=Light) */
+  /* background/base/primary, background/base/secondary (Figma Analytics | Tokens, Mode=Light) */
   --canvas: #f5f5f5;
   --surface: #ffffff;
   --raised: #ffffff;
@@ -201,7 +201,7 @@ body {
   }
 }
 
-@keyframes boxui-pop {
+@keyframes app-pop {
   from {
     opacity: 0;
     transform: translateY(6px) scale(0.99);
@@ -212,10 +212,10 @@ body {
   }
 }
 .animate-pop {
-  animation: boxui-pop 0.16s cubic-bezier(0.2, 0.8, 0.3, 1);
+  animation: app-pop 0.16s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 
-@keyframes boxui-fade {
+@keyframes app-fade {
   from {
     opacity: 0;
   }
@@ -224,7 +224,7 @@ body {
   }
 }
 .animate-fade {
-  animation: boxui-fade 0.14s ease-out;
+  animation: app-fade 0.14s ease-out;
 }
 
 /* Крупные числа. Отдельная утилита, а не глобальная подмена: узкий гротеск

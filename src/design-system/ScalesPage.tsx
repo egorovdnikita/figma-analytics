@@ -51,7 +51,7 @@ export function ScalesPage() {
   return (
     <div>
       <p style={{ font: '400 13px/1.6 var(--font-body)', color: 'var(--muted)', marginBottom: 24 }}>
-        Box UI | Primitives — коллекции <code>Spacing</code>, <code>Rounding</code>,{' '}
+        Figma Analytics | Primitives — коллекции <code>Spacing</code>, <code>Rounding</code>,{' '}
         <code>Size</code>, <code>Opacity</code>, <code>Typography</code> (единственный режим Value)
         в точности как в Figma. Это сырые числовые шкалы — семантические токены (Скругления,
         Типографика) ссылаются на них по имени ступени.
