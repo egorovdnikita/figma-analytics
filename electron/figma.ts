@@ -1,6 +1,7 @@
 import { getFigmaToken } from './store'
 
-const BASE = 'https://api.figma.com/v1'
+const ORIGIN = 'https://api.figma.com'
+const BASE = `${ORIGIN}/v1`
 
 export class FigmaApiError extends Error {
   status: number
@@ -84,7 +85,13 @@ async function api<T>(pathname: string, attempt = 0): Promise<T> {
 
   await reserveSlot()
 
-  const res = await fetch(pathname.startsWith('http') ? pathname : `${BASE}${pathname}`, {
+  // Пути к v2 передаются целиком («/v2/...»), остальное живёт в v1.
+  const url = pathname.startsWith('http')
+    ? pathname
+    : pathname.startsWith('/v2/')
+      ? `${ORIGIN}${pathname}`
+      : `${BASE}${pathname}`
+  const res = await fetch(url, {
     headers: { 'X-Figma-Token': token },
   })
 
@@ -141,8 +148,27 @@ export interface FigmaProject {
   name: string
 }
 
-export function listTeamProjects(teamId: string) {
-  return api<{ name: string; projects: FigmaProject[] }>(`/teams/${encodeURIComponent(teamId)}/projects`)
+/** Figma переименовала «проекты» в «папки» и вынесла их в v2. Старый
+ * /v1/teams/:id/projects требует scope projects:read, который объявлен
+ * устаревшим и новым токенам уже не выдаётся — поэтому сначала пробуем v2, а на
+ * v1 откатываемся ради токенов, выпущенных до этого перехода.
+ *
+ * Формы ответа у v2 разбираем терпимо: важно только то, что нужно дальше — id и
+ * имя. */
+export async function listTeamProjects(teamId: string): Promise<{ name: string; projects: FigmaProject[] }> {
+  try {
+    const data = await api<{ folders?: FigmaProject[] } | FigmaProject[]>(
+      `/v2/teams/${encodeURIComponent(teamId)}/folders`,
+    )
+    const folders = Array.isArray(data) ? data : data.folders
+    // Пустой список папок — законный ответ, а вот незнакомая форма ответа не
+    // должна тихо превращаться в «синхронизировать нечего».
+    if (!folders) throw new FigmaApiError(500, 'Неожиданный ответ /v2/teams/:id/folders')
+    return { name: '', projects: folders.map((folder) => ({ id: folder.id, name: folder.name })) }
+  } catch (error) {
+    if (!(error instanceof FigmaApiError) || error.status !== 403) throw error
+    return api<{ name: string; projects: FigmaProject[] }>(`/teams/${encodeURIComponent(teamId)}/projects`)
+  }
 }
 
 export interface FigmaFileSummary {
@@ -152,8 +178,35 @@ export interface FigmaFileSummary {
   last_modified: string
 }
 
-export function listProjectFiles(projectId: string) {
-  return api<{ name: string; files: FigmaFileSummary[] }>(`/projects/${encodeURIComponent(projectId)}/files`)
+/** То же самое для файлов внутри папки: v2 сначала, v1 как запасной путь.
+ * Ключ времени изменения в v2 может приехать в camelCase — нормализуем, иначе
+ * инкрементальный синк перестанет узнавать неизменившиеся файлы. */
+export async function listProjectFiles(projectId: string): Promise<{ name: string; files: FigmaFileSummary[] }> {
+  try {
+    const data = await api<{ files?: RawFileSummary[] } | RawFileSummary[]>(
+      `/v2/folders/${encodeURIComponent(projectId)}/files`,
+    )
+    const files = Array.isArray(data) ? data : data.files
+    if (!files) throw new FigmaApiError(500, 'Неожиданный ответ /v2/folders/:id/files')
+    return { name: '', files: files.map(normaliseFile) }
+  } catch (error) {
+    if (!(error instanceof FigmaApiError) || error.status !== 403) throw error
+    return api<{ name: string; files: FigmaFileSummary[] }>(`/projects/${encodeURIComponent(projectId)}/files`)
+  }
+}
+
+interface RawFileSummary extends Omit<FigmaFileSummary, 'last_modified'> {
+  last_modified?: string
+  lastModified?: string
+}
+
+function normaliseFile(file: RawFileSummary): FigmaFileSummary {
+  return {
+    key: file.key,
+    name: file.name,
+    thumbnail_url: file.thumbnail_url,
+    last_modified: file.last_modified ?? file.lastModified ?? '',
+  }
 }
 
 export interface FigmaFileMeta {
