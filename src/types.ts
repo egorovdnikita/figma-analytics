@@ -288,6 +288,7 @@ export interface FigmaSyncProgress {
 export type FigmaSyncFailureReason =
   | 'rate-limit'
   | 'forbidden'
+  | 'expired'
   | 'missing'
   | 'unauthorized'
   | 'unknown'

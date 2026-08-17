@@ -427,6 +427,7 @@ export function FigmaWorkspace({
 const FAILURE_LABELS: Record<FigmaSyncFailureReason, string> = {
   'rate-limit': 'Figma ограничила частоту запросов — повторите синхронизацию позже',
   forbidden: 'нет доступа с этим токеном',
+  expired: 'токен Figma истёк — выпустите новый и переподключитесь',
   missing: 'удалено или перемещено',
   unauthorized: 'токен больше не действует',
   unknown: 'неизвестная ошибка',

@@ -236,7 +236,13 @@ export interface SyncProgress {
   rateLimitMs: number
 }
 
-export type SyncFailureReason = 'rate-limit' | 'forbidden' | 'missing' | 'unauthorized' | 'unknown'
+export type SyncFailureReason =
+  | 'rate-limit'
+  | 'forbidden'
+  | 'expired'
+  | 'missing'
+  | 'unauthorized'
+  | 'unknown'
 
 /** Что именно не прочиталось: команда, проект или файл. Без этого сообщение
  * в интерфейсе врёт («не прочитано файлов», когда упал проект) и не даёт понять,
@@ -443,8 +449,11 @@ function failureDetail(error: unknown): string | undefined {
 }
 
 function failureReason(error: unknown): SyncFailureReason {
-  const status = (error as { status?: number }).status
+  const { status, message } = error as { status?: number; message?: string }
   if (status === 429) return 'rate-limit'
+  // Истёкший personal access token Figma отдаёт как 403, а не 401, и без разбора
+  // текста он неотличим от «нет доступа к этой команде» — советы при этом разные.
+  if (status === 403 && /expired/i.test(message ?? '')) return 'expired'
   if (status === 403) return 'forbidden'
   if (status === 404) return 'missing'
   if (status === 401) return 'unauthorized'
