@@ -157,14 +157,15 @@ export interface FigmaProject {
  * имя. */
 export async function listTeamProjects(teamId: string): Promise<{ name: string; projects: FigmaProject[] }> {
   try {
-    const data = await api<{ folders?: FigmaProject[] } | FigmaProject[]>(
+    const data = await api<{ name?: string; folders?: FigmaProject[] } | FigmaProject[]>(
       `/v2/teams/${encodeURIComponent(teamId)}/folders`,
     )
     const folders = Array.isArray(data) ? data : data.folders
+    const teamName = Array.isArray(data) ? '' : (data.name ?? '')
     // Пустой список папок — законный ответ, а вот незнакомая форма ответа не
     // должна тихо превращаться в «синхронизировать нечего».
     if (!folders) throw new FigmaApiError(500, 'Неожиданный ответ /v2/teams/:id/folders')
-    return { name: '', projects: folders.map((folder) => ({ id: folder.id, name: folder.name })) }
+    return { name: teamName, projects: folders.map((folder) => ({ id: folder.id, name: folder.name })) }
   } catch (error) {
     if (!(error instanceof FigmaApiError) || error.status !== 403) throw error
     return api<{ name: string; projects: FigmaProject[] }>(`/teams/${encodeURIComponent(teamId)}/projects`)

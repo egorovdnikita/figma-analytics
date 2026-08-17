@@ -262,6 +262,9 @@ export interface SyncResult {
   files: number
   /** Файлы, у которых история не менялась и не перечитывалась. */
   skipped: number
+  /** Папки, список файлов которых взят из прошлого синка: Figma не дала
+   * прочитать состав. Новые файлы в них не обнаружатся, известные обновятся. */
+  staleFolders: number
   versions: number
   comments: number
   errors: SyncFailure[]
@@ -291,7 +294,14 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
 
   // 1. Проекты по каждой команде
   onProgress({ phase: 'projects', done: 0, total: teams.length, current: '', rateLimitMs: 0 })
-  const projects: Array<{ teamId: string; teamName: string; id: string; name: string }> = []
+  const projects: Array<{
+    teamId: string
+    teamName: string
+    id: string
+    name: string
+    /** Папка пришла не из живого ответа, а из прошлого синка. */
+    stale?: boolean
+  }> = []
   for (const [index, team] of teams.entries()) {
     try {
       const data = await figma.listTeamProjects(team.id)
@@ -303,6 +313,13 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
       writeFigmaCache(cache)
     } catch (error) {
       errors.push({ scope: 'team', name: team.label || team.id, reason: failureReason(error), detail: failureDetail(error) })
+      // Список папок недоступен — работаем по составу прошлого синка. Иначе
+      // отказ в одном служебном запросе обнуляет весь синк, хотя сами файлы
+      // читаются прекрасно.
+      const cache = readFigmaCache()
+      for (const project of (cache.projectsByTeam[team.id] ?? []) as figma.FigmaProject[]) {
+        projects.push({ teamId: team.id, teamName: team.label || team.id, id: project.id, name: project.name, stale: true })
+      }
     }
     onProgress({
       phase: 'projects',
@@ -323,8 +340,42 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
     projectName: string
     teamId: string
     teamName: string
+    /** Состав папки взят из прошлого синка: время изменения файлов могло уйти
+     * вперёд, поэтому историю таких файлов нужно перечитать, а не пропустить. */
+    stale?: boolean
   }> = []
+  let staleFolders = 0
+
+  const takeCachedFiles = (project: (typeof projects)[number]) => {
+    const cached = (readFigmaCache().filesByProject[project.id] ?? []) as figma.FigmaFileSummary[]
+    staleFolders += 1
+    for (const file of cached) {
+      files.push({
+        key: file.key,
+        name: file.name,
+        lastModified: file.last_modified,
+        projectId: project.id,
+        projectName: project.name,
+        teamId: project.teamId,
+        teamName: project.teamName,
+        stale: true,
+      })
+    }
+  }
+
   for (const [index, project] of projects.entries()) {
+    // Папка и так пришла из кэша — живой запрос состава заведомо не пройдёт.
+    if (project.stale) {
+      takeCachedFiles(project)
+      onProgress({
+        phase: 'files',
+        done: index + 1,
+        total: projects.length,
+        current: project.name,
+        rateLimitMs: figma.rateLimitDelayMs(),
+      })
+      continue
+    }
     try {
       const data = await figma.listProjectFiles(project.id)
       const cache = readFigmaCache()
@@ -343,6 +394,7 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
       }
     } catch (error) {
       errors.push({ scope: 'project', name: project.name, reason: failureReason(error), detail: failureDetail(error) })
+      takeCachedFiles(project)
     }
     onProgress({
       phase: 'files',
@@ -369,6 +421,7 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
       // тот же, а история уже выкачана до конца, версии не трогаем: это самая
       // дорогая часть синка (страница на 30 версий, десятки страниц на файл).
       const versionsUnchanged =
+        !file.stale &&
         Boolean(before?.versionsComplete) &&
         Boolean(before?.lastModified) &&
         before?.lastModified === file.lastModified
@@ -435,6 +488,7 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
     skipped,
     versions: versionCount,
     comments: commentCount,
+    staleFolders,
     errors,
     finishedAt: Date.now(),
   }

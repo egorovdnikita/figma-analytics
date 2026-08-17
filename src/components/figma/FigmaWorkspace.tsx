@@ -155,8 +155,8 @@ export function FigmaWorkspace({
     try {
       const result = await ipc.figmaSync()
       if (result.errors.length > 0) {
-        setSyncError(describeSyncErrors(result.errors))
-        setSyncErrorDetails(listSyncErrors(result.errors))
+        setSyncError(describeSyncErrors(result.errors, result.staleFolders))
+        setSyncErrorDetails(listSyncErrors(result.errors, result.staleFolders))
       }
       await reload()
     } catch (error) {
@@ -458,7 +458,7 @@ function plural(count: number, forms: [string, string, string]) {
 
 /** Строка в шапке: сколько и чего именно не прочиталось. Имена не влезают —
  * они уходят в подсказку, см. listSyncErrors. */
-export function describeSyncErrors(errors: FigmaSyncFailure[]): string {
+export function describeSyncErrors(errors: FigmaSyncFailure[], staleFolders = 0): string {
   const counts = new Map<FigmaSyncFailureScope, number>()
   for (const failure of errors) counts.set(failure.scope, (counts.get(failure.scope) ?? 0) + 1)
 
@@ -467,7 +467,8 @@ export function describeSyncErrors(errors: FigmaSyncFailure[]): string {
     return `${count} ${plural(count, SCOPE_LABELS[scope])}`
   })
 
-  return `Не прочитано: ${parts.join(', ')}`
+  const tail = staleFolders > 0 ? ' — известные файлы обновлены' : ''
+  return `Не прочитано: ${parts.join(', ')}${tail}`
 }
 
 /** Отказ на уровне команды почти всегда упирается в токен, а не в саму команду:
@@ -477,7 +478,7 @@ const TEAM_FORBIDDEN_HINT = '(проверьте права токена и чл
 const DETAIL_LIMIT = 12
 
 /** Подсказка: что именно не прочиталось и почему — иначе дыру в данных не найти. */
-export function listSyncErrors(errors: FigmaSyncFailure[]): string {
+export function listSyncErrors(errors: FigmaSyncFailure[], staleFolders = 0): string {
   const lines = errors.slice(0, DETAIL_LIMIT).map((failure) => {
     const head = `${SCOPE_PREFIX[failure.scope]} «${failure.name}» — ${FAILURE_LABELS[failure.reason]}`
     const hint = failure.scope === 'team' && failure.reason === 'forbidden' ? TEAM_FORBIDDEN_HINT : ''
@@ -486,6 +487,12 @@ export function listSyncErrors(errors: FigmaSyncFailure[]): string {
 
   const rest = errors.length - lines.length
   if (rest > 0) lines.push(`…и ещё ${rest}`)
+  if (staleFolders > 0) {
+    lines.push(
+      `Состав ${staleFolders} ${plural(staleFolders, SCOPE_LABELS.project)} взят из прошлой синхронизации:`,
+      'известные файлы обновлены, новые в этих папках не обнаружатся.',
+    )
+  }
   return lines.join('\n')
 }
 

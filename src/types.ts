@@ -306,6 +306,8 @@ export interface FigmaSyncFailure {
 export interface FigmaSyncResult {
   files: number
   skipped: number
+  /** Папки, состав которых взят из прошлого синка. */
+  staleFolders: number
   versions: number
   comments: number
   errors: FigmaSyncFailure[]
