@@ -298,6 +298,8 @@ export interface FigmaSyncFailure {
   scope: FigmaSyncFailureScope
   name: string
   reason: FigmaSyncFailureReason
+  /** Ответ Figma как есть: код и текст. */
+  detail?: string
 }
 
 export interface FigmaSyncResult {

@@ -469,13 +469,19 @@ export function describeSyncErrors(errors: FigmaSyncFailure[]): string {
   return `Не прочитано: ${parts.join(', ')}`
 }
 
+/** Отказ на уровне команды почти всегда упирается в токен, а не в саму команду:
+ * у personal access token может не быть прав на чтение файлов команды. */
+const TEAM_FORBIDDEN_HINT = '(проверьте права токена и членство аккаунта в команде)'
+
 const DETAIL_LIMIT = 12
 
 /** Подсказка: что именно не прочиталось и почему — иначе дыру в данных не найти. */
 export function listSyncErrors(errors: FigmaSyncFailure[]): string {
-  const lines = errors
-    .slice(0, DETAIL_LIMIT)
-    .map((failure) => `${SCOPE_PREFIX[failure.scope]} «${failure.name}» — ${FAILURE_LABELS[failure.reason]}`)
+  const lines = errors.slice(0, DETAIL_LIMIT).map((failure) => {
+    const head = `${SCOPE_PREFIX[failure.scope]} «${failure.name}» — ${FAILURE_LABELS[failure.reason]}`
+    const hint = failure.scope === 'team' && failure.reason === 'forbidden' ? TEAM_FORBIDDEN_HINT : ''
+    return [head, hint, failure.detail ? `[${failure.detail}]` : ''].filter(Boolean).join(' ')
+  })
 
   const rest = errors.length - lines.length
   if (rest > 0) lines.push(`…и ещё ${rest}`)

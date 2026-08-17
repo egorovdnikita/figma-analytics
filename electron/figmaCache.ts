@@ -247,6 +247,9 @@ export interface SyncFailure {
   scope: SyncFailureScope
   name: string
   reason: SyncFailureReason
+  /** Что ответила Figma: код и текст. Классификация выше говорит, что делать,
+   * а это — единственный способ понять, почему именно отказали. */
+  detail?: string
 }
 
 export interface SyncResult {
@@ -293,7 +296,7 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
       cache.projectsByTeam[team.id] = data.projects
       writeFigmaCache(cache)
     } catch (error) {
-      errors.push({ scope: 'team', name: team.label || team.id, reason: failureReason(error) })
+      errors.push({ scope: 'team', name: team.label || team.id, reason: failureReason(error), detail: failureDetail(error) })
     }
     onProgress({
       phase: 'projects',
@@ -333,7 +336,7 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
         })
       }
     } catch (error) {
-      errors.push({ scope: 'project', name: project.name, reason: failureReason(error) })
+      errors.push({ scope: 'project', name: project.name, reason: failureReason(error), detail: failureDetail(error) })
     }
     onProgress({
       phase: 'files',
@@ -405,7 +408,7 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
       versionCount += versions.items.length
       commentCount += comments.length
     } catch (error) {
-      errors.push({ scope: 'file', name: file.name, reason: failureReason(error) })
+      errors.push({ scope: 'file', name: file.name, reason: failureReason(error), detail: failureDetail(error) })
     }
     processed += 1
     onProgress({
@@ -433,6 +436,12 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
 
 /** Человеческая причина отказа: рендереру нужен не текст от Figma, а понимание,
  * что делать дальше. */
+function failureDetail(error: unknown): string | undefined {
+  const { status, message } = error as { status?: number; message?: string }
+  if (!status && !message) return undefined
+  return [status, message].filter(Boolean).join(' ')
+}
+
 function failureReason(error: unknown): SyncFailureReason {
   const status = (error as { status?: number }).status
   if (status === 429) return 'rate-limit'
