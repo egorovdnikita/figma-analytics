@@ -293,6 +293,7 @@ export type FigmaSyncFailureReason =
   | 'expired'
   | 'missing'
   | 'unauthorized'
+  | 'network'
   | 'unknown'
 
 export type FigmaSyncFailureScope = 'team' | 'project' | 'file'

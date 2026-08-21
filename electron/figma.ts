@@ -96,6 +96,19 @@ export function rateLimitDelayMs(): number {
  * дороже, чем подождать. Ожидание общее, так что повторы не множат нагрузку. */
 const MAX_ATTEMPTS_RATE_LIMIT = 10
 const MAX_ATTEMPTS_SERVER = 6
+/** Обрыв соединения — не отказ Figma, а помеха по дороге: на длинном синке
+ * (сотни запросов подряд, тяжёлые ответы по комментариям) отдельные сокеты
+ * рвутся всегда. Раньше такой обрыв сразу убивал файл — «неизвестная ошибка». */
+const MAX_ATTEMPTS_NETWORK = 4
+
+/** Разворачивает undici-обёртку: у fetch сообщение всегда «fetch failed», а
+ * настоящая причина (ECONNRESET, таймаут заголовков, DNS) лежит в cause. */
+function networkMessage(error: unknown): string {
+  const cause = (error as { cause?: { code?: string; message?: string } }).cause
+  const detail = cause?.code ?? cause?.message
+  const base = (error as Error).message || 'сетевая ошибка'
+  return detail ? `${base}: ${detail}` : base
+}
 
 async function api<T>(pathname: string, attempt = 0): Promise<T> {
   const token = getFigmaToken()
@@ -110,9 +123,17 @@ async function api<T>(pathname: string, attempt = 0): Promise<T> {
     : pathname.startsWith('/v2/')
       ? `${ORIGIN}${pathname}`
       : `${BASE}${pathname}`
-  const res = await fetch(url, {
-    headers: { 'X-Figma-Token': token },
-  })
+  let res: Response
+  try {
+    res = await fetch(url, { headers: { 'X-Figma-Token': token } })
+  } catch (error) {
+    if (attempt < MAX_ATTEMPTS_NETWORK) {
+      await sleep(Math.min(1000 * 2 ** attempt, 15_000))
+      return api<T>(pathname, attempt + 1)
+    }
+    // status 0 — «ответа не было вовсе», это не то же самое, что отказ Figma.
+    throw new FigmaApiError(0, networkMessage(error))
+  }
 
   const limit = res.status === 429
   if (limit) tightenBudget(tier)

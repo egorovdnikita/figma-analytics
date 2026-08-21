@@ -487,6 +487,7 @@ const FAILURE_LABELS: Record<FigmaSyncFailureReason, string> = {
   expired: 'токен Figma истёк — выпустите новый и переподключитесь',
   missing: 'удалено или перемещено',
   unauthorized: 'токен больше не действует',
+  network: 'связь оборвалась — попробуйте синхронизацию ещё раз',
   unknown: 'неизвестная ошибка',
 }
 

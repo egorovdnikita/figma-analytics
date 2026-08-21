@@ -243,6 +243,7 @@ export type SyncFailureReason =
   | 'expired'
   | 'missing'
   | 'unauthorized'
+  | 'network'
   | 'unknown'
 
 /** Что именно не прочиталось: команда, проект или файл. Без этого сообщение
@@ -567,6 +568,8 @@ function failureDetail(error: unknown): string | undefined {
 
 function failureReason(error: unknown): SyncFailureReason {
   const { status, message } = error as { status?: number; message?: string }
+  // Ответа не было вовсе: оборванный сокет, таймаут, пропавшая сеть.
+  if (status === 0 || /fetch failed|ECONN|ETIMEDOUT|ENOTFOUND|socket/i.test(message ?? '')) return 'network'
   if (status === 429) return 'rate-limit'
   // Истёкший personal access token Figma отдаёт как 403, а не 401, и без разбора
   // текста он неотличим от «нет доступа к этой команде» — советы при этом разные.
