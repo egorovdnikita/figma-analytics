@@ -13,60 +13,78 @@ export class FigmaApiError extends Error {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-/* ---------- общий ограничитель запросов ----------
- * Лимит Figma считается на аккаунт, а не на соединение, поэтому тормозить
- * нужно все запросы разом. Раньше бэкофф был локальным: воркер, поймавший 429,
- * ждал, а остальные продолжали долбить тот же лимит — в итоге на глубокой
- * выкачке истории 429 получали все и синк заканчивался сотней «непрочитанных»
- * файлов. Теперь выдача слотов на запрос общая: между запросами держим паузу,
- * а полученный 429 останавливает всю очередь до конца кулдауна.
+/* ---------- бюджет запросов ----------
+ * Figma считает лимит поминутно и по «тарифу» эндпоинта: 10/мин на тяжёлые
+ * файловые запросы, 25/мин на историю версий и комментарии, 50/мин на
+ * метаданные и библиотеку (это потолки для Dev/Full-мест, у View/Collab ниже).
+ *
+ * Раньше пауза была одна на все запросы и подбиралась вслепую: старт со 120 мс
+ * — это 500 запросов в минуту, то есть гарантированный 429 через несколько
+ * секунд, кулдаун, робкое ускорение и снова 429. Синхронизация проводила в
+ * ожидании снятия лимита больше времени, чем в работе. Теперь у каждого тарифа
+ * свой бюджет и скользящее окно в минуту: идём ровно в темпе, который Figma
+ * разрешает, и 429 перестаёт быть штатным режимом.
  */
+export type FigmaTier = 1 | 2 | 3
 
-/** Пауза между любыми двумя запросами: подбирается на ходу. Свой лимит Figma
- * не публикует и считает его по стоимости endpoint'а, поэтому единственный
- * честный способ попасть в темп — замедляться на 429 и потихоньку ускоряться,
- * пока их нет. Постоянно влетать в лимит и ждать снятия дороже, чем сразу
- * идти чуть медленнее. */
-const MIN_INTERVAL_MS = 120
-const MAX_INTERVAL_MS = 2000
-/** Через столько удачных запросов подряд пробуем ускориться. */
-const SPEEDUP_AFTER_OK = 20
+const TIER_BUDGET: Record<FigmaTier, number> = { 1: 10, 2: 25, 3: 50 }
+const WINDOW_MS = 60_000
+/** Зазор на расхождение часов: окно лучше считать чуть шире, чем ровно минуту. */
+const WINDOW_SLACK_MS = 750
 /** Потолок ожидания после 429, если Figma не прислала Retry-After. */
 const MAX_COOLDOWN_MS = 60_000
 
-let queue: Promise<void> = Promise.resolve()
+/** Действующий бюджет: стартуем с документированного и ужимаем, если Figma всё
+ * равно отвечает 429 — у View/Collab-мест потолки в разы ниже. */
+const budget: Record<FigmaTier, number> = { ...TIER_BUDGET }
+const recent: Record<FigmaTier, number[]> = { 1: [], 2: [], 3: [] }
+const queues: Record<FigmaTier, Promise<void>> = {
+  1: Promise.resolve(),
+  2: Promise.resolve(),
+  3: Promise.resolve(),
+}
+
 let cooldownUntil = 0
-let interval = MIN_INTERVAL_MS
-let okStreak = 0
 
-function slowDown() {
-  okStreak = 0
-  interval = Math.min(MAX_INTERVAL_MS, Math.round(interval * 1.5))
+function tierOf(pathname: string): FigmaTier {
+  if (/\/(components|component_sets|styles)\b/.test(pathname)) return 3
+  if (/\/me\b/.test(pathname) || /\/meta\b/.test(pathname)) return 3
+  if (/\/(versions|comments)\b/.test(pathname) || pathname.startsWith('/v2/')) return 2
+  return 1
 }
 
-function speedUp() {
-  okStreak += 1
-  if (okStreak < SPEEDUP_AFTER_OK) return
-  okStreak = 0
-  interval = Math.max(MIN_INTERVAL_MS, Math.round(interval / 1.25))
+function nextSlotDelay(tier: FigmaTier): number {
+  const now = Date.now()
+  const window = recent[tier]
+  while (window.length > 0 && now - window[0] > WINDOW_MS) window.shift()
+
+  const cooldown = Math.max(0, cooldownUntil - now)
+  if (window.length < budget[tier]) return cooldown
+  return Math.max(cooldown, window[0] + WINDOW_MS + WINDOW_SLACK_MS - now)
 }
 
-/** Ждёт своей очереди: сначала общий кулдаун, затем интервал между запросами. */
-function reserveSlot(): Promise<void> {
-  const ticket = queue.then(async () => {
+/** Ждёт слот в пределах своего тарифа. Очередь у каждого тарифа своя: дешёвые
+ * метаданные не должны стоять за тяжёлыми файловыми запросами. */
+function reserveSlot(tier: FigmaTier): Promise<void> {
+  const ticket = queues[tier].then(async () => {
     for (;;) {
-      const wait = cooldownUntil - Date.now()
+      const wait = nextSlotDelay(tier)
       if (wait <= 0) break
-      await sleep(wait)
+      await sleep(Math.min(wait, WINDOW_MS))
     }
-    await sleep(interval)
+    recent[tier].push(Date.now())
   })
-  queue = ticket.catch(() => {})
+  queues[tier] = ticket.catch(() => {})
   return ticket
 }
 
 function startCooldown(ms: number) {
   cooldownUntil = Math.max(cooldownUntil, Date.now() + Math.min(ms, MAX_COOLDOWN_MS))
+}
+
+/** 429 при соблюдённом бюджете значит, что у места лимит ниже документированного. */
+function tightenBudget(tier: FigmaTier) {
+  budget[tier] = Math.max(3, Math.floor(budget[tier] / 2))
 }
 
 /** Сколько сейчас ждать очередь — рендерер показывает это в прогрессе синка. */
@@ -83,7 +101,8 @@ async function api<T>(pathname: string, attempt = 0): Promise<T> {
   const token = getFigmaToken()
   if (!token) throw new FigmaApiError(401, 'Figma не подключена: не задан personal access token')
 
-  await reserveSlot()
+  const tier = tierOf(pathname)
+  await reserveSlot(tier)
 
   // Пути к v2 передаются целиком («/v2/...»), остальное живёт в v1.
   const url = pathname.startsWith('http')
@@ -96,8 +115,7 @@ async function api<T>(pathname: string, attempt = 0): Promise<T> {
   })
 
   const limit = res.status === 429
-  if (limit) slowDown()
-  else if (res.ok) speedUp()
+  if (limit) tightenBudget(tier)
 
   if ((limit || res.status >= 500) && attempt < (limit ? MAX_ATTEMPTS_RATE_LIMIT : MAX_ATTEMPTS_SERVER)) {
     const retryAfter = Number(res.headers.get('retry-after'))
@@ -224,6 +242,19 @@ export function getFile(fileKey: string) {
 }
 
 /* ---------- версии (история сохранений) ---------- */
+
+/** Лёгкая проверка «менялся ли файл»: тариф 3 (50 запросов в минуту против 25
+ * у истории версий), в ответе есть время последнего изменения. Нужна там, где
+ * список папок недоступен и взять last_modified больше неоткуда. */
+export async function getFileTouchedAt(fileKey: string) {
+  const data = await api<{ file?: { last_touched_at?: string; folder_name?: string } }>(
+    `/files/${encodeURIComponent(fileKey)}/meta`,
+  )
+  return {
+    lastModified: data.file?.last_touched_at ?? '',
+    folderName: data.file?.folder_name ?? '',
+  }
+}
 
 export interface FigmaVersion {
   id: string

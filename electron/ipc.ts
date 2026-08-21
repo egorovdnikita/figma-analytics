@@ -214,9 +214,65 @@ export function registerIpc(getWindow: () => BrowserWindow | null) {
     fs.writeFileSync(result.filePath, figmaCache.exportEventsCsv(), 'utf8')
     return { saved: true, path: result.filePath }
   })
-  handle('figma:sync', () =>
-    figmaCache.syncAll((progress) => getWindow()?.webContents.send('figma:syncProgress', progress)),
-  )
+  /* Синхронизация принадлежит main-процессу, а не экрану.
+   *
+   * Раньше её состояние жило в компоненте: уход в другой раздел размонтировал
+   * его, прогресс пропадал, кнопка возвращалась в исходное положение — а сам
+   * обход продолжался вслепую, и повторное нажатие запускало второй такой же
+   * поверх первого. Теперь сессия одна на приложение: параллельный запрос
+   * подключается к текущей, а вернувшийся экран забирает состояние как есть. */
+  interface SyncSession {
+    promise: Promise<figmaCache.SyncResult>
+    progress: figmaCache.SyncProgress
+    startedAt: number
+  }
+  let session: SyncSession | null = null
+  let lastResult: (figmaCache.SyncResult & { startedAt: number }) | null = null
+
+  const broadcast = (channel: string, payload: unknown) => {
+    for (const window of BrowserWindow.getAllWindows()) window.webContents.send(channel, payload)
+  }
+
+  handle('figma:sync', () => {
+    if (session) return session.promise
+
+    const startedAt = Date.now()
+    const current: SyncSession = {
+      startedAt,
+      progress: { phase: 'projects', done: 0, total: 0, current: '', rateLimitMs: 0 },
+      promise: Promise.resolve() as unknown as Promise<figmaCache.SyncResult>,
+    }
+    current.promise = figmaCache
+      .syncAll((progress) => {
+        current.progress = progress
+        broadcast('figma:syncProgress', progress)
+      })
+      .then((result) => {
+        lastResult = { ...result, startedAt }
+        return result
+      })
+      .finally(() => {
+        session = null
+        broadcast('figma:syncDone', lastResult)
+      })
+
+    session = current
+    return current.promise
+  })
+
+  /** Экран спрашивает это при открытии: если синк идёт, он подхватит прогресс,
+   * а не покажет кнопку «Синхронизировать» поверх работающего обхода. */
+  handle('figma:syncState', () => ({
+    running: Boolean(session),
+    progress: session?.progress ?? null,
+    startedAt: session?.startedAt ?? null,
+    lastResult,
+  }))
+
+  handle('figma:syncStop', () => {
+    if (session) figmaCache.requestSyncStop()
+    return true
+  })
 
   /* системное */
   handle('app:info', () => ({

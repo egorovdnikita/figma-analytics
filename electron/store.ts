@@ -328,6 +328,11 @@ export interface FigmaPrefs {
   syncDepthPages: number
   /** Параллельных файлов при синхронизации. */
   syncConcurrency: number
+  /** Сколько «спящих» файлов дочитывать по комментариям за один синк.
+   * Комментарии не меняют last_modified файла, поэтому единственный способ
+   * узнать о новых — перечитать. Читать все 170+ файлов каждый раз слишком
+   * дорого при лимите 25 запросов в минуту, поэтому идём по кругу. */
+  commentsRotation: number
   /** Плотность интерфейса раздела. */
   density: 'compact' | 'comfortable'
   /** Раздел, открывающийся первым. */
@@ -357,6 +362,7 @@ export const defaultFigmaPrefs: FigmaPrefs = {
   timelineBuckets: { day: 30, week: 12, month: 12, year: 5 },
   syncDepthPages: 400,
   syncConcurrency: 4,
+  commentsRotation: 40,
   density: 'comfortable',
   defaultSection: 'dashboard',
   tablesByDefault: false,
@@ -459,6 +465,9 @@ export interface FigmaFileCache {
   /** last_modified файла на момент последней выкачки истории: пока он не
    * изменился, перечитывать версии незачем — новых сохранений не было. */
   lastModified?: string
+  /** Когда последний раз читались комментарии. У них нет дешёвого признака
+   * изменения, поэтому спящие файлы обновляются по очереди, а не каждый синк. */
+  commentsFetchedAt?: number
   /** true — вся история версий выкачана до конца (курсор исчерпан). */
   versionsComplete?: boolean
 }

@@ -73,10 +73,17 @@ const api = {
     hiddenUsers: () => invoke<string[]>('figma:hiddenUsers'),
     setHiddenUsers: (handles: string[]) => invoke<string[]>('figma:setHiddenUsers', handles),
     sync: () => invoke<any>('figma:sync'),
+    syncState: () => invoke<any>('figma:syncState'),
+    syncStop: () => invoke<boolean>('figma:syncStop'),
     onSyncProgress: (listener: (progress: any) => void) => {
       const handler = (_event: unknown, progress: any) => listener(progress)
       ipcRenderer.on('figma:syncProgress', handler)
       return () => ipcRenderer.off('figma:syncProgress', handler)
+    },
+    onSyncDone: (listener: (result: any) => void) => {
+      const handler = (_event: unknown, result: any) => listener(result)
+      ipcRenderer.on('figma:syncDone', handler)
+      return () => ipcRenderer.off('figma:syncDone', handler)
     },
   },
 }

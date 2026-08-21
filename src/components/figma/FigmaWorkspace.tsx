@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   FigmaEvent,
   FigmaFileIndexEntry,
@@ -7,6 +7,7 @@ import type {
   FigmaSyncFailureReason,
   FigmaSyncFailureScope,
   FigmaSyncProgress,
+  FigmaSyncState,
   FigmaTeamRef,
   FigmaUser,
 } from '@/types'
@@ -26,6 +27,7 @@ import {
   applyFilters,
   perPersonStats,
 } from './analytics'
+import { relativeTime } from './utils'
 import { FilterBar } from './FilterBar'
 import { FigmaSidebar, type SectionItem } from './FigmaSidebar'
 import { CommandPalette, type Command } from './CommandPalette'
@@ -89,6 +91,7 @@ export function FigmaWorkspace({
   const [progress, setProgress] = useState<FigmaSyncProgress | null>(null)
   const [syncError, setSyncError] = useState<string | null>(null)
   const [syncErrorDetails, setSyncErrorDetails] = useState<string | null>(null)
+  const [lastSyncAt, setLastSyncAt] = useState<number | null>(null)
 
   const reload = useCallback(async () => {
     const [nextTeams, nextEvents, nextFiles, nextPrefs] = await Promise.all([
@@ -148,23 +151,67 @@ export function FigmaWorkspace({
     [prefs],
   )
 
+  const applyResult = useCallback(
+    async (result: FigmaSyncState['lastResult']) => {
+      if (!result) return
+      setLastSyncAt(result.startedAt)
+      if (result.errors.length > 0) {
+        setSyncError(describeSyncErrors(result.errors, result.staleFolders))
+        setSyncErrorDetails(listSyncErrors(result.errors, result.staleFolders))
+      } else {
+        setSyncError(result.stopped ? 'Синхронизация остановлена' : null)
+        setSyncErrorDetails(null)
+      }
+      await reload()
+    },
+    [reload],
+  )
+
+  // Синк идёт в main-процессе, поэтому при открытии раздела забираем его
+  // состояние: вернувшись из календаря, пользователь видит тот же прогресс, а
+  // не кнопку «Синхронизировать» поверх работающего обхода.
+  useEffect(() => {
+    void (async () => {
+      const state = await ipc.figmaSyncState()
+      if (state.running) {
+        setSyncing(true)
+        setProgress(state.progress)
+      }
+      if (state.lastResult) {
+        setLastSyncAt(state.lastResult.startedAt)
+        if (state.lastResult.errors.length > 0) {
+          setSyncError(describeSyncErrors(state.lastResult.errors, state.lastResult.staleFolders))
+          setSyncErrorDetails(listSyncErrors(state.lastResult.errors, state.lastResult.staleFolders))
+        }
+      }
+    })()
+  }, [])
+
+  useEffect(
+    () =>
+      ipc.figmaOnSyncDone((result) => {
+        setSyncing(false)
+        setProgress(null)
+        void applyResult(result)
+      }),
+    [applyResult],
+  )
+
   const runSync = async () => {
     setSyncing(true)
     setSyncError(null)
     setSyncErrorDetails(null)
     try {
-      const result = await ipc.figmaSync()
-      if (result.errors.length > 0) {
-        setSyncError(describeSyncErrors(result.errors, result.staleFolders))
-        setSyncErrorDetails(listSyncErrors(result.errors, result.staleFolders))
-      }
-      await reload()
+      await ipc.figmaSync()
     } catch (error) {
       setSyncError(error instanceof IpcError ? error.message : 'Синхронизация не удалась')
-    } finally {
       setSyncing(false)
       setProgress(null)
     }
+  }
+
+  const stopSync = async () => {
+    await ipc.figmaSyncStop()
   }
 
   const scopedEvents = useMemo(
@@ -299,6 +346,16 @@ export function FigmaWorkspace({
                 <span className="hidden text-[12px] text-faint lg:inline">
                   {events.length > 0 ? `${events.length.toLocaleString('ru')} событий` : ''}
                 </span>
+                {!syncing && lastSyncAt ? (
+                  <span className="hidden text-[12px] text-faint xl:inline">
+                    обновлено {relativeTime(new Date(lastSyncAt).toISOString())}
+                  </span>
+                ) : null}
+                {syncing ? (
+                  <Button variant="soft" size="sm" onClick={() => void stopSync()}>
+                    Остановить
+                  </Button>
+                ) : null}
                 <Button variant="soft" size="sm" onClick={runSync} disabled={syncing}>
                   {syncing ? <Spinner className="h-4 w-4" /> : <AppIcon name="RefreshCw" size={16} />}
                   {syncing ? 'Синхронизация…' : 'Синхронизировать'}
@@ -501,13 +558,26 @@ export function listSyncErrors(errors: FigmaSyncFailure[], staleFolders = 0): st
 export function SyncProgressInline({ progress }: { progress: FigmaSyncProgress }) {
   const phase =
     progress.phase === 'projects'
-      ? 'Проекты'
+      ? 'Папки'
       : progress.phase === 'files'
         ? 'Файлы'
         : progress.phase === 'history'
           ? 'История'
           : 'Готово'
   const percent = progress.total > 0 ? (progress.done / progress.total) * 100 : 0
+
+  // Оценка по темпу текущей фазы, а не всего синка: фазы стоят очень по-разному,
+  // и общий средний темп даёт заведомо неверный остаток.
+  const mark = useRef<{ phase: string; at: number; done: number } | null>(null)
+  if (!mark.current || mark.current.phase !== progress.phase) {
+    mark.current = { phase: progress.phase, at: Date.now(), done: progress.done }
+  }
+  const passed = progress.done - mark.current.done
+  const elapsed = Date.now() - mark.current.at
+  const left =
+    passed > 0 && progress.total > progress.done
+      ? Math.round(((elapsed / passed) * (progress.total - progress.done)) / 1000)
+      : null
 
   return (
     <div className="flex min-w-0 flex-1 items-center gap-2.5">
@@ -519,6 +589,7 @@ export function SyncProgressInline({ progress }: { progress: FigmaSyncProgress }
       </div>
       <span className="shrink-0 text-[12px] text-muted [font-variant-numeric:tabular-nums]">
         {phase} {progress.done}/{progress.total}
+        {left !== null && left > 2 ? ` · ${formatLeft(left)}` : ''}
       </span>
       <span className="hidden min-w-0 max-w-[220px] truncate text-[12px] text-faint lg:block">
         {progress.rateLimitMs > 0
@@ -528,6 +599,13 @@ export function SyncProgressInline({ progress }: { progress: FigmaSyncProgress }
     </div>
   )
 }
+
+function formatLeft(seconds: number) {
+  if (seconds < 60) return `~${seconds} с`
+  const minutes = Math.round(seconds / 60)
+  return `~${minutes} мин`
+}
+
 
 function EmptyState({
   onSync,

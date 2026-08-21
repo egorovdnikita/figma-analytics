@@ -255,6 +255,8 @@ export interface FigmaPrefs {
   timelineBuckets: { day: number; week: number; month: number; year: number }
   syncDepthPages: number
   syncConcurrency: number
+  /** Сколько спящих файлов дочитывать по комментариям за синк. */
+  commentsRotation: number
   density: 'compact' | 'comfortable'
   defaultSection: string
   tablesByDefault: boolean
@@ -303,7 +305,18 @@ export interface FigmaSyncFailure {
   detail?: string
 }
 
+/** Состояние синхронизации в main-процессе: экран забирает его при открытии,
+ * чтобы не потерять идущий обход при переходе между разделами. */
+export interface FigmaSyncState {
+  running: boolean
+  progress: FigmaSyncProgress | null
+  startedAt: number | null
+  lastResult: (FigmaSyncResult & { startedAt: number }) | null
+}
+
 export interface FigmaSyncResult {
+  /** Синхронизацию остановили вручную. */
+  stopped: boolean
   files: number
   skipped: number
   /** Папки, состав которых взят из прошлого синка. */

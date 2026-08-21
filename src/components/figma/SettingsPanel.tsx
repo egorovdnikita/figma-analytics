@@ -234,13 +234,26 @@ export function SettingsPanel({
                 className="h-9 text-[13px]"
               />
             </Field>
-            <Field label="Файлов параллельно" hint="Больше — быстрее, но выше риск лимитов">
+            <Field label="Файлов параллельно" hint="Темп всё равно ограничен лимитом Figma">
               <Input
                 type="number"
                 min={1}
                 max={12}
                 value={prefs.syncConcurrency}
                 onChange={(event) => void patch({ syncConcurrency: Number(event.target.value) || 1 })}
+                className="h-9 text-[13px]"
+              />
+            </Field>
+            <Field
+              label="Спящих файлов за синк"
+              hint="Комментарии в них перечитываются по кругу: Figma даёт 25 запросов в минуту"
+            >
+              <Input
+                type="number"
+                min={0}
+                max={200}
+                value={prefs.commentsRotation}
+                onChange={(event) => void patch({ commentsRotation: Number(event.target.value) || 0 })}
                 className="h-9 text-[13px]"
               />
             </Field>

@@ -17,6 +17,7 @@ import type {
   FigmaProject,
   FigmaSyncProgress,
   FigmaSyncResult,
+  FigmaSyncState,
   FigmaTeamRef,
   FigmaUser,
   FigmaVersion,
@@ -90,7 +91,10 @@ interface RawApi {
     hiddenUsers(): Promise<Envelope<string[]>>
     setHiddenUsers(handles: string[]): Promise<Envelope<string[]>>
     sync(): Promise<Envelope<FigmaSyncResult>>
+    syncState(): Promise<Envelope<FigmaSyncState>>
+    syncStop(): Promise<Envelope<boolean>>
     onSyncProgress(listener: (progress: FigmaSyncProgress) => void): () => void
+    onSyncDone(listener: (result: FigmaSyncState['lastResult']) => void): () => void
   }
 }
 
@@ -177,6 +181,10 @@ export const ipc = {
   figmaHiddenUsers: () => unwrap(raw().figma.hiddenUsers()),
   figmaSetHiddenUsers: (handles: string[]) => unwrap(raw().figma.setHiddenUsers(handles)),
   figmaSync: () => unwrap(raw().figma.sync()),
+  figmaSyncState: () => unwrap(raw().figma.syncState()),
+  figmaSyncStop: () => unwrap(raw().figma.syncStop()),
   figmaOnSyncProgress: (listener: (progress: FigmaSyncProgress) => void) =>
     raw().figma.onSyncProgress(listener),
+  figmaOnSyncDone: (listener: (result: FigmaSyncState['lastResult']) => void) =>
+    raw().figma.onSyncDone(listener),
 }

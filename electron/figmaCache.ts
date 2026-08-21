@@ -207,6 +207,7 @@ export async function getComments(fileKey: string, offset: number, limit: number
       const data = await figma.getFileComments(fileKey)
       comments = data.comments
       entry.comments = comments
+      entry.commentsFetchedAt = Date.now()
       entry.fetchedAt = Date.now()
       cache.files[fileKey] = entry
       writeFigmaCache(cache)
@@ -259,6 +260,9 @@ export interface SyncFailure {
 }
 
 export interface SyncResult {
+  /** Синхронизацию остановили вручную — данные неполные, но то, что успели
+   * прочитать, уже в кэше. */
+  stopped: boolean
   files: number
   /** Файлы, у которых история не менялась и не перечитывалась. */
   skipped: number
@@ -287,7 +291,16 @@ async function pooled<T>(items: T[], size: number, worker: (item: T, index: numb
   await Promise.all(runners)
 }
 
+let stopRequested = false
+
+/** Просьба остановиться: длинные фазы проверяют флаг между элементами, так что
+ * остановка мягкая — начатые запросы дочитываются, кэш остаётся согласованным. */
+export function requestSyncStop() {
+  stopRequested = true
+}
+
 export async function syncAll(onProgress: (progress: SyncProgress) => void): Promise<SyncResult> {
+  stopRequested = false
   const teams = getFigmaTeams()
   const prefs = getFigmaPrefs()
   const errors: SyncFailure[] = []
@@ -303,6 +316,7 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
     stale?: boolean
   }> = []
   for (const [index, team] of teams.entries()) {
+    if (stopRequested) break
     try {
       const data = await figma.listTeamProjects(team.id)
       for (const project of data.projects) {
@@ -364,6 +378,7 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
   }
 
   for (const [index, project] of projects.entries()) {
+    if (stopRequested) break
     // Папка и так пришла из кэша — живой запрос состава заведомо не пройдёт.
     if (project.stale) {
       takeCachedFiles(project)
@@ -413,20 +428,63 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
 
   let skipped = 0
 
+  /* Комментарии — половина всех запросов синка, и у них нет дешёвого признака
+   * изменения: обсуждение не двигает last_modified файла. При лимите в 25
+   * запросов в минуту перечитывать все 170+ файлов каждый раз — это семь минут
+   * на одни комментарии. Поэтому обязательно читаем там, где обсуждение живое
+   * или файл менялся, а остальные обходим по кругу, начиная с самых давно не
+   * читанных. */
+  const commentsCache = readFigmaCache().files
+  const mustReadComments = (file: (typeof files)[number]) => {
+    const before = commentsCache[file.key]
+    if (!before?.commentsFetchedAt) return true
+    // Живое обсуждение перечитываем всегда: там прибавляются ответы и реакции.
+    return (before.comments as figma.FigmaComment[]).some((comment) => !comment.resolved_at)
+  }
+
+  const rotation = new Set(
+    files
+      .filter((file) => !mustReadComments(file))
+      .sort(
+        (a, b) =>
+          (commentsCache[a.key]?.commentsFetchedAt ?? 0) - (commentsCache[b.key]?.commentsFetchedAt ?? 0),
+      )
+      .slice(0, Math.max(0, prefs.commentsRotation))
+      .map((file) => file.key),
+  )
+
   await pooled(files, prefs.syncConcurrency, async (file) => {
+    if (stopRequested) return
     try {
       const before = readFigmaCache().files[file.key]
+
+      /* Состав папки взят из прошлого синка — времени изменения у нас нет.
+       * Перечитывать ради этого историю версий (тариф 25 запросов в минуту)
+       * дорого, поэтому спрашиваем метаданные файла: тот же ответ про «менялся
+       * или нет», но вдвое более щедрый тариф. */
+      let lastModified = file.lastModified
+      if (file.stale) {
+        try {
+          lastModified = (await figma.getFileTouchedAt(file.key)).lastModified || lastModified
+        } catch {
+          // Не ответили — считаем файл изменившимся и читаем историю честно.
+          lastModified = ''
+        }
+      }
 
       // История версий меняется только вместе с last_modified файла. Если он
       // тот же, а история уже выкачана до конца, версии не трогаем: это самая
       // дорогая часть синка (страница на 30 версий, десятки страниц на файл).
       const versionsUnchanged =
-        !file.stale &&
         Boolean(before?.versionsComplete) &&
         Boolean(before?.lastModified) &&
-        before?.lastModified === file.lastModified
+        Boolean(lastModified) &&
+        before?.lastModified === lastModified
 
       if (versionsUnchanged) skipped += 1
+
+      // Изменившийся файл почти наверняка получил и новые обсуждения.
+      const readComments = !versionsUnchanged || mustReadComments(file) || rotation.has(file.key)
 
       const [versions, comments] = await Promise.all([
         versionsUnchanged
@@ -441,8 +499,9 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
               Boolean(before?.versionsComplete),
               prefs.syncDepthPages,
             ),
-        // Комментарии тянем всегда: обсуждение не меняет last_modified файла.
-        figma.getFileComments(file.key).then((r) => r.comments),
+        readComments
+          ? figma.getFileComments(file.key).then((r) => r.comments)
+          : Promise.resolve((before?.comments ?? []) as figma.FigmaComment[]),
       ])
 
       // Кэш держится в памяти, поэтому правим свою запись прямо здесь: воркеры
@@ -453,9 +512,10 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
       entry.versionsCursor = versions.nextCursor
       entry.versionsComplete = versions.complete
       entry.comments = comments
+      if (readComments) entry.commentsFetchedAt = Date.now()
       entry.fetchedAt = Date.now()
       entry.fileName = file.name
-      entry.lastModified = file.lastModified
+      entry.lastModified = lastModified || file.lastModified
       entry.projectId = file.projectId
       entry.projectName = file.projectName
       entry.teamId = file.teamId
@@ -465,7 +525,9 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
       writeFigmaCache(cache)
 
       versionCount += versions.items.length
-      commentCount += comments.length
+      // Считаем только реально прочитанное: иначе цифра в отчёте раздувается за
+      // счёт комментариев, взятых из кэша.
+      if (readComments) commentCount += comments.length
     } catch (error) {
       errors.push({ scope: 'file', name: file.name, reason: failureReason(error), detail: failureDetail(error) })
     }
@@ -488,6 +550,7 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
     skipped,
     versions: versionCount,
     comments: commentCount,
+    stopped: stopRequested,
     staleFolders,
     errors,
     finishedAt: Date.now(),
