@@ -2,7 +2,10 @@ appId: com.figmaanalytics.desktop
 productName: Figma Analytics
 copyright: © 2026 Nikita Egorov
 directories:
-  output: release
+  # Суффикс .noindex — чтобы Spotlight не индексировал промежуточные .app
+  # внутри: иначе рядом с установленным приложением в поиске всплывали ещё две
+  # копии, arm64 и x86_64.
+  output: release.noindex
   buildResources: build
 files:
   - dist/**/*
