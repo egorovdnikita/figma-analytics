@@ -51,7 +51,7 @@ interface RawApi {
     setToken(token: string): Promise<Envelope<FigmaUser>>
     clearToken(): Promise<Envelope<boolean>>
     teamsList(): Promise<Envelope<FigmaTeamRef[]>>
-    teamsAdd(id: string, label: string): Promise<Envelope<FigmaTeamRef[]>>
+    teamsAdd(id: string, label: string, kind: 'team' | 'project'): Promise<Envelope<FigmaTeamRef[]>>
     teamsRemove(id: string): Promise<Envelope<FigmaTeamRef[]>>
     projects(teamId: string): Promise<Envelope<FigmaProject[]>>
     files(projectId: string): Promise<Envelope<FigmaFileSummary[]>>
@@ -123,7 +123,8 @@ export const ipc = {
   figmaSetToken: (token: string) => unwrap(raw().figma.setToken(token)),
   figmaClearToken: () => unwrap(raw().figma.clearToken()),
   figmaTeamsList: () => unwrap(raw().figma.teamsList()),
-  figmaTeamsAdd: (id: string, label: string) => unwrap(raw().figma.teamsAdd(id, label)),
+  figmaTeamsAdd: (id: string, label: string, kind: 'team' | 'project' = 'team') =>
+    unwrap(raw().figma.teamsAdd(id, label, kind)),
   figmaTeamsRemove: (id: string) => unwrap(raw().figma.teamsRemove(id)),
   figmaProjects: (teamId: string) => unwrap(raw().figma.projects(teamId)),
   figmaFiles: (projectId: string) => unwrap(raw().figma.files(projectId)),

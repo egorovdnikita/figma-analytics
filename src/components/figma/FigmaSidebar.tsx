@@ -210,12 +210,18 @@ function TeamNode({
 
   useEffect(() => {
     if (!expanded || projects !== null) return
+    // У источника-папки списка папок нет — он сам и есть папка, запрашивать
+    // у Figma нечего.
+    if (team.kind === 'project') {
+      setProjects([{ id: team.id, name: team.label || team.id }])
+      return
+    }
     setLoading(true)
     ipc
       .figmaProjects(team.id)
       .then(setProjects)
       .finally(() => setLoading(false))
-  }, [expanded, projects, team.id])
+  }, [expanded, projects, team.id, team.kind, team.label])
 
   const visibleProjects = filter
     ? (projects ?? []).filter((project) => project.name.toLowerCase().includes(filter.toLowerCase()))
@@ -236,7 +242,7 @@ function TeamNode({
           type="button"
           onClick={onRemoved}
           className="mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-control text-faint opacity-0 hover:bg-[var(--line)] hover:text-ink group-hover:opacity-100"
-          aria-label="Убрать команду"
+          aria-label={team.kind === 'project' ? 'Убрать папку' : 'Убрать команду'}
           title="Убрать из списка"
         >
           <CrossGlyph size={14} />

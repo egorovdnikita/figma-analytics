@@ -25,9 +25,13 @@ export function LibraryPanel({ teams }: { teams: FigmaTeamRef[] }) {
 
   return (
     <div className="space-y-3">
-      {teams.map((team) => (
-        <TeamLibrary key={team.id} team={team} />
-      ))}
+      {teams
+        // Библиотека публикуется на уровне команды: у отдельной папки своей
+        // библиотеки нет, и запрос по её ID вернул бы 404.
+        .filter((team) => team.kind !== 'project')
+        .map((team) => (
+          <TeamLibrary key={team.id} team={team} />
+        ))}
     </div>
   )
 }

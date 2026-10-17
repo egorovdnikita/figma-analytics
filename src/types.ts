@@ -50,6 +50,8 @@ export interface FigmaUser {
 export interface FigmaTeamRef {
   id: string
   label: string
+  /** 'project' — отдельная папка Figma, а не вся команда. */
+  kind?: 'team' | 'project'
 }
 
 export interface FigmaProject {

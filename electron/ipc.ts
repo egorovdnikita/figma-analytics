@@ -160,7 +160,9 @@ export function registerIpc(getWindow: () => BrowserWindow | null) {
   })
 
   handle('figma:teams:list', () => figmaCache.listTeams())
-  handle('figma:teams:add', (id: string, label: string) => figmaCache.addTeam(id, label))
+  handle('figma:teams:add', (id: string, label: string, kind: 'team' | 'project' = 'team') =>
+    figmaCache.addTeam(id, label, kind),
+  )
   handle('figma:teams:remove', (id: string) => figmaCache.removeTeam(id))
 
   handle('figma:projects', (teamId: string) => figmaCache.listProjects(teamId))

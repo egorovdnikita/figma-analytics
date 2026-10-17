@@ -32,8 +32,8 @@ const api = {
     setToken: (token: string) => invoke<any>('figma:setToken', token),
     clearToken: () => invoke<boolean>('figma:clearToken'),
     teamsList: () => invoke<{ id: string; label: string }[]>('figma:teams:list'),
-    teamsAdd: (id: string, label: string) =>
-      invoke<{ id: string; label: string }[]>('figma:teams:add', id, label),
+    teamsAdd: (id: string, label: string, kind: 'team' | 'project' = 'team') =>
+      invoke<{ id: string; label: string }[]>('figma:teams:add', id, label, kind),
     teamsRemove: (id: string) => invoke<{ id: string; label: string }[]>('figma:teams:remove', id),
     projects: (teamId: string) => invoke<any[]>('figma:projects', teamId),
     files: (projectId: string) => invoke<any[]>('figma:files', projectId),

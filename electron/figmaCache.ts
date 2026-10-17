@@ -34,16 +34,31 @@ function mergeAppend<T extends { id: string }>(base: T[], addition: T[]): T[] {
 
 /* ---------- команды (ручной список — Figma API не отдаёт список команд токена) ---------- */
 
-export async function addTeam(id: string, label: string): Promise<FigmaTeamRef[]> {
+export async function addTeam(
+  id: string,
+  label: string,
+  kind: 'team' | 'project' = 'team',
+): Promise<FigmaTeamRef[]> {
   const trimmedId = id.trim()
-  const data = await figma.listTeamProjects(trimmedId) // валидирует доступ и заодно прогревает кэш
   const cache = readFigmaCache()
-  cache.projectsByTeam[trimmedId] = data.projects
+
+  // Запрос заодно проверяет доступ и даёт название: подписывать источник
+  // руками не нужно.
+  let name: string
+  if (kind === 'project') {
+    const data = await figma.listProjectFiles(trimmedId)
+    cache.filesByProject[trimmedId] = data.files
+    name = data.name
+  } else {
+    const data = await figma.listTeamProjects(trimmedId)
+    cache.projectsByTeam[trimmedId] = data.projects
+    name = data.name
+  }
   writeFigmaCache(cache)
 
   const teams = getFigmaTeams()
-  if (teams.some((team) => team.id === trimmedId)) return teams
-  const next = [...teams, { id: trimmedId, label: label.trim() || data.name }]
+  if (teams.some((team) => team.id === trimmedId && (team.kind ?? 'team') === kind)) return teams
+  const next = [...teams, { id: trimmedId, label: label.trim() || name, kind }]
   return saveFigmaTeams(next)
 }
 
@@ -318,6 +333,21 @@ export async function syncAll(onProgress: (progress: SyncProgress) => void): Pro
   }> = []
   for (const [index, team] of teams.entries()) {
     if (stopRequested) break
+
+    // Источник-папка — сам себе проект: списка папок у него нет, а состав
+    // файлов всё равно читается на следующем шаге.
+    if (team.kind === 'project') {
+      projects.push({ teamId: team.id, teamName: team.label, id: team.id, name: team.label })
+      onProgress({
+        phase: 'projects',
+        done: index + 1,
+        total: teams.length,
+        current: team.label || team.id,
+        rateLimitMs: figma.rateLimitDelayMs(),
+      })
+      continue
+    }
+
     try {
       const data = await figma.listTeamProjects(team.id)
       for (const project of data.projects) {
