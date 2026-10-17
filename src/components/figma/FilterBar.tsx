@@ -4,13 +4,11 @@ import type {
   FigmaEvent,
   FigmaEventKind,
   FigmaFilterPreset,
-  FigmaSyncProgress,
   FigmaTeamRef,
 } from '@/types'
 import { Button, Checkbox, Input, Modal, Segmented, Select } from '@/components/ui'
 import { AppIcon } from '@/components/AppIcon'
 import { CrossGlyph } from '@/components/Glyphs'
-import { SyncProgressInline } from './FigmaWorkspace'
 import { cn } from '@/lib/cn'
 import {
   DEFAULT_FILTERS,
@@ -47,8 +45,6 @@ export function FilterBar({
   onDeletePreset,
   matchedCount,
   totalCount,
-  syncing,
-  progress,
 }: {
   filters: FigmaFilters
   onChange: (next: FigmaFilters) => void
@@ -61,8 +57,6 @@ export function FilterBar({
   onDeletePreset: (id: string) => void
   matchedCount: number
   totalCount: number
-  syncing: boolean
-  progress: FigmaSyncProgress | null
 }) {
   const [open, setOpen] = useState(false)
   const [preset, setPreset] = useState('rolling')
@@ -114,10 +108,7 @@ export function FilterBar({
   return (
     <>
       <div className="mt-3 flex flex-wrap items-center gap-2 rounded-card bg-surface p-2">
-        {syncing && progress ? (
-          <SyncProgressInline progress={progress} />
-        ) : (
-          <>
+        <>
             <Segmented
               value={filters.granularity}
               onChange={(value) => onChange({ ...filters, granularity: value as Granularity })}
@@ -188,8 +179,7 @@ export function FilterBar({
                 ) : null}
               </Button>
             </div>
-          </>
-        )}
+        </>
       </div>
 
       <Modal

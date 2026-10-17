@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type {
   FigmaEvent,
   FigmaFileIndexEntry,
@@ -29,6 +29,7 @@ import {
 } from './analytics'
 import { relativeTime } from './utils'
 import { FilterBar } from './FilterBar'
+import { SyncStatus } from './SyncStatus'
 import { FigmaSidebar, type SectionItem } from './FigmaSidebar'
 import { CommandPalette, type Command } from './CommandPalette'
 import { DashboardSkeleton, EmptyBlock, VizPrefsProvider } from './charts'
@@ -359,41 +360,18 @@ export function FigmaWorkspace({
               <h1 className="truncate text-[28px] font-bold leading-none tracking-tight text-ink">
                 {selectedFile ? selectedFile.name : sectionTitle}
               </h1>
-              <div className="no-drag flex shrink-0 items-center gap-2">
-                {syncError ? (
-                  <span
-                    className="max-w-[240px] cursor-help truncate text-[12px] text-[var(--danger)]"
-                    title={syncErrorDetails ?? syncError}
-                  >
-                    {syncError}
-                  </span>
-                ) : null}
-                <span className="hidden text-[12px] text-faint lg:inline">
-                  {events.length > 0 ? `${events.length.toLocaleString('ru')} событий` : ''}
-                </span>
-                {!syncing && lastSyncAt ? (
-                  <span
-                    className="hidden cursor-help text-[12px] text-faint xl:inline"
-                    title={autoSyncHint(nextAutoSyncAt)}
-                  >
-                    обновлено {relativeTime(new Date(lastSyncAt).toISOString())}
-                  </span>
-                ) : null}
-                {syncing ? (
-                  <Button variant="soft" size="sm" onClick={() => void stopSync()}>
-                    Остановить
-                  </Button>
-                ) : null}
-                <Button
-                  variant="soft"
-                  size="sm"
-                  onClick={runSync}
-                  disabled={syncing}
-                  title={syncing && autoSync ? 'Данные обновляются по расписанию' : undefined}
-                >
-                  {syncing ? <Spinner className="h-4 w-4" /> : <AppIcon name="RefreshCw" size={16} />}
-                  {syncing ? (autoSync ? 'Обновление…' : 'Синхронизация…') : 'Синхронизировать'}
-                </Button>
+              <div className="no-drag flex min-w-0 shrink-0 items-center gap-2">
+                <SyncStatus
+                  syncing={syncing}
+                  auto={autoSync}
+                  progress={progress}
+                  error={syncError}
+                  errorDetails={syncErrorDetails}
+                  lastSyncAt={lastSyncAt}
+                  nextAutoSyncAt={nextAutoSyncAt}
+                  onSync={runSync}
+                  onStop={() => void stopSync()}
+                />
               </div>
             </div>
 
@@ -409,13 +387,7 @@ export function FigmaWorkspace({
                 onDeletePreset={(id) => void deletePreset(id)}
                 matchedCount={scopedEvents.length}
                 totalCount={events.length}
-                syncing={syncing}
-                progress={progress}
               />
-            ) : syncing && progress ? (
-              <div className="mt-3 flex items-center gap-2 rounded-card bg-surface p-2">
-                <SyncProgressInline progress={progress} />
-              </div>
             ) : null}
           </header>
 
@@ -513,17 +485,6 @@ export function FigmaWorkspace({
   )
 }
 
-/** Подсказка у метки «обновлено …»: когда данные обновятся сами. Без неё
- * непонятно, ждать ли, и кнопку жмут вручную просто на всякий случай. */
-function autoSyncHint(nextAt: number | null): string {
-  if (!nextAt) return 'Автообновление выключено — включается в настройках раздела'
-  const minutes = Math.round((nextAt - Date.now()) / 60_000)
-  if (minutes <= 0) return 'Следующее автообновление — вот-вот'
-  if (minutes < 60) return `Следующее автообновление через ${minutes} мин`
-  const hours = Math.round(minutes / 60)
-  return `Следующее автообновление примерно через ${hours} ч`
-}
-
 /** Причина отказа объясняет, что делать: «упёрлись в лимит Figma» и «нет
  * доступа» требуют разных действий. */
 const FAILURE_LABELS: Record<FigmaSyncFailureReason, string> = {
@@ -598,60 +559,6 @@ export function listSyncErrors(errors: FigmaSyncFailure[], staleFolders = 0): st
   }
   return lines.join('\n')
 }
-
-/** Прогресс синхронизации внутри панели инструментов — отдельной полосы,
- * сдвигающей весь контент вниз, больше нет. */
-export function SyncProgressInline({ progress }: { progress: FigmaSyncProgress }) {
-  const phase =
-    progress.phase === 'projects'
-      ? 'Папки'
-      : progress.phase === 'files'
-        ? 'Файлы'
-        : progress.phase === 'history'
-          ? 'История'
-          : 'Готово'
-  const percent = progress.total > 0 ? (progress.done / progress.total) * 100 : 0
-
-  // Оценка по темпу текущей фазы, а не всего синка: фазы стоят очень по-разному,
-  // и общий средний темп даёт заведомо неверный остаток.
-  const mark = useRef<{ phase: string; at: number; done: number } | null>(null)
-  if (!mark.current || mark.current.phase !== progress.phase) {
-    mark.current = { phase: progress.phase, at: Date.now(), done: progress.done }
-  }
-  const passed = progress.done - mark.current.done
-  const elapsed = Date.now() - mark.current.at
-  const left =
-    passed > 0 && progress.total > progress.done
-      ? Math.round(((elapsed / passed) * (progress.total - progress.done)) / 1000)
-      : null
-
-  return (
-    <div className="flex min-w-0 flex-1 items-center gap-2.5">
-      <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-[var(--sunken)]">
-        <div
-          className="h-full rounded-full bg-[var(--grass)] transition-[width] duration-300"
-          style={{ width: `${percent}%` }}
-        />
-      </div>
-      <span className="shrink-0 text-[12px] text-muted [font-variant-numeric:tabular-nums]">
-        {phase} {progress.done}/{progress.total}
-        {left !== null && left > 2 ? ` · ${formatLeft(left)}` : ''}
-      </span>
-      <span className="hidden min-w-0 max-w-[220px] truncate text-[12px] text-faint lg:block">
-        {progress.rateLimitMs > 0
-          ? `Лимит Figma — ждём ${Math.ceil(progress.rateLimitMs / 1000)} с`
-          : progress.current}
-      </span>
-    </div>
-  )
-}
-
-function formatLeft(seconds: number) {
-  if (seconds < 60) return `~${seconds} с`
-  const minutes = Math.round(seconds / 60)
-  return `~${minutes} мин`
-}
-
 
 function EmptyState({
   onSync,
