@@ -312,6 +312,8 @@ export interface FigmaPrefs {
   syncDepthPages: number
   /** Параллельных файлов при синхронизации. */
   syncConcurrency: number
+  /** Как часто обновлять данные в фоне, в минутах. 0 — только вручную. */
+  autoSyncMinutes: number
   /** Сколько «спящих» файлов дочитывать по комментариям за один синк.
    * Комментарии не меняют last_modified файла, поэтому единственный способ
    * узнать о новых — перечитать. Читать все 170+ файлов каждый раз слишком
@@ -346,6 +348,7 @@ export const defaultFigmaPrefs: FigmaPrefs = {
   timelineBuckets: { day: 30, week: 12, month: 12, year: 5 },
   syncDepthPages: 400,
   syncConcurrency: 4,
+  autoSyncMinutes: 60,
   commentsRotation: 40,
   density: 'comfortable',
   defaultSection: 'dashboard',
@@ -367,16 +370,26 @@ interface FigmaSettings {
    * соседних команд, попавшие в файлы через шаринг. */
   hiddenUsers: string[]
   prefs: FigmaPrefs
+  /** Когда синхронизация заканчивалась в последний раз. Лежит на диске, а не в
+   * памяти процесса: от него считается следующее фоновое обновление, иначе
+   * каждый запуск приложения начинал бы отсчёт заново. */
+  lastSyncAt: number
 }
 
 const FIGMA_SETTINGS_FILE = 'figma-settings.json'
-const defaultFigmaSettings: FigmaSettings = { teams: [], hiddenUsers: [], prefs: defaultFigmaPrefs }
+const defaultFigmaSettings: FigmaSettings = {
+  teams: [],
+  hiddenUsers: [],
+  prefs: defaultFigmaPrefs,
+  lastSyncAt: 0,
+}
 
 function readFigmaSettings(): FigmaSettings {
   const stored = readJson<FigmaSettings>(FIGMA_SETTINGS_FILE, defaultFigmaSettings)
   return {
     teams: stored.teams ?? [],
     hiddenUsers: stored.hiddenUsers ?? [],
+    lastSyncAt: stored.lastSyncAt ?? 0,
     prefs: {
       ...defaultFigmaPrefs,
       ...(stored.prefs ?? {}),
@@ -416,6 +429,15 @@ export function saveFigmaTeams(teams: FigmaTeamRef[]) {
   // скрытых участников, который живёт в том же файле.
   writeJson(FIGMA_SETTINGS_FILE, { ...readFigmaSettings(), teams })
   return teams
+}
+
+export function getFigmaLastSyncAt(): number {
+  return readFigmaSettings().lastSyncAt
+}
+
+export function saveFigmaLastSyncAt(timestamp: number) {
+  writeJson(FIGMA_SETTINGS_FILE, { ...readFigmaSettings(), lastSyncAt: timestamp })
+  return timestamp
 }
 
 export function getFigmaHiddenUsers(): string[] {

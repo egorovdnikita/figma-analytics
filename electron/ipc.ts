@@ -11,10 +11,12 @@ import {
   clearFigmaUser,
   getCredentials,
   getFigmaPrefs,
+  getFigmaLastSyncAt,
   getFigmaToken,
   getFigmaUser,
   getSettings,
   saveCredentials,
+  saveFigmaLastSyncAt,
   saveFigmaPrefs,
   saveFigmaToken,
   saveFigmaUser,
@@ -203,20 +205,25 @@ export function registerIpc(getWindow: () => BrowserWindow | null) {
     promise: Promise<figmaCache.SyncResult>
     progress: figmaCache.SyncProgress
     startedAt: number
+    /** Запущена планировщиком, а не кнопкой: экран показывает это тише. */
+    auto: boolean
   }
   let session: SyncSession | null = null
-  let lastResult: (figmaCache.SyncResult & { startedAt: number }) | null = null
+  let lastResult: (figmaCache.SyncResult & { startedAt: number; auto: boolean }) | null = null
 
   const broadcast = (channel: string, payload: unknown) => {
     for (const window of BrowserWindow.getAllWindows()) window.webContents.send(channel, payload)
   }
 
-  handle('figma:sync', () => {
+  /** Единственная точка запуска: и кнопка, и планировщик идут сюда, поэтому
+   * второй синк поверх первого не стартует ни при каком сочетании. */
+  function startSync(auto: boolean) {
     if (session) return session.promise
 
     const startedAt = Date.now()
     const current: SyncSession = {
       startedAt,
+      auto,
       progress: { phase: 'projects', done: 0, total: 0, current: '', rateLimitMs: 0 },
       promise: Promise.resolve() as unknown as Promise<figmaCache.SyncResult>,
     }
@@ -226,24 +233,34 @@ export function registerIpc(getWindow: () => BrowserWindow | null) {
         broadcast('figma:syncProgress', progress)
       })
       .then((result) => {
-        lastResult = { ...result, startedAt }
+        lastResult = { ...result, startedAt, auto }
         return result
       })
       .finally(() => {
         session = null
+        // Отсчёт следующего автообновления идёт от конца попытки, а не от
+        // успеха: иначе упёршийся в лимит Figma синк повторялся бы без паузы.
+        saveFigmaLastSyncAt(Date.now())
         broadcast('figma:syncDone', lastResult)
       })
 
     session = current
+    // Экран узнаёт о фоновом синке только отсюда — сам он его не начинал.
+    broadcast('figma:syncStarted', { startedAt, auto })
     return current.promise
-  })
+  }
+
+  handle('figma:sync', () => startSync(false))
 
   /** Экран спрашивает это при открытии: если синк идёт, он подхватит прогресс,
    * а не покажет кнопку «Синхронизировать» поверх работающего обхода. */
   handle('figma:syncState', () => ({
     running: Boolean(session),
+    auto: session?.auto ?? false,
     progress: session?.progress ?? null,
     startedAt: session?.startedAt ?? null,
+    lastSyncAt: getFigmaLastSyncAt() || null,
+    nextAutoSyncAt: nextAutoSyncAt(),
     lastResult,
   }))
 
@@ -251,6 +268,41 @@ export function registerIpc(getWindow: () => BrowserWindow | null) {
     if (session) figmaCache.requestSyncStop()
     return true
   })
+
+  /* Фоновое обновление.
+   *
+   * Тикаем часто, а решение принимаем по времени последнего синка: таймер на
+   * весь интервал пришлось бы пересоздавать при каждой смене настройки, и он
+   * всё равно врал бы после сна компьютера — setTimeout на час его не
+   * переживает, а сравнение меток времени переживает. */
+  const SCHEDULER_TICK_MS = 60_000
+
+  function nextAutoSyncAt(): number | null {
+    const minutes = getFigmaPrefs().autoSyncMinutes
+    if (!minutes) return null
+    const last = getFigmaLastSyncAt()
+    // Без единого синка в истории ждать целый интервал незачем.
+    if (!last) return Date.now()
+    return last + minutes * 60_000
+  }
+
+  function autoSyncTick() {
+    if (session) return
+    const due = nextAutoSyncAt()
+    if (due === null || Date.now() < due) return
+    // Нечего и некого обходить — тихо ждём дальше, без ошибок на экране.
+    if (!getFigmaToken() || figmaCache.listTeams().length === 0) return
+    void startSync(true).catch(() => {
+      /* ошибки уже разложены по причинам в результате синка */
+    })
+  }
+
+  const scheduler = setInterval(autoSyncTick, SCHEDULER_TICK_MS)
+  scheduler.unref?.()
+  // Первая проверка — вскоре после запуска, когда окно уже готово слушать
+  // прогресс, но пользователь ещё не успел ничего нажать.
+  const firstCheck = setTimeout(autoSyncTick, 15_000)
+  firstCheck.unref?.()
 
   /* системное */
   handle('app:info', () => ({

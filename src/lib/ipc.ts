@@ -73,6 +73,7 @@ interface RawApi {
     sync(): Promise<Envelope<FigmaSyncResult>>
     syncState(): Promise<Envelope<FigmaSyncState>>
     syncStop(): Promise<Envelope<boolean>>
+    onSyncStarted(listener: (info: { startedAt: number; auto: boolean }) => void): () => void
     onSyncProgress(listener: (progress: FigmaSyncProgress) => void): () => void
     onSyncDone(listener: (result: FigmaSyncState['lastResult']) => void): () => void
   }
@@ -146,6 +147,8 @@ export const ipc = {
   figmaSync: () => unwrap(raw().figma.sync()),
   figmaSyncState: () => unwrap(raw().figma.syncState()),
   figmaSyncStop: () => unwrap(raw().figma.syncStop()),
+  figmaOnSyncStarted: (listener: (info: { startedAt: number; auto: boolean }) => void) =>
+    raw().figma.onSyncStarted(listener),
   figmaOnSyncProgress: (listener: (progress: FigmaSyncProgress) => void) =>
     raw().figma.onSyncProgress(listener),
   figmaOnSyncDone: (listener: (result: FigmaSyncState['lastResult']) => void) =>

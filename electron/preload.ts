@@ -57,6 +57,11 @@ const api = {
     sync: () => invoke<any>('figma:sync'),
     syncState: () => invoke<any>('figma:syncState'),
     syncStop: () => invoke<boolean>('figma:syncStop'),
+    onSyncStarted: (listener: (info: { startedAt: number; auto: boolean }) => void) => {
+      const handler = (_event: unknown, info: any) => listener(info)
+      ipcRenderer.on('figma:syncStarted', handler)
+      return () => ipcRenderer.off('figma:syncStarted', handler)
+    },
     onSyncProgress: (listener: (progress: any) => void) => {
       const handler = (_event: unknown, progress: any) => listener(progress)
       ipcRenderer.on('figma:syncProgress', handler)

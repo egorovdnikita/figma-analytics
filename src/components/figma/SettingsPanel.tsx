@@ -224,6 +224,24 @@ export function SettingsPanel({
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-3">
+            <Field
+              label="Обновлять в фоне"
+              hint="Приложение само обходит пространство с этим интервалом"
+            >
+              <Select
+                value={String(prefs.autoSyncMinutes)}
+                onChange={(event) => void patch({ autoSyncMinutes: Number(event.target.value) })}
+                className="h-9 text-[13px]"
+              >
+                <option value="0">только вручную</option>
+                <option value="15">каждые 15 минут</option>
+                <option value="30">каждые 30 минут</option>
+                <option value="60">каждый час</option>
+                <option value="180">каждые 3 часа</option>
+                <option value="360">каждые 6 часов</option>
+                <option value="1440">раз в сутки</option>
+              </Select>
+            </Field>
             <Field label="Глубина истории, страниц" hint="30 версий на страницу">
               <Input
                 type="number"

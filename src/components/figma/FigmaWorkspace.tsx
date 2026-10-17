@@ -92,6 +92,9 @@ export function FigmaWorkspace({
   const [syncError, setSyncError] = useState<string | null>(null)
   const [syncErrorDetails, setSyncErrorDetails] = useState<string | null>(null)
   const [lastSyncAt, setLastSyncAt] = useState<number | null>(null)
+  /** Текущий синк начал планировщик: показываем его тише, чем нажатие кнопки. */
+  const [autoSync, setAutoSync] = useState(false)
+  const [nextAutoSyncAt, setNextAutoSyncAt] = useState<number | null>(null)
 
   const reload = useCallback(async () => {
     const [nextTeams, nextEvents, nextFiles, nextPrefs] = await Promise.all([
@@ -155,6 +158,7 @@ export function FigmaWorkspace({
     async (result: FigmaSyncState['lastResult']) => {
       if (!result) return
       setLastSyncAt(result.startedAt)
+      void ipc.figmaSyncState().then((state) => setNextAutoSyncAt(state.nextAutoSyncAt))
       if (result.errors.length > 0) {
         setSyncError(describeSyncErrors(result.errors, result.staleFolders))
         setSyncErrorDetails(listSyncErrors(result.errors, result.staleFolders))
@@ -173,10 +177,15 @@ export function FigmaWorkspace({
   useEffect(() => {
     void (async () => {
       const state = await ipc.figmaSyncState()
+      setNextAutoSyncAt(state.nextAutoSyncAt)
       if (state.running) {
         setSyncing(true)
+        setAutoSync(state.auto)
         setProgress(state.progress)
       }
+      // Метка последнего синка живёт на диске, поэтому «обновлено …» есть и
+      // после перезапуска, когда результата в памяти процесса ещё нет.
+      if (state.lastSyncAt) setLastSyncAt(state.lastSyncAt)
       if (state.lastResult) {
         setLastSyncAt(state.lastResult.startedAt)
         if (state.lastResult.errors.length > 0) {
@@ -189,8 +198,23 @@ export function FigmaWorkspace({
 
   useEffect(
     () =>
+      ipc.figmaOnSyncStarted(({ auto }) => {
+        setSyncing(true)
+        setAutoSync(auto)
+        if (auto) {
+          // Фоновое обновление не должно стирать ошибку прошлого ручного
+          // синка до того, как принесёт свой результат.
+          setProgress(null)
+        }
+      }),
+    [],
+  )
+
+  useEffect(
+    () =>
       ipc.figmaOnSyncDone((result) => {
         setSyncing(false)
+        setAutoSync(false)
         setProgress(null)
         void applyResult(result)
       }),
@@ -199,6 +223,7 @@ export function FigmaWorkspace({
 
   const runSync = async () => {
     setSyncing(true)
+    setAutoSync(false)
     setSyncError(null)
     setSyncErrorDetails(null)
     try {
@@ -347,7 +372,10 @@ export function FigmaWorkspace({
                   {events.length > 0 ? `${events.length.toLocaleString('ru')} событий` : ''}
                 </span>
                 {!syncing && lastSyncAt ? (
-                  <span className="hidden text-[12px] text-faint xl:inline">
+                  <span
+                    className="hidden cursor-help text-[12px] text-faint xl:inline"
+                    title={autoSyncHint(nextAutoSyncAt)}
+                  >
                     обновлено {relativeTime(new Date(lastSyncAt).toISOString())}
                   </span>
                 ) : null}
@@ -356,9 +384,15 @@ export function FigmaWorkspace({
                     Остановить
                   </Button>
                 ) : null}
-                <Button variant="soft" size="sm" onClick={runSync} disabled={syncing}>
+                <Button
+                  variant="soft"
+                  size="sm"
+                  onClick={runSync}
+                  disabled={syncing}
+                  title={syncing && autoSync ? 'Данные обновляются по расписанию' : undefined}
+                >
                   {syncing ? <Spinner className="h-4 w-4" /> : <AppIcon name="RefreshCw" size={16} />}
-                  {syncing ? 'Синхронизация…' : 'Синхронизировать'}
+                  {syncing ? (autoSync ? 'Обновление…' : 'Синхронизация…') : 'Синхронизировать'}
                 </Button>
               </div>
             </div>
@@ -477,6 +511,17 @@ export function FigmaWorkspace({
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={commands} />
     </div>
   )
+}
+
+/** Подсказка у метки «обновлено …»: когда данные обновятся сами. Без неё
+ * непонятно, ждать ли, и кнопку жмут вручную просто на всякий случай. */
+function autoSyncHint(nextAt: number | null): string {
+  if (!nextAt) return 'Автообновление выключено — включается в настройках раздела'
+  const minutes = Math.round((nextAt - Date.now()) / 60_000)
+  if (minutes <= 0) return 'Следующее автообновление — вот-вот'
+  if (minutes < 60) return `Следующее автообновление через ${minutes} мин`
+  const hours = Math.round(minutes / 60)
+  return `Следующее автообновление примерно через ${hours} ч`
 }
 
 /** Причина отказа объясняет, что делать: «упёрлись в лимит Figma» и «нет

@@ -185,6 +185,7 @@ export interface FigmaPrefs {
   timelineBuckets: { day: number; week: number; month: number; year: number }
   syncDepthPages: number
   syncConcurrency: number
+  autoSyncMinutes: number
   /** Сколько спящих файлов дочитывать по комментариям за синк. */
   commentsRotation: number
   density: 'compact' | 'comfortable'
@@ -240,9 +241,15 @@ export interface FigmaSyncFailure {
  * чтобы не потерять идущий обход при переходе между разделами. */
 export interface FigmaSyncState {
   running: boolean
+  /** Текущий синк запущен планировщиком, а не пользователем. */
+  auto: boolean
   progress: FigmaSyncProgress | null
   startedAt: number | null
-  lastResult: (FigmaSyncResult & { startedAt: number }) | null
+  /** Конец последней синхронизации — переживает перезапуск приложения. */
+  lastSyncAt: number | null
+  /** Когда планировщик обновит данные в следующий раз. null — автообновление выключено. */
+  nextAutoSyncAt: number | null
+  lastResult: (FigmaSyncResult & { startedAt: number; auto: boolean }) | null
 }
 
 export interface FigmaSyncResult {
