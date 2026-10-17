@@ -11,9 +11,9 @@ files:
 asar: true
 afterPack: build/afterPack.cjs
 
-# Своей иконки у приложения нет — берётся стандартная иконка Electron.
-# Чтобы вернуть свою: положить icon.png в build/ (electron-builder подхватит
-# её из buildResources сам, строка icon: не нужна).
+# Иконка — build/icon.png: electron-builder сам берёт её из buildResources и
+# собирает .icns/.ico, строка icon: для этого не нужна. Картинка не правится
+# руками, а рисуется из дизайн-системы: npx electron scripts/make-icon.mjs.
 
 mac:
   category: public.app-category.productivity
