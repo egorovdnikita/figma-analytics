@@ -19,24 +19,6 @@ const api = {
       invoke<boolean>('credentials:set', creds),
     clear: () => invoke<boolean>('credentials:clear'),
   },
-  calendar: {
-    list: () => invoke<any[]>('calendar:list'),
-    setSelected: (id: string, selected: boolean) =>
-      invoke<any>('calendar:setSelected', id, selected),
-    colors: () => invoke<any>('calendar:colors'),
-    googleSettings: () => invoke<Record<string, string>>('calendar:googleSettings'),
-  },
-  events: {
-    list: (args: { calendarId: string; timeMin: string; timeMax: string; query?: string }) =>
-      invoke<any[]>('events:list', args),
-    create: (calendarId: string, event: unknown) => invoke<any>('events:create', calendarId, event),
-    update: (calendarId: string, eventId: string, patch: unknown) =>
-      invoke<any>('events:update', calendarId, eventId, patch),
-    remove: (calendarId: string, eventId: string) =>
-      invoke<{ ok: boolean }>('events:delete', calendarId, eventId),
-    respond: (calendarId: string, eventId: string, response: string) =>
-      invoke<any>('events:respond', calendarId, eventId, response),
-  },
   settings: {
     get: () => invoke<any>('settings:get'),
     set: (patch: Record<string, unknown>) => invoke<any>('settings:set', patch),

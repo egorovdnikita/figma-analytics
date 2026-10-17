@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { AppProvider, useApp } from '@/state/store'
 import { IconRail } from '@/components/IconRail'
-import { Sidebar } from '@/components/Sidebar'
-import { CalendarScreen } from '@/components/CalendarScreen'
 import { ProfileView } from '@/components/ProfileView'
 import { FigmaScreen } from '@/components/figma/FigmaScreen'
 import { PlaceholderScreen } from '@/components/PlaceholderScreen'
-import { DriveBrandIcon, MailBrandIcon, TasksBrandIcon } from '@/components/RailBrandIcons'
+import {
+  CalendarBrandIcon,
+  DriveBrandIcon,
+  MailBrandIcon,
+  TasksBrandIcon,
+} from '@/components/RailBrandIcons'
 import { SetupScreen, SignInScreen } from '@/components/Onboarding'
 import { IconStyleProvider } from '@/components/AppIcon'
 import { Spinner } from '@/components/ui'
@@ -15,7 +18,6 @@ import { FONT_STACKS } from '@/lib/fonts'
 
 function Shell() {
   const { booted, hasCredentials, authenticated, screen, notice, settings } = useApp()
-  const [createSignal, setCreateSignal] = useState(0)
 
   useEffect(() => {
     document.documentElement.style.setProperty('--font-body', FONT_STACKS[settings.fontFamily])
@@ -42,14 +44,11 @@ function Shell() {
 
           <div className="flex min-h-0 flex-1">
             <IconRail />
-            {screen === 'calendar' ? (
-              <Sidebar onCreate={() => setCreateSignal((value) => value + 1)} />
-            ) : null}
             <div className="min-h-0 min-w-0 flex-1">
               {screen === 'profile' ? (
                 <ProfileView />
-              ) : screen === 'figma' ? (
-                <FigmaScreen />
+              ) : screen === 'calendar' ? (
+                <PlaceholderScreen icon={<CalendarBrandIcon size={32} />} title="Календарь" />
               ) : screen === 'mail' ? (
                 <PlaceholderScreen icon={<MailBrandIcon size={32} />} title="Почта" />
               ) : screen === 'drive' ? (
@@ -57,10 +56,7 @@ function Shell() {
               ) : screen === 'tasks' ? (
                 <PlaceholderScreen icon={<TasksBrandIcon size={32} />} title="Задачи" />
               ) : (
-                <CalendarScreen
-                  createSignal={createSignal}
-                  onCreateHandled={() => setCreateSignal(0)}
-                />
+                <FigmaScreen />
               )}
             </div>
           </div>

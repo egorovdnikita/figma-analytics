@@ -2,19 +2,21 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { useApp } from '@/state/store'
 import { ipc } from '@/lib/ipc'
-import { locale } from '@/lib/date'
+import { ru as locale } from 'date-fns/locale'
 import { cn } from '@/lib/cn'
-import { Avatar, Button, Chip, Field, Modal, Segmented, Select, Switch } from '@/components/ui'
+import { Avatar, Button, Chip, Modal, Segmented } from '@/components/ui'
 import { AppIcon, ICON_STYLES } from '@/components/AppIcon'
 import { FONT_OPTIONS } from '@/lib/fonts'
-import type { ViewMode } from '@/types'
 
 const SCOPE_LABELS: Record<string, string> = {
   openid: 'Идентификатор аккаунта',
   email: 'Адрес почты',
   profile: 'Имя и фото',
-  'https://www.googleapis.com/auth/calendar': 'Календари: чтение и изменение',
-  'https://www.googleapis.com/auth/calendar.events': 'События: чтение и изменение',
+  // Приложение этих разрешений больше не просит, но у токена, выданного старой
+  // версии, они остались — показываем прямо, чтобы было видно, что их пора снять.
+  'https://www.googleapis.com/auth/calendar': 'Календарь — лишнее разрешение из старой версии',
+  'https://www.googleapis.com/auth/calendar.events':
+    'События календаря — лишнее разрешение из старой версии',
 }
 
 export function ProfileView() {
@@ -22,10 +24,8 @@ export function ProfileView() {
     profile,
     session,
     appInfo,
-    calendars,
     settings,
     updateSettings,
-    googleSettings,
     signOut,
     revoke,
     setScreen,
@@ -39,11 +39,11 @@ export function ProfileView() {
       <div className="mx-auto max-w-[860px] space-y-3 px-4 pt-3">
         <button
           type="button"
-          onClick={() => setScreen('calendar')}
+          onClick={() => setScreen('figma')}
           className="flex items-center gap-2 py-1 text-[12px] text-muted transition-colors hover:text-ink"
         >
           <AppIcon name="ArrowLeft" size={16} />
-          к календарю
+          к аналитике
         </button>
 
         <section className="rounded-card bg-surface p-6">
@@ -153,115 +153,6 @@ export function ProfileView() {
           </div>
         </Card>
 
-        <Card title="Календарь">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Вид по умолчанию">
-              <Select
-                value={settings.defaultView}
-                onChange={(e) => void updateSettings({ defaultView: e.target.value as ViewMode })}
-              >
-                <option value="day">День</option>
-                <option value="week">Неделя</option>
-                <option value="month">Месяц</option>
-                <option value="agenda">Список</option>
-              </Select>
-            </Field>
-            <Field label="Первый день недели">
-              <Select
-                value={String(settings.firstDayOfWeek)}
-                onChange={(e) =>
-                  void updateSettings({ firstDayOfWeek: Number(e.target.value) as 0 | 1 })
-                }
-              >
-                <option value="1">Понедельник</option>
-                <option value="0">Воскресенье</option>
-              </Select>
-            </Field>
-            <Field label="Формат времени">
-              <Select
-                value={settings.timeFormat}
-                onChange={(e) =>
-                  void updateSettings({ timeFormat: e.target.value as '24h' | '12h' })
-                }
-              >
-                <option value="24h">24 часа</option>
-                <option value="12h">12 часов (AM/PM)</option>
-              </Select>
-            </Field>
-            <Field label="Часы в сетке дня">
-              <div className="flex items-center gap-2">
-                <Select
-                  value={String(settings.dayStartHour)}
-                  onChange={(e) => void updateSettings({ dayStartHour: Number(e.target.value) })}
-                >
-                  {Array.from({ length: 13 }, (_, i) => i).map((hour) => (
-                    <option key={hour} value={hour}>
-                      с {String(hour).padStart(2, '0')}:00
-                    </option>
-                  ))}
-                </Select>
-                <Select
-                  value={String(settings.dayEndHour)}
-                  onChange={(e) => void updateSettings({ dayEndHour: Number(e.target.value) })}
-                >
-                  {Array.from({ length: 13 }, (_, i) => i + 12).map((hour) => (
-                    <option key={hour} value={hour}>
-                      до {String(hour).padStart(2, '0')}:00
-                    </option>
-                  ))}
-                </Select>
-              </div>
-            </Field>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            <Row label="Показывать отклонённые события">
-              <Switch
-                checked={settings.showDeclined}
-                onChange={(value) => void updateSettings({ showDeclined: value })}
-              />
-            </Row>
-            <Row label="Показывать выходные">
-              <Switch
-                checked={settings.showWeekends}
-                onChange={(value) => void updateSettings({ showWeekends: value })}
-              />
-            </Row>
-          </div>
-        </Card>
-
-        <Card title={`календари · ${calendars.length}`}>
-          <div className="divide-y divide-[var(--line)]">
-            {calendars.map((calendar) => (
-              <div key={calendar.id} className="flex items-center gap-3 py-2.5">
-                <span
-                  className="h-3 w-3 shrink-0 rounded-full"
-                  style={{ background: calendar.backgroundColor }}
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-[14px] text-ink">
-                    {calendar.summaryOverride ?? calendar.summary}
-                  </div>
-                  <div className="truncate text-[12px] text-faint">{calendar.id}</div>
-                </div>
-                {calendar.primary ? <Chip tone="grass">Основной</Chip> : null}
-                <Chip>{accessLabel(calendar.accessRole)}</Chip>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {Object.keys(googleSettings).length ? (
-          <Card title="Настройки из Google">
-            <div className="grid gap-2 sm:grid-cols-2">
-              <Meta label="Часовой пояс" value={googleSettings.timezone ?? '—'} />
-              <Meta label="Формат времени" value={googleSettings.format24HourTime === 'true' ? '24 часа' : '12 часов'} />
-              <Meta label="Начало недели" value={weekStartLabel(googleSettings.weekStart)} />
-              <Meta label="Локаль" value={googleSettings.locale ?? '—'} />
-            </div>
-          </Card>
-        ) : null}
-
         <Card title="О приложении">
           <div className="grid gap-2 sm:grid-cols-2">
             <Meta label="Figma Analytics" value={appInfo?.version ?? '—'} />
@@ -299,8 +190,9 @@ export function ProfileView() {
         }
       >
         <p className="pb-4 text-[14px] leading-relaxed text-muted">
-          Figma Analytics удалит сохранённые токены и отзовёт разрешение на стороне Google. Данные календаря
-          останутся в Google без изменений — приложение просто потеряет к ним доступ.
+          Figma Analytics удалит сохранённые токены и отзовёт разрешение на стороне Google.
+          Аккаунт и его данные останутся без изменений — приложение просто перестанет вас узнавать,
+          и для входа понадобится подключить Google заново.
         </p>
       </Modal>
     </div>
@@ -334,24 +226,3 @@ function Meta({ label, value }: { label: string; value: string }) {
   )
 }
 
-function accessLabel(role: string) {
-  switch (role) {
-    case 'owner':
-      return 'владелец'
-    case 'writer':
-      return 'редактор'
-    case 'reader':
-      return 'чтение'
-    case 'freeBusyReader':
-      return 'занятость'
-    default:
-      return role
-  }
-}
-
-function weekStartLabel(value?: string) {
-  if (value === '0') return 'Воскресенье'
-  if (value === '1') return 'Понедельник'
-  if (value === '6') return 'Суббота'
-  return '—'
-}

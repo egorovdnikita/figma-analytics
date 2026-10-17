@@ -22,14 +22,6 @@ export type FontVariant = 'inter' | 'inter-display' | 'inter-tight' | 'inter-var
 
 export interface AppSettings {
   theme: 'light' | 'dark' | 'system'
-  defaultView: 'day' | 'week' | 'month' | 'agenda'
-  firstDayOfWeek: 0 | 1
-  timeFormat: '24h' | '12h'
-  showWeekends: boolean
-  showDeclined: boolean
-  hiddenCalendarIds: string[]
-  dayStartHour: number
-  dayEndHour: number
   iconStyle: IconStyle
   iconStyleArrows: IconStyle
   fontFamily: FontVariant
@@ -37,14 +29,6 @@ export interface AppSettings {
 
 export const defaultSettings: AppSettings = {
   theme: 'system',
-  defaultView: 'week',
-  firstDayOfWeek: 1,
-  timeFormat: '24h',
-  showWeekends: true,
-  showDeclined: true,
-  hiddenCalendarIds: [],
-  dayStartHour: 0,
-  dayEndHour: 24,
   iconStyle: 'linear',
   iconStyleArrows: 'linear',
   fontFamily: 'inter-variable',

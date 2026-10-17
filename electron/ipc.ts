@@ -1,7 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain, nativeTheme, shell } from 'electron'
 import fs from 'node:fs'
 import * as auth from './auth'
-import * as google from './google'
 import * as figma from './figma'
 import * as figmaCache from './figmaCache'
 import {
@@ -79,27 +78,6 @@ export function registerIpc(getWindow: () => BrowserWindow | null) {
     clearCredentials()
     return true
   })
-
-  /* календарь */
-  handle('calendar:list', () => google.listCalendars())
-  handle('calendar:setSelected', (id: string, selected: boolean) =>
-    google.updateCalendarSelected(id, selected),
-  )
-  handle('events:list', (args: google.ListEventsArgs) => google.listEvents(args))
-  handle('events:create', (calendarId: string, event: Record<string, unknown>) =>
-    google.createEvent(calendarId, event),
-  )
-  handle('events:update', (calendarId: string, eventId: string, patch: Record<string, unknown>) =>
-    google.updateEvent(calendarId, eventId, patch),
-  )
-  handle('events:delete', (calendarId: string, eventId: string) =>
-    google.deleteEvent(calendarId, eventId),
-  )
-  handle('events:respond', (calendarId: string, eventId: string, response: any) =>
-    google.respondToEvent(calendarId, eventId, response),
-  )
-  handle('calendar:colors', () => google.getColors())
-  handle('calendar:googleSettings', () => google.getUserSettings())
 
   /* настройки приложения */
   handle('settings:get', () => getSettings())

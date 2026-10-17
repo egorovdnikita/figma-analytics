@@ -101,18 +101,18 @@ export function SignInScreen() {
     <Layout>
       <Brand />
       <h1 className="text-[28px] font-bold leading-tight text-ink">
-        ваш цифровой мозг начинается с календаря
+        вход в Figma Analytics
       </h1>
       <p className="mt-3 text-[14px] leading-relaxed text-muted">
-        Подключите аккаунт Google — Figma Analytics покажет все ваши календари, события и участников, и
-        позволит их менять прямо отсюда.
+        Аккаунт Google нужен только для входа и карточки профиля. Приложение не читает ни
+        календарь, ни почту, ни диск — аналитика собирается из вашего пространства Figma.
       </p>
 
       <ul className="mt-6 space-y-2.5">
         {[
-          'Просмотр по дням, неделям, месяцам и списком',
-          'Создание, редактирование и удаление событий',
-          'Участники, повторения, напоминания и цвета',
+          'Запрашиваются три разрешения: идентификатор, адрес почты, имя и фото',
+          'Данные Google никуда не отправляются и не сохраняются на сервере',
+          'Доступ можно отозвать в профиле в один клик',
         ].map((item) => (
           <li key={item} className="flex items-start gap-2.5 text-[14px] text-ink">
             <AppIcon name="ShieldCheck" size={16} className="mt-0.5 shrink-0 text-[var(--grass)]" />

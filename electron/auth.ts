@@ -15,13 +15,12 @@ const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token'
 const REVOKE_ENDPOINT = 'https://oauth2.googleapis.com/revoke'
 const USERINFO_ENDPOINT = 'https://openidconnect.googleapis.com/v1/userinfo'
 
-export const SCOPES = [
-  'openid',
-  'email',
-  'profile',
-  'https://www.googleapis.com/auth/calendar',
-  'https://www.googleapis.com/auth/calendar.events',
-]
+/* Google нужен приложению только для входа и карточки аккаунта: ни календаря,
+ * ни почты, ни диска оно не читает. Поэтому запрашиваем минимум — три scope
+ * профиля. Токены, выданные раньше с доступом к календарю, продолжают
+ * работать; чтобы снять лишнее разрешение, достаточно отозвать доступ в
+ * профиле и войти заново. */
+export const SCOPES = ['openid', 'email', 'profile']
 
 export class AuthError extends Error {
   code: string
