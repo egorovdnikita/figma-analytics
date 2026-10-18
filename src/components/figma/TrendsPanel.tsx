@@ -123,7 +123,7 @@ export function TrendsPanel({
           />
         }
         table={
-          <table className="w-full text-[13px]">
+          <table className="w-full text-[14px]">
             <thead>
               <tr className="text-left text-[12px] text-faint">
                 <th className="pb-1.5 font-medium">Период</th>
@@ -182,7 +182,7 @@ export function TrendsPanel({
             />
           }
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <thead>
                 <tr className="text-left text-[12px] text-faint">
                   <th className="pb-1.5 font-medium">Период</th>
@@ -223,7 +223,7 @@ export function TrendsPanel({
           title="Накопленный объём"
           subtitle="Как рос суммарный след команды"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {model.timeline.map((bucket, index) => (
                   <tr key={bucket.key} className="border-t border-line">
@@ -258,7 +258,7 @@ export function TrendsPanel({
         title="Календарь активности"
         subtitle="Каждый день за последний год — сразу видны отпуска, авралы и мёртвые недели"
         table={
-          <table className="w-full text-[13px]">
+          <table className="w-full text-[14px]">
             <tbody>
               {model.calendar.cells
                 .filter((cell) => cell.count > 0)
@@ -284,7 +284,7 @@ export function TrendsPanel({
           title="Сезонность по месяцам"
           subtitle="Год × месяц за всю историю"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {model.matrix.rows.map((row) => (
                   <tr key={row.year} className="border-t border-line">
@@ -305,7 +305,7 @@ export function TrendsPanel({
           title="Изменение по типам событий"
           subtitle={`текущий период ${PREVIOUS_LABEL[granularity]}`}
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {model.kindDeltas.map((row) => (
                   <tr key={row.kind} className="border-t border-line">
@@ -325,9 +325,9 @@ export function TrendsPanel({
               const positive = (row.delta ?? 0) >= 0
               return (
                 <div key={row.kind}>
-                  <div className="mb-1 flex items-baseline justify-between text-[13px]">
+                  <div className="mb-1 flex items-baseline justify-between text-[14px]">
                     <span className="flex items-center gap-1.5 text-ink">
-                      <span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: EVENT_COLOR_VAR[row.kind] }} />
+                      <span className="h-2.5 w-2.5 rounded-[2px]" style={{ background: EVENT_COLOR_VAR[row.kind] }} />
                       {EVENT_LABELS[row.kind]}
                     </span>
                     <span
@@ -361,7 +361,7 @@ export function TrendsPanel({
         title="Кто поднимается и падает в рейтинге"
         subtitle="Место участника по активности в каждом периоде — 1 сверху"
         table={
-          <table className="w-full text-[13px]">
+          <table className="w-full text-[14px]">
             <thead>
               <tr className="text-left text-[12px] text-faint">
                 <th className="pb-1.5 font-medium">Участник</th>
@@ -388,7 +388,7 @@ export function TrendsPanel({
         }
       >
         {model.rank.series.length === 0 ? (
-          <p className="text-[13px] text-muted">Недостаточно данных</p>
+          <p className="text-[12px] text-muted">Недостаточно данных</p>
         ) : (
           <BumpChart
             series={model.rank.series}
@@ -403,7 +403,7 @@ export function TrendsPanel({
         title="Темп каждого участника"
         subtitle="Одинаковый масштаб времени, разные люди — видно, кто разогнался, а кто затих"
         table={
-          <table className="w-full text-[13px]">
+          <table className="w-full text-[14px]">
             <tbody>
               {model.perPersonSeries.map((entry) => (
                 <tr key={entry.label} className="border-t border-line">

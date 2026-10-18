@@ -49,7 +49,7 @@ export function FigmaFileDetail({
         )}
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-[16px] font-semibold text-ink">{meta?.name ?? fallbackName}</h2>
-          <p className="mt-0.5 text-[13px] text-muted">
+          <p className="mt-0.5 text-[12px] text-muted">
             {meta ? (
               <>
                 Обновлён {relativeTime(meta.lastModified)} · роль: {meta.role}
@@ -191,7 +191,7 @@ function VersionsTab({ fileKey }: { fileKey: string }) {
           </Button>
         </div>
       ) : items.length === 0 ? (
-        <p className="p-3 text-[13px] text-faint">Истории версий пока нет</p>
+        <p className="p-3 text-[12px] text-faint">Истории версий пока нет</p>
       ) : null}
     </section>
   )
@@ -233,7 +233,7 @@ function CommentsTab({ fileKey }: { fileKey: string }) {
       />
 
       {threads.length === 0 ? (
-        <p className="rounded-card bg-surface p-4 text-[13px] text-faint">
+        <p className="rounded-card bg-surface p-4 text-[12px] text-faint">
           {filter === 'open' ? 'Открытых обсуждений нет' : 'Комментариев пока нет'}
         </p>
       ) : (

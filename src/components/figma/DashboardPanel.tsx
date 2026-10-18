@@ -247,7 +247,7 @@ export function DashboardPanel({
           }
         >
           {model.topPeople.length === 0 ? (
-            <p className="text-[13px] text-muted">За период активности не было</p>
+            <p className="text-[12px] text-muted">За период активности не было</p>
           ) : (
             <HBars items={model.topPeople} color="var(--viz-5)" />
           )}
@@ -293,7 +293,7 @@ export function DashboardPanel({
 
 function SimpleTable({ head, rows }: { head: string[]; rows: string[][] }) {
   return (
-    <table className="w-full text-[13px]">
+    <table className="w-full text-[14px]">
       <thead>
         <tr className="text-left text-[12px] text-faint">
           {head.map((cell, i) => (

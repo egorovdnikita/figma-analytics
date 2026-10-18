@@ -95,7 +95,7 @@ export function SettingsPanel({
   return (
     <div className="space-y-3">
       {notice ? (
-        <p className="rounded-card bg-surface p-3 text-[13px] text-ink">{notice}</p>
+        <p className="rounded-card bg-surface p-3 text-[14px] text-ink">{notice}</p>
       ) : null}
 
       <section className="rounded-card bg-surface p-4">
@@ -131,7 +131,7 @@ export function SettingsPanel({
               <Select
                 value={String(prefs.workdayStart)}
                 onChange={(event) => void patch({ workdayStart: Number(event.target.value) })}
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               >
                 {HOURS.map((hour) => (
                   <option key={hour} value={hour}>{`${String(hour).padStart(2, '0')}:00`}</option>
@@ -142,7 +142,7 @@ export function SettingsPanel({
               <Select
                 value={String(prefs.workdayEnd)}
                 onChange={(event) => void patch({ workdayEnd: Number(event.target.value) })}
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               >
                 {HOURS.map((hour) => (
                   <option key={hour} value={hour}>{`${String(hour).padStart(2, '0')}:00`}</option>
@@ -153,7 +153,7 @@ export function SettingsPanel({
               <Select
                 value={String(prefs.nightStart)}
                 onChange={(event) => void patch({ nightStart: Number(event.target.value) })}
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               >
                 {HOURS.map((hour) => (
                   <option key={hour} value={hour}>{`${String(hour).padStart(2, '0')}:00`}</option>
@@ -164,7 +164,7 @@ export function SettingsPanel({
               <Select
                 value={String(prefs.nightEnd)}
                 onChange={(event) => void patch({ nightEnd: Number(event.target.value) })}
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               >
                 {HOURS.map((hour) => (
                   <option key={hour} value={hour}>{`${String(hour).padStart(2, '0')}:00`}</option>
@@ -181,7 +181,7 @@ export function SettingsPanel({
                   key={day.value}
                   type="button"
                   onClick={() => toggleWeekend(day.value)}
-                  className={`h-8 w-11 rounded-control text-[13px] transition-colors ${
+                  className={`h-8 w-11 rounded-control text-[12px] transition-colors ${
                     prefs.weekendDays.includes(day.value)
                       ? 'bg-[var(--grass)] text-white'
                       : 'bg-[var(--sunken)] text-muted hover:text-ink'
@@ -217,7 +217,7 @@ export function SettingsPanel({
                       timelineBuckets: { ...prefs.timelineBuckets, [key]: Number(event.target.value) || 1 },
                     })
                   }
-                  className="h-9 text-[13px]"
+                  className="h-9 text-[14px]"
                 />
               </Field>
             ))}
@@ -231,7 +231,7 @@ export function SettingsPanel({
               <Select
                 value={String(prefs.autoSyncMinutes)}
                 onChange={(event) => void patch({ autoSyncMinutes: Number(event.target.value) })}
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               >
                 <option value="0">только вручную</option>
                 <option value="15">каждые 15 минут</option>
@@ -249,7 +249,7 @@ export function SettingsPanel({
                 max={2000}
                 value={prefs.syncDepthPages}
                 onChange={(event) => void patch({ syncDepthPages: Number(event.target.value) || 1 })}
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               />
             </Field>
             <Field label="Файлов параллельно" hint="Темп всё равно ограничен лимитом Figma">
@@ -259,7 +259,7 @@ export function SettingsPanel({
                 max={12}
                 value={prefs.syncConcurrency}
                 onChange={(event) => void patch({ syncConcurrency: Number(event.target.value) || 1 })}
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               />
             </Field>
             <Field
@@ -272,7 +272,7 @@ export function SettingsPanel({
                 max={200}
                 value={prefs.commentsRotation}
                 onChange={(event) => void patch({ commentsRotation: Number(event.target.value) || 0 })}
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               />
             </Field>
           </div>
@@ -291,7 +291,7 @@ export function SettingsPanel({
               <Select
                 value={prefs.density}
                 onChange={(event) => void patch({ density: event.target.value as 'compact' | 'comfortable' })}
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               >
                 <option value="comfortable">Просторная</option>
                 <option value="compact">Компактная</option>
@@ -302,7 +302,7 @@ export function SettingsPanel({
               <Select
                 value={prefs.defaultSection}
                 onChange={(event) => void patch({ defaultSection: event.target.value })}
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               >
                 {sections.map((item) => (
                   <option key={item.value} value={item.value}>
@@ -341,7 +341,7 @@ export function SettingsPanel({
                     },
                   })
                 }
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               />
             </Field>
             <Field label="Без ответа, дней">
@@ -358,7 +358,7 @@ export function SettingsPanel({
                     },
                   })
                 }
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               />
             </Field>
             <Field label="Концентрация, %">
@@ -375,7 +375,7 @@ export function SettingsPanel({
                     },
                   })
                 }
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               />
             </Field>
             <Field label="Значимое изменение, %">
@@ -392,7 +392,7 @@ export function SettingsPanel({
                     },
                   })
                 }
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               />
             </Field>
             <Field label="Ночная работа, %">
@@ -409,7 +409,7 @@ export function SettingsPanel({
                     },
                   })
                 }
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               />
             </Field>
           </div>
@@ -479,7 +479,7 @@ export function SettingsPanel({
               label={`${person.handle} · ${person.events.toLocaleString('ru')} событий`}
             />
           ))}
-          {directory.length === 0 ? <p className="text-[13px] text-muted">Нет данных</p> : null}
+          {directory.length === 0 ? <p className="text-[12px] text-muted">Нет данных</p> : null}
         </div>
       </section>
     </div>

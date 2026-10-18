@@ -62,7 +62,7 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
     return (
       <div className="rounded-card bg-surface p-4">
         <h3 className="text-[14px] font-semibold text-ink">{team.label || team.id}</h3>
-        <p className="mt-1 text-[13px] text-muted">
+        <p className="mt-1 text-[12px] text-muted">
           Библиотека недоступна: у токена нет прав на library-эндпоинты этой команды либо в ней нет
           опубликованных файлов.
         </p>
@@ -76,7 +76,7 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
     return (
       <div className="rounded-card bg-surface p-4">
         <h3 className="text-[14px] font-semibold text-ink">{team.label || team.id}</h3>
-        <p className="mt-1 text-[13px] text-muted">В команде нет опубликованной библиотеки.</p>
+        <p className="mt-1 text-[12px] text-muted">В команде нет опубликованной библиотеки.</p>
       </div>
     )
   }
@@ -111,7 +111,7 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
           title="Состав библиотеки"
           subtitle={`всего опубликовано: ${total}`}
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 <tr className="border-t border-line">
                   <td className="py-1.5 text-ink">Компоненты</td>
@@ -144,7 +144,7 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
           title="Кто ведёт дизайн-систему"
           subtitle="Публикации по авторам"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {summary.byAuthor.map((author) => (
                   <tr key={author.handle} className="border-t border-line">
@@ -171,7 +171,7 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
           {summary.recent.map((item) => (
             <div key={item.key} className="flex items-center gap-2.5 rounded-control px-2 py-1.5">
               <Avatar src={item.user.img_url} name={item.user.handle} size={22} />
-              <span className="min-w-0 flex-1 truncate text-[13.5px] text-ink">{item.name}</span>
+              <span className="min-w-0 flex-1 truncate text-[14px] text-ink">{item.name}</span>
               <span className="shrink-0 rounded-chip bg-[var(--sunken)] px-2 py-0.5 text-[12px] text-muted">
                 {KIND_LABELS[item.kind]}
               </span>

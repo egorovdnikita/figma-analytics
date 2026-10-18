@@ -119,7 +119,7 @@ export function Legend({ items }: { items: { label: string; color: string }[] })
     <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
       {items.map((item) => (
         <li key={item.label} className="flex items-center gap-1.5 text-[12px] text-muted">
-          <span className="h-2.5 w-2.5 shrink-0 rounded-[3px]" style={{ background: item.color }} aria-hidden />
+          <span className="h-2.5 w-2.5 shrink-0 rounded-[2px]" style={{ background: item.color }} aria-hidden />
           {item.label}
         </li>
       ))}
@@ -530,7 +530,7 @@ export function HBars({
     <div className="space-y-2">
       {items.map((item) => (
         <div key={item.label} className="flex items-center gap-3">
-          <span className="w-[38%] shrink-0 truncate text-[13px] text-ink" title={item.label}>
+          <span className="w-[38%] shrink-0 truncate text-[14px] text-ink" title={item.label}>
             {item.label}
           </span>
           <div className="relative h-3 flex-1 overflow-hidden rounded-[4px] bg-[var(--sunken)]">
@@ -540,7 +540,7 @@ export function HBars({
               title={item.hint}
             />
           </div>
-          <span className="w-12 shrink-0 text-right text-[13px] text-muted [font-variant-numeric:tabular-nums]">
+          <span className="w-12 shrink-0 text-right text-[12px] text-muted [font-variant-numeric:tabular-nums]">
             {formatValue(item.value)}
           </span>
         </div>
@@ -580,7 +580,7 @@ export function Heatmap({
         {rows.map((row, rowIndex) => (
           <div key={row} className="flex items-center gap-1">
             <span className="w-6 shrink-0 text-[10px] text-muted">{row}</span>
-            <div className="flex flex-1 gap-[3px]">
+            <div className="flex flex-1 gap-1">
               {grid[rowIndex].map((value, hour) => (
                 <div
                   key={hour}
@@ -679,8 +679,8 @@ export function Donut({
       </svg>
       <ul className="min-w-0 flex-1 space-y-1.5">
         {segments.map((segment) => (
-          <li key={segment.label} className="flex items-center gap-2 text-[13px]">
-            <span className="h-2.5 w-2.5 shrink-0 rounded-[3px]" style={{ background: segment.color }} />
+          <li key={segment.label} className="flex items-center gap-2 text-[14px]">
+            <span className="h-2.5 w-2.5 shrink-0 rounded-[2px]" style={{ background: segment.color }} />
             <span className="min-w-0 flex-1 truncate text-ink">{segment.label}</span>
             <span className="shrink-0 text-muted [font-variant-numeric:tabular-nums]">
               {segment.value} · {total ? Math.round((segment.value / total) * 100) : 0}%
@@ -752,7 +752,7 @@ export function StatTile({
 
   return (
     <div className="viz relative overflow-hidden rounded-card bg-surface p-4">
-      <p className="text-[13px] text-muted">{label}</p>
+      <p className="text-[12px] text-muted">{label}</p>
 
       <div className="mt-2 flex items-end justify-between gap-3">
         <p className="font-display display-lg text-ink">{value}</p>
@@ -877,7 +877,7 @@ export function EmptyBlock({
       ) : null}
       <p className="text-[14px] font-semibold text-ink">{title}</p>
       {description ? (
-        <p className="max-w-[380px] text-[13px] leading-relaxed text-muted">{description}</p>
+        <p className="max-w-[380px] text-[12px] leading-relaxed text-muted">{description}</p>
       ) : null}
       {action ? <div className="mt-1">{action}</div> : null}
     </div>
@@ -900,13 +900,13 @@ export function ComparisonBars({
     <div className="space-y-3">
       {items.map((item) => (
         <div key={item.label}>
-          <div className="mb-1 flex items-baseline justify-between text-[13px]">
+          <div className="mb-1 flex items-baseline justify-between text-[14px]">
             <span className="text-ink">{item.label}</span>
             <span className="text-muted [font-variant-numeric:tabular-nums]">
               {item.current} / {item.previous}
             </span>
           </div>
-          <div className="space-y-[3px]">
+          <div className="space-y-0.5">
             <div className="h-2.5 rounded-[4px]" style={{ width: `${Math.max(1, (item.current / max) * 100)}%`, background: 'var(--viz-1)' }} />
             <div className="h-2.5 rounded-[4px]" style={{ width: `${Math.max(1, (item.previous / max) * 100)}%`, background: 'var(--viz-axis)' }} />
           </div>
@@ -995,19 +995,19 @@ export function CalendarHeatmap({
     <div ref={ref} className="relative">
       <div className="scroll-thin overflow-x-auto pb-1">
         <div className="inline-block min-w-full">
-          <div className="mb-1 flex gap-[3px] pl-7">
+          <div className="mb-1 flex gap-0.5 pl-7">
             {visible.map((_, index) => {
               const label = monthLabels.find((entry) => entry.index === index)
               return (
-                <span key={index} className="w-[12px] shrink-0 text-[9px] text-muted">
+                <span key={index} className="w-[12px] shrink-0 text-[10px] text-muted">
                   {label ? label.label : ''}
                 </span>
               )
             })}
           </div>
 
-          <div className="flex gap-[3px]">
-            <div className="flex w-6 shrink-0 flex-col gap-[3px] text-[9px] text-muted">
+          <div className="flex gap-0.5">
+            <div className="flex w-6 shrink-0 flex-col gap-0.5 text-[10px] text-muted">
               {['Пн', '', 'Ср', '', 'Пт', '', 'Вс'].map((label, index) => (
                 <span key={index} className="h-[12px] leading-[12px]">
                   {label}
@@ -1016,11 +1016,11 @@ export function CalendarHeatmap({
             </div>
 
             {visible.map((col, colIndex) => (
-              <div key={colIndex} className="flex flex-col gap-[3px]">
+              <div key={colIndex} className="flex flex-col gap-0.5">
                 {col.map((cell, rowIndex) => (
                   <div
                     key={rowIndex}
-                    className="h-[12px] w-[12px] shrink-0 rounded-[3px]"
+                    className="h-[12px] w-[12px] shrink-0 rounded-[2px]"
                     style={{ background: cell ? step(cell.count) : 'transparent' }}
                     onMouseEnter={(event) => {
                       if (!cell) return
@@ -1240,7 +1240,7 @@ export function ScatterPlot({
       ) : (
         <div style={{ height }} />
       )}
-      <p className="mt-1 text-[11px] text-muted">
+      <p className="mt-1 text-[12px] text-muted">
         по горизонтали — {xLabel}, по вертикали — {yLabel}
       </p>
       <Tooltip state={tooltip} width={width} />
@@ -1261,7 +1261,7 @@ export function SmallMultiples({
     <div className="grid grid-cols-2 gap-x-4 gap-y-2">
       {items.map((item) => (
         <div key={item.label} className="flex items-center gap-2">
-          <span className="w-[38%] shrink-0 truncate text-[12.5px] text-ink" title={item.label}>
+          <span className="w-[38%] shrink-0 truncate text-[12px] text-ink" title={item.label}>
             {item.label}
           </span>
           <Sparkline values={item.values} color={color} width={96} height={24} />
@@ -1313,7 +1313,7 @@ export function YearMonthGrid({
             {row.months.map((value, month) => (
               <div
                 key={month}
-                className="h-7 flex-1 rounded-[5px]"
+                className="h-7 flex-1 rounded-[4px]"
                 style={{ background: step(value) }}
                 onMouseEnter={(event) => {
                   const parent = event.currentTarget.closest('.relative') as HTMLElement | null
@@ -1423,15 +1423,15 @@ export function HealthRing({
       <ul className="min-w-0 flex-1 space-y-2">
         {factors.map((factor) => (
           <li key={factor.key}>
-            <div className="mb-1 flex items-baseline justify-between gap-2 text-[13px]">
+            <div className="mb-1 flex items-baseline justify-between gap-2 text-[14px]">
               <span className="truncate text-ink">{factor.label}</span>
               <span className="shrink-0 text-muted [font-variant-numeric:tabular-nums]">
                 {Math.round(factor.score)}
               </span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-[3px] bg-[var(--sunken)]">
+            <div className="h-1.5 overflow-hidden rounded-full bg-[var(--sunken)]">
               <div
-                className="h-full rounded-[3px]"
+                className="h-full rounded-full"
                 style={{
                   width: `${Math.max(2, Math.min(100, factor.score))}%`,
                   background:
@@ -1439,7 +1439,7 @@ export function HealthRing({
                 }}
               />
             </div>
-            <p className="mt-0.5 truncate text-[11.5px] text-faint" title={factor.detail}>
+            <p className="mt-0.5 truncate text-[12px] text-faint" title={factor.detail}>
               {factor.detail}
             </p>
           </li>
@@ -1468,7 +1468,7 @@ export function Histogram({
   const [tooltip, setTooltip] = useState<TooltipState | null>(null)
 
   if (values.length === 0) {
-    return <p className="text-[13px] text-muted">Недостаточно данных</p>
+    return <p className="text-[12px] text-muted">Недостаточно данных</p>
   }
 
   const max = Math.max(...values)
@@ -1693,16 +1693,16 @@ export function CohortGrid({
           <div className="space-y-1">
             {rows.map((row) => (
               <div key={row.cohort} className="flex items-center gap-1">
-                <span className="w-[64px] shrink-0 text-[11.5px] text-ink [font-variant-numeric:tabular-nums]">
+                <span className="w-[64px] shrink-0 text-[12px] text-ink [font-variant-numeric:tabular-nums]">
                   {row.cohort}
                 </span>
-                <span className="w-[36px] shrink-0 text-right text-[11.5px] text-muted [font-variant-numeric:tabular-nums]">
+                <span className="w-[36px] shrink-0 text-right text-[12px] text-muted [font-variant-numeric:tabular-nums]">
                   {row.size}
                 </span>
                 {row.cells.slice(0, months).map((cell, index) => (
                   <div
                     key={index}
-                    className="h-7 flex-1 rounded-[5px]"
+                    className="h-7 flex-1 rounded-[4px]"
                     style={{ background: step(cell) }}
                     onMouseEnter={(event) => {
                       if (cell === null) return
@@ -1746,7 +1746,7 @@ export function NetworkGraph({
   const [tooltip, setTooltip] = useState<TooltipState | null>(null)
 
   if (nodes.length === 0) {
-    return <p className="text-[13px] text-muted">Недостаточно данных для графа</p>
+    return <p className="text-[12px] text-muted">Недостаточно данных для графа</p>
   }
 
   // Раскладка по кругу: детерминированная и читаемая, в отличие от
@@ -1845,9 +1845,9 @@ export function StageFunnel({
     <div className="space-y-2">
       {stages.map((stage) => (
         <div key={stage.label}>
-          <div className="mb-1 flex items-baseline justify-between text-[13px]">
+          <div className="mb-1 flex items-baseline justify-between text-[14px]">
             <span className="flex items-center gap-1.5 text-ink">
-              <span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: stage.color }} />
+              <span className="h-2.5 w-2.5 rounded-[2px]" style={{ background: stage.color }} />
               {stage.label}
             </span>
             <span className="text-muted [font-variant-numeric:tabular-nums]">

@@ -56,12 +56,12 @@ export function ActivityPanel({
             type="button"
             onClick={() => toggle(kind)}
             className={cn(
-              'flex h-7 items-center gap-1.5 rounded-chip px-2.5 text-[13px] transition-colors',
+              'flex h-7 items-center gap-1.5 rounded-chip px-2.5 text-[14px] transition-colors',
               kinds.has(kind) ? 'bg-[var(--sunken)] text-ink' : 'text-faint hover:text-muted',
             )}
             aria-pressed={kinds.has(kind)}
           >
-            <span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: EVENT_COLOR_VAR[kind] }} />
+            <span className="h-2.5 w-2.5 rounded-[2px]" style={{ background: EVENT_COLOR_VAR[kind] }} />
             {EVENT_LABELS[kind]}
           </button>
         ))}
@@ -73,7 +73,7 @@ export function ActivityPanel({
               setLimit(PAGE)
             }}
             placeholder="Поиск по автору, файлу, тексту…"
-            className="h-8 text-[13px]"
+            className="h-8 text-[14px]"
           />
         </div>
       </div>
@@ -102,12 +102,12 @@ export function ActivityPanel({
                   <span className="h-[22px] w-[22px] shrink-0 rounded-full bg-[var(--sunken)]" aria-hidden />
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13.5px] text-ink">
+                  <p className="text-[14px] text-ink">
                     <span className="font-medium">{event.handle || 'Система'}</span>{' '}
                     <span className="text-muted">{describe(event)}</span>
                   </p>
                   {event.message ? (
-                    <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-muted">{event.message}</p>
+                    <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-muted">{event.message}</p>
                   ) : null}
                   <p className="mt-0.5 text-[12px] text-faint">
                     {event.fileName}
@@ -128,7 +128,7 @@ export function ActivityPanel({
             <button
               type="button"
               onClick={() => setLimit((v) => v + PAGE)}
-              className="h-8 rounded-control px-3 text-[13px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
+              className="h-8 rounded-control px-3 text-[12px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
             >
               Показать ещё {Math.min(PAGE, filtered.length - visible.length)}
             </button>

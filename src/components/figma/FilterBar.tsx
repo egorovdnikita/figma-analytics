@@ -146,13 +146,13 @@ export function FilterBar({
               </div>
             ) : null}
 
-            <span className="text-[13px] text-muted">
+            <span className="text-[12px] text-muted">
               {filters.from || filters.to
                 ? `${filters.from ?? '…'} — ${filters.to ?? 'сегодня'}`
                 : `сравнение ${windowLabel}`}
             </span>
 
-            <span className="text-[13px] text-faint [font-variant-numeric:tabular-nums]">
+            <span className="text-[12px] text-faint [font-variant-numeric:tabular-nums]">
               {matchedCount.toLocaleString('ru')} из {totalCount.toLocaleString('ru')}
             </span>
 
@@ -206,20 +206,20 @@ export function FilterBar({
       >
         <div className="space-y-5 pb-2">
           <section>
-            <h4 className="mb-2 text-[13px] font-semibold text-ink">Произвольный период</h4>
+            <h4 className="mb-2 text-[14px] font-semibold text-ink">Произвольный период</h4>
             <div className="flex items-center gap-2">
               <Input
                 type="date"
                 value={filters.from ?? ''}
                 onChange={(event) => onChange({ ...filters, from: event.target.value || null })}
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               />
-              <span className="text-[13px] text-muted">—</span>
+              <span className="text-[12px] text-muted">—</span>
               <Input
                 type="date"
                 value={filters.to ?? ''}
                 onChange={(event) => onChange({ ...filters, to: event.target.value || null })}
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               />
             </div>
             <p className="mt-1.5 text-[12px] text-muted">
@@ -228,7 +228,7 @@ export function FilterBar({
           </section>
 
           <section>
-            <h4 className="mb-2 text-[13px] font-semibold text-ink">Сохранённые наборы</h4>
+            <h4 className="mb-2 text-[14px] font-semibold text-ink">Сохранённые наборы</h4>
             <p className="mb-2 text-[12px] text-muted">
               Текущая комбинация фильтров сохраняется под именем и остаётся доступной после перезапуска.
             </p>
@@ -237,7 +237,7 @@ export function FilterBar({
                 value={presetName}
                 onChange={(event) => setPresetName(event.target.value)}
                 placeholder="Название набора"
-                className="h-9 text-[13px]"
+                className="h-9 text-[14px]"
               />
               <Button
                 variant="soft"
@@ -256,7 +256,7 @@ export function FilterBar({
                 {presets.map((item) => (
                   <span
                     key={item.id}
-                    className="flex h-7 items-center gap-1.5 rounded-chip bg-[var(--sunken)] px-2.5 text-[13px] text-muted"
+                    className="flex h-7 items-center gap-1.5 rounded-chip bg-[var(--sunken)] px-2.5 text-[12px] text-muted"
                   >
                     <button type="button" onClick={() => onChange(item.filters as FigmaFilters)} className="hover:text-ink">
                       {item.name}
@@ -276,7 +276,7 @@ export function FilterBar({
           </section>
 
           <section>
-            <h4 className="mb-2 text-[13px] font-semibold text-ink">Типы событий</h4>
+            <h4 className="mb-2 text-[14px] font-semibold text-ink">Типы событий</h4>
             <div className="flex flex-wrap gap-1.5">
               {EVENT_KINDS.map((kind) => (
                 <button
@@ -284,14 +284,14 @@ export function FilterBar({
                   type="button"
                   onClick={() => toggleKind(kind)}
                   className={cn(
-                    'flex h-7 items-center gap-1.5 rounded-chip px-2.5 text-[13px] transition-colors',
+                    'flex h-7 items-center gap-1.5 rounded-chip px-2.5 text-[14px] transition-colors',
                     filters.kinds.includes(kind)
                       ? 'bg-[var(--sunken)] text-ink'
                       : 'text-faint hover:text-muted',
                   )}
                   aria-pressed={filters.kinds.includes(kind)}
                 >
-                  <span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: EVENT_COLOR_VAR[kind] }} />
+                  <span className="h-2.5 w-2.5 rounded-[2px]" style={{ background: EVENT_COLOR_VAR[kind] }} />
                   {EVENT_LABELS[kind]}
                 </button>
               ))}
@@ -299,7 +299,7 @@ export function FilterBar({
           </section>
 
           <section>
-            <h4 className="mb-2 text-[13px] font-semibold text-ink">Режим работы</h4>
+            <h4 className="mb-2 text-[14px] font-semibold text-ink">Режим работы</h4>
             <div className="space-y-1">
               <Checkbox
                 checked={filters.workdaysOnly}
@@ -316,7 +316,7 @@ export function FilterBar({
 
           {teams.length > 1 ? (
             <section>
-              <h4 className="mb-2 text-[13px] font-semibold text-ink">
+              <h4 className="mb-2 text-[14px] font-semibold text-ink">
                 Команды {filters.teams.length > 0 ? `(${filters.teams.length})` : ''}
               </h4>
               <div className="space-y-0.5">
@@ -333,7 +333,7 @@ export function FilterBar({
           ) : null}
 
           <section>
-            <h4 className="mb-2 text-[13px] font-semibold text-ink">
+            <h4 className="mb-2 text-[14px] font-semibold text-ink">
               Проекты {filters.projects.length > 0 ? `(${filters.projects.length})` : ''}
             </h4>
             <div className="scroll-thin max-h-[180px] space-y-0.5 overflow-y-auto pr-2">
@@ -345,12 +345,12 @@ export function FilterBar({
                   label={project.name}
                 />
               ))}
-              {projects.length === 0 ? <p className="text-[13px] text-muted">Нет данных</p> : null}
+              {projects.length === 0 ? <p className="text-[12px] text-muted">Нет данных</p> : null}
             </div>
           </section>
 
           <section>
-            <h4 className="mb-2 text-[13px] font-semibold text-ink">
+            <h4 className="mb-2 text-[14px] font-semibold text-ink">
               Участники {filters.people.length > 0 ? `(${filters.people.length})` : ''}
             </h4>
             <div className="scroll-thin max-h-[220px] space-y-0.5 overflow-y-auto pr-2">
@@ -362,7 +362,7 @@ export function FilterBar({
                   label={`${person.handle} · ${person.count}`}
                 />
               ))}
-              {people.length === 0 ? <p className="text-[13px] text-muted">Нет данных</p> : null}
+              {people.length === 0 ? <p className="text-[12px] text-muted">Нет данных</p> : null}
             </div>
           </section>
         </div>

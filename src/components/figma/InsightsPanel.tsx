@@ -121,7 +121,7 @@ export function InsightsPanel({
         title="Пульс пространства"
         subtitle="Сводный индекс из пяти наблюдаемых признаков — каждый виден отдельно"
         table={
-          <table className="w-full text-[13px]">
+          <table className="w-full text-[14px]">
             <tbody>
               {model.health.factors.map((factor) => (
                 <tr key={factor.key} className="border-t border-line">
@@ -156,7 +156,7 @@ export function InsightsPanel({
           title="Куда идёт активность"
           subtitle="Продолжение линейного тренда на 4 периода с коридором в одно σ"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {model.forecastPoints.map((point) => (
                   <tr key={point.label} className="border-t border-line">
@@ -183,7 +183,7 @@ export function InsightsPanel({
           title="Жизненный цикл файлов"
           subtitle="По давности последнего события"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {(Object.keys(FILE_STAGE_LABELS) as FileStage[]).map((stage) => (
                   <tr key={stage} className="border-t border-line">
@@ -213,7 +213,7 @@ export function InsightsPanel({
                   key={row.fileKey}
                   type="button"
                   onClick={() => onOpenFile(row.fileKey, row.name)}
-                  className="flex h-7 w-full items-center gap-2 rounded-control px-2 text-left text-[13px] text-ink hover:bg-[var(--sunken)]"
+                  className="flex h-7 w-full items-center gap-2 rounded-control px-2 text-left text-[14px] text-ink hover:bg-[var(--sunken)]"
                 >
                   <span className="flex-1 truncate">{row.name}</span>
                   <span className="shrink-0 text-[12px] text-faint">{row.days} дн.</span>
@@ -228,7 +228,7 @@ export function InsightsPanel({
           title="Как быстро отвечают"
           subtitle="Распределение времени до первого ответа, в часах"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {model.responders.map((row) => (
                   <tr key={row.handle} className="border-t border-line">
@@ -267,7 +267,7 @@ export function InsightsPanel({
           title="Признаки переработок"
           subtitle="Ночная работа, выходные и длинные серии без перерыва"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <thead>
                 <tr className="text-left text-[12px] text-faint">
                   <th className="pb-1.5 font-medium">Участник</th>
@@ -296,7 +296,7 @@ export function InsightsPanel({
           }
         >
           {model.burnout.length === 0 ? (
-            <p className="text-[13px] text-muted">Недостаточно данных</p>
+            <p className="text-[12px] text-muted">Недостаточно данных</p>
           ) : (
             <>
               <HBars
@@ -321,7 +321,7 @@ export function InsightsPanel({
         title="Граф связей команды"
         subtitle="Кто с кем пересекается в файлах — толщина линии равна числу общих файлов"
         table={
-          <table className="w-full text-[13px]">
+          <table className="w-full text-[14px]">
             <tbody>
               {model.graph.edges.slice(0, 20).map((edge) => (
                 <tr key={`${edge.source}|${edge.target}`} className="border-t border-line">
@@ -344,7 +344,7 @@ export function InsightsPanel({
         title="Удержание участников по когортам"
         subtitle="Строка — месяц первого появления, столбец — сколько из них активны N месяцев спустя"
         table={
-          <table className="w-full text-[13px]">
+          <table className="w-full text-[14px]">
             <tbody>
               {model.cohorts.map((row) => (
                 <tr key={row.cohort} className="border-t border-line">
@@ -362,7 +362,7 @@ export function InsightsPanel({
         }
       >
         {model.cohorts.length === 0 ? (
-          <p className="text-[13px] text-muted">Недостаточно истории для когорт</p>
+          <p className="text-[12px] text-muted">Недостаточно истории для когорт</p>
         ) : (
           <CohortGrid rows={model.cohorts} />
         )}
@@ -384,14 +384,14 @@ function InsightCard({ insight }: { insight: Insight }) {
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
-          <h4 className="text-[13.5px] font-semibold text-ink">{insight.title}</h4>
+          <h4 className="text-[14px] font-semibold text-ink">{insight.title}</h4>
           {insight.metric ? (
-            <span className="shrink-0 text-[13px] font-semibold [font-variant-numeric:tabular-nums]" style={{ color: tone.fg }}>
+            <span className="shrink-0 text-[14px] font-semibold [font-variant-numeric:tabular-nums]" style={{ color: tone.fg }}>
               {insight.metric}
             </span>
           ) : null}
         </div>
-        <p className="mt-0.5 text-[12.5px] leading-relaxed text-muted">{insight.detail}</p>
+        <p className="mt-0.5 text-[12px] leading-relaxed text-muted">{insight.detail}</p>
       </div>
     </article>
   )

@@ -143,7 +143,7 @@ export function SyncStatus({
         <p className="mb-3 text-[14px] leading-relaxed text-muted">{error}</p>
         <div className="scroll-thin max-h-[320px] overflow-y-auto rounded-control bg-[var(--sunken)] p-3">
           {(errorDetails ?? '').split('\n').map((line, index) => (
-            <p key={index} className="text-[13px] leading-relaxed text-ink">
+            <p key={index} className="text-[14px] leading-relaxed text-ink">
               {line}
             </p>
           ))}

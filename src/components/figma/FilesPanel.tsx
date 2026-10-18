@@ -87,7 +87,7 @@ export function FilesPanel({
           title="Самые нагруженные файлы"
           subtitle="События за текущий период"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {rows.slice(0, 12).map((file) => (
                   <tr key={file.fileKey} className="border-t border-line">
@@ -108,7 +108,7 @@ export function FilesPanel({
           title="Открытых обсуждений"
           subtitle="Файлы с незакрытыми комментариями"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {rows
                   .filter((f) => f.openComments > 0)
@@ -143,13 +143,13 @@ export function FilesPanel({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Поиск по файлам и проектам…"
-              className="h-8 text-[13px]"
+              className="h-8 text-[14px]"
             />
           </div>
         </div>
 
         <div className="scroll-thin max-h-[520px] overflow-auto pt-1">
-          <table className="w-full text-[13px]">
+          <table className="w-full text-[14px]">
             <thead className="sticky top-0 bg-surface">
               <tr className="text-left text-[12px] text-faint">
                 <SortHeader label="Файл" active={sort === 'name'} onClick={() => setSort('name')} />
@@ -213,7 +213,7 @@ export function FilesPanel({
                 key={file.fileKey}
                 type="button"
                 onClick={() => onOpenFile(file.fileKey, file.name)}
-                className="flex h-8 w-full items-center gap-2 rounded-control px-2 text-left text-[13.5px] text-ink hover:bg-[var(--sunken)]"
+                className="flex h-8 w-full items-center gap-2 rounded-control px-2 text-left text-[14px] text-ink hover:bg-[var(--sunken)]"
               >
                 <span className="flex-1 truncate">{file.name}</span>
                 <span className="shrink-0 text-[12px] text-faint">

@@ -141,7 +141,7 @@ export function PeoplePanel({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Поиск по участникам…"
-            className="h-8 text-[13px]"
+            className="h-8 text-[14px]"
           />
         </div>
 
@@ -168,12 +168,12 @@ export function PeoplePanel({
                     <Avatar src={person.img} name={person.handle} size={26} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline justify-between gap-2">
-                        <span className="truncate text-[13.5px] text-ink">{person.handle}</span>
+                        <span className="truncate text-[14px] text-ink">{person.handle}</span>
                         <span className="shrink-0 text-[12px] text-muted [font-variant-numeric:tabular-nums]">
                           {person.total.toLocaleString('ru')}
                         </span>
                       </div>
-                      <div className="mt-1 flex h-2 gap-[2px] overflow-hidden rounded-[3px]">
+                      <div className="mt-1 flex h-2 gap-[2px] overflow-hidden rounded-full">
                         {PERSON_KINDS.map((kind) =>
                           person.counts[kind] > 0 ? (
                             <div
@@ -186,7 +186,7 @@ export function PeoplePanel({
                           ) : null,
                         )}
                       </div>
-                      <p className="mt-1 text-[11.5px] text-faint">
+                      <p className="mt-1 text-[12px] text-faint">
                         {person.files} файлов · {person.activeDays} активных дней
                         {person.silentDays > 0 ? ` · молчит ${person.silentDays} дн.` : ' · активен сегодня'}
                       </p>
@@ -229,7 +229,7 @@ export function PeoplePanel({
                 key={person.handle}
                 type="button"
                 onClick={() => void unhide(person.handle)}
-                className="flex h-7 items-center gap-1.5 rounded-chip bg-[var(--sunken)] px-2.5 text-[13px] text-muted hover:text-ink"
+                className="flex h-7 items-center gap-1.5 rounded-chip bg-[var(--sunken)] px-2.5 text-[12px] text-muted hover:text-ink"
                 title="Вернуть в аналитику"
               >
                 <Avatar src={person.img} name={person.handle} size={16} />
@@ -315,7 +315,7 @@ function TeamSummary({
           title="Концентрация активности"
           subtitle="Какую долю всей работы делают самые активные"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 <tr className="border-t border-line">
                   <td className="py-1.5 text-ink">Топ-1 участник</td>
@@ -346,7 +346,7 @@ function TeamSummary({
           title="Кто с кем работает"
           subtitle="Пары участников по общим файлам"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {model.pairs.map((pair) => (
                   <tr key={`${pair.a}|${pair.b}`} className="border-t border-line">
@@ -363,7 +363,7 @@ function TeamSummary({
           }
         >
           {model.pairs.length === 0 ? (
-            <p className="text-[13px] text-muted">Пересечений по файлам не найдено</p>
+            <p className="text-[12px] text-muted">Пересечений по файлам не найдено</p>
           ) : (
             <HBars
               color="var(--viz-3)"
@@ -405,7 +405,7 @@ function HeadcountChart({ events, granularity }: { events: FigmaEvent[]; granula
 function HeadcountTable({ events, granularity }: { events: FigmaEvent[]; granularity: Granularity }) {
   const points = useMemo(() => headcountPoints(events, granularity), [events, granularity])
   return (
-    <table className="w-full text-[13px]">
+    <table className="w-full text-[14px]">
       <tbody>
         {points.map((point) => (
           <tr key={point.label} className="border-t border-line">
@@ -421,7 +421,7 @@ function HeadcountTable({ events, granularity }: { events: FigmaEvent[]; granula
 function Meter({ label, value }: { label: string; value: number | null }) {
   return (
     <div>
-      <div className="mb-1 flex items-baseline justify-between text-[13px]">
+      <div className="mb-1 flex items-baseline justify-between text-[14px]">
         <span className="text-ink">{label}</span>
         <span className="text-muted [font-variant-numeric:tabular-nums]">
           {value !== null ? `${value.toFixed(0)}%` : '—'}
@@ -456,7 +456,7 @@ function RosterTable({
   scope: Scope
 }) {
   return (
-    <table className="w-full text-[13px]">
+    <table className="w-full text-[14px]">
       <thead className="sticky top-0 bg-surface">
         <tr className="text-left text-[12px] text-faint">
           <th className="pb-1.5 font-medium">Участник</th>
@@ -594,7 +594,7 @@ function PersonDetail({
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-6 gap-3 rounded-control bg-[var(--sunken)] p-3 text-[13px]">
+        <div className="mt-4 grid grid-cols-6 gap-3 rounded-control bg-[var(--sunken)] p-3 text-[14px]">
           <Metric
             label="Доля в команде"
             value={teamTotal > 0 ? `${(((allTime?.total ?? 0) / teamTotal) * 100).toFixed(1)}%` : '—'}
@@ -628,7 +628,7 @@ function PersonDetail({
             <Legend items={PERSON_KINDS.map((kind) => ({ label: EVENT_LABELS[kind], color: EVENT_COLOR_VAR[kind] }))} />
           }
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <thead>
                 <tr className="text-left text-[12px] text-faint">
                   <th className="pb-1.5 font-medium">Период</th>
@@ -669,7 +669,7 @@ function PersonDetail({
           title={`Расписание: ${handle}`}
           subtitle="День недели × час, за всю историю"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {heat.rows.map((row, i) => (
                   <tr key={row} className="border-t border-line">
@@ -692,7 +692,7 @@ function PersonDetail({
           title="Файлы"
           subtitle="По числу событий"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {topFiles.map((file) => (
                   <tr key={file.label} className="border-t border-line">
@@ -713,7 +713,7 @@ function PersonDetail({
           title="Проекты"
           subtitle="По числу событий"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {topProjects.map((project) => (
                   <tr key={project.label} className="border-t border-line">
@@ -734,7 +734,7 @@ function PersonDetail({
           title="Профиль активности"
           subtitle="Доли типов событий"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {PERSON_KINDS.map((kind) => (
                   <tr key={kind} className="border-t border-line">

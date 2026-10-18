@@ -25,6 +25,7 @@ import {
   TIMELINE_BUCKETS,
   WINDOW_LABEL,
   applyFilters,
+  filtersActive,
   perPersonStats,
 } from './analytics'
 import { relativeTime } from './utils'
@@ -292,15 +293,67 @@ export function FigmaWorkspace({
       },
     }))
 
+    // Действия — то, что раньше требовало мыши и знания, где кнопка лежит.
+    list.push(
+      syncing
+        ? {
+            id: 'action-sync-stop',
+            group: 'Действия',
+            label: 'Остановить синхронизацию',
+            icon: 'X',
+            run: () => void stopSync(),
+          }
+        : {
+            id: 'action-sync',
+            group: 'Действия',
+            label: 'Синхронизировать пространство',
+            icon: 'RefreshCw',
+            run: runSync,
+          },
+    )
+    if (filtersActive(filters)) {
+      list.push({
+        id: 'action-reset-filters',
+        group: 'Действия',
+        label: 'Сбросить фильтры',
+        icon: 'X',
+        run: () => setFilters(DEFAULT_FILTERS),
+      })
+    }
+    if (selectedFile) {
+      const pinned = (prefs?.pinnedFiles ?? []).some((item) => item.key === selectedFile.key)
+      list.push({
+        id: 'action-pin',
+        group: 'Действия',
+        label: pinned ? 'Открепить текущий файл' : 'Закрепить текущий файл',
+        hint: selectedFile.name,
+        icon: 'Check',
+        run: () => void togglePin(selectedFile.key, selectedFile.name),
+      })
+    }
     list.push({
-      id: 'action-sync',
+      id: 'action-export',
       group: 'Действия',
-      label: 'Синхронизировать пространство',
-      icon: 'RefreshCw',
-      run: runSync,
+      label: 'Выгрузить события в CSV',
+      icon: 'ExternalLink',
+      run: () => void ipc.figmaExportCsv(),
     })
 
+    // Закреплённые — первыми среди файлов: их закрепляют ровно затем, чтобы
+    // быстро к ним возвращаться.
+    const pinnedKeys = new Set((prefs?.pinnedFiles ?? []).map((item) => item.key))
+    for (const pin of prefs?.pinnedFiles ?? []) {
+      list.push({
+        id: `pinned-${pin.key}`,
+        group: 'Закреплённые',
+        label: pin.name,
+        icon: 'CalendarDays',
+        run: () => openFile(pin.key, pin.name),
+      })
+    }
+
     for (const file of files.slice(0, 200)) {
+      if (pinnedKeys.has(file.fileKey)) continue
       list.push({
         id: `file-${file.fileKey}`,
         group: 'Файлы',
@@ -318,7 +371,10 @@ export function FigmaWorkspace({
         label: person.handle,
         hint: `${person.total} событий`,
         avatar: person.img,
+        // Раньше переход вёл в «Люди» без фильтра — человека приходилось
+        // искать второй раз. Теперь вся аналитика сужается до него.
         run: () => {
+          setFilters({ ...filters, people: [person.handle] })
           setSection('people')
           setSelectedFile(null)
         },
@@ -327,7 +383,7 @@ export function FigmaWorkspace({
 
     return list
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [files, events, analyticsPrefs])
+  }, [files, events, analyticsPrefs, syncing, filters, selectedFile, prefs])
 
   const dense = prefs?.density === 'compact'
   const showFilters = !selectedFile && section !== 'settings' && section !== 'library'

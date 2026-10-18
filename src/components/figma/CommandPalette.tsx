@@ -13,8 +13,46 @@ export interface Command {
   run: () => void
 }
 
+/**
+ * Оценка совпадения запроса со строкой. Чем больше, тем лучше; null — не
+ * подходит вовсе.
+ *
+ * Простого вхождения подстроки мало: в палитре набирают огрызками («дшбрд»,
+ * «dsgn sys»), и при точном вхождении такой запрос не находит ничего. Поэтому
+ * сначала пробуем подстроку — это самый сильный сигнал, — а затем ищем буквы
+ * запроса по порядку, награждая совпадения подряд и начала слов.
+ */
+export function matchScore(text: string, query: string): number | null {
+  const haystack = text.toLowerCase()
+  const needle = query.toLowerCase()
+  if (!needle) return 0
+
+  const direct = haystack.indexOf(needle)
+  if (direct === 0) return 1000
+  if (direct > 0) return 800 - Math.min(direct, 100) + (isWordStart(haystack, direct) ? 60 : 0)
+
+  let score = 0
+  let cursor = 0
+  let streak = 0
+  for (const char of needle) {
+    const found = haystack.indexOf(char, cursor)
+    if (found === -1) return null
+    streak = found === cursor && cursor > 0 ? streak + 1 : 0
+    score += 10 + streak * 6 + (isWordStart(haystack, found) ? 12 : 0)
+    cursor = found + 1
+  }
+  // Короткое совпадение весомее длинного: в «Дашборд» три буквы значат больше,
+  // чем те же три в названии файла на сорок символов.
+  return score - Math.round(haystack.length / 8)
+}
+
+function isWordStart(text: string, index: number) {
+  if (index === 0) return true
+  return /[\s/\-_.·:,()]/.test(text[index - 1])
+}
+
 /** Быстрый переход по разделам, файлам и людям без мыши. Открывается на ⌘K,
- * закрывается на Escape; поиск идёт по подстроке без учёта регистра. */
+ * закрывается на Escape; поиск нечёткий, результаты отсортированы по близости. */
 export function CommandPalette({
   open,
   onClose,
@@ -30,14 +68,35 @@ export function CommandPalette({
   const listRef = useRef<HTMLDivElement | null>(null)
 
   const results = useMemo(() => {
-    const needle = query.trim().toLowerCase()
-    const matched = needle
-      ? commands.filter(
-          (command) =>
-            command.label.toLowerCase().includes(needle) || command.hint?.toLowerCase().includes(needle),
-        )
-      : commands
-    return matched.slice(0, 60)
+    const needle = query.trim()
+    if (!needle) return commands.slice(0, 60)
+
+    const scored: { command: Command; score: number }[] = []
+    for (const command of commands) {
+      const label = matchScore(command.label, needle)
+      // Подсказка — слабый сигнал: по ней находят проект или команду, но
+      // название всё равно важнее.
+      const hint = command.hint ? matchScore(command.hint, needle) : null
+      const best = Math.max(label ?? -Infinity, hint === null ? -Infinity : hint * 0.4)
+      if (best > -Infinity) scored.push({ command, score: best })
+    }
+
+    scored.sort((a, b) => b.score - a.score)
+    const top = scored.slice(0, 60).map((item) => item.command)
+
+    // Группы — в порядке их лучшего совпадения, внутри — по близости. Без этого
+    // ранжированный список шёл бы вперемешку, и заголовок «Файлы» повторялся
+    // бы между разделами и людьми.
+    const order: string[] = []
+    const byGroup = new Map<string, Command[]>()
+    for (const command of top) {
+      if (!byGroup.has(command.group)) {
+        byGroup.set(command.group, [])
+        order.push(command.group)
+      }
+      byGroup.get(command.group)!.push(command)
+    }
+    return order.flatMap((group) => byGroup.get(group)!)
   }, [commands, query])
 
   useEffect(() => {
@@ -120,7 +179,7 @@ export function CommandPalette({
               return (
                 <div key={command.id}>
                   {showGroup ? (
-                    <p className="px-2 pb-1 pt-3 text-[11.5px] font-semibold uppercase tracking-wide text-faint">
+                    <p className="px-2 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-wide text-faint">
                       {command.group}
                     </p>
                   ) : null}
@@ -153,12 +212,22 @@ export function CommandPalette({
           )}
         </div>
 
-        <footer className="flex items-center gap-3 bg-[var(--sunken)] px-4 py-2 text-[11.5px] text-faint">
+        <footer className="flex items-center gap-3 bg-[var(--sunken)] px-4 py-2 text-[12px] text-faint">
           <span>↑↓ — выбор</span>
           <span>↵ — открыть</span>
-          <span className="ml-auto">{results.length} результатов</span>
+          <span className="ml-auto [font-variant-numeric:tabular-nums]">
+            {results.length} {pluralResults(results.length)}
+          </span>
         </footer>
       </div>
     </div>
   )
+}
+
+function pluralResults(count: number) {
+  const mod10 = count % 10
+  const mod100 = count % 100
+  if (mod10 === 1 && mod100 !== 11) return 'результат'
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'результата'
+  return 'результатов'
 }

@@ -186,7 +186,7 @@ export function ThreadsPanel({
         title="Открыто и закрыто по периодам"
         subtitle="Если открывается стабильно больше, чем закрывается — долг обсуждений растёт"
         table={
-          <table className="w-full text-[13px]">
+          <table className="w-full text-[14px]">
             <thead>
               <tr className="text-left text-[12px] text-faint">
                 <th className="pb-1.5 font-medium">Период</th>
@@ -228,7 +228,7 @@ export function ThreadsPanel({
           title="Кто задаёт вопросы"
           subtitle="Авторы корневых обсуждений"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {model.askers.map((item) => (
                   <tr key={item.label} className="border-t border-line">
@@ -247,7 +247,7 @@ export function ThreadsPanel({
           title="Кто отвечает"
           subtitle="Участие в чужих обсуждениях"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {model.responders.map((item) => (
                   <tr key={item.label} className="border-t border-line">
@@ -260,7 +260,7 @@ export function ThreadsPanel({
           }
         >
           {model.responders.length === 0 ? (
-            <p className="text-[13px] text-muted">Ответов пока нет</p>
+            <p className="text-[12px] text-muted">Ответов пока нет</p>
           ) : (
             <HBars items={model.responders} color="var(--viz-3)" />
           )}
@@ -270,7 +270,7 @@ export function ThreadsPanel({
           title="Реакции"
           subtitle="Какими эмодзи пользуется команда"
           table={
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {model.emoji.map((item) => (
                   <tr key={item.key} className="border-t border-line">
@@ -283,7 +283,7 @@ export function ThreadsPanel({
           }
         >
           {model.emoji.length === 0 ? (
-            <p className="text-[13px] text-muted">Реакций нет</p>
+            <p className="text-[12px] text-muted">Реакций нет</p>
           ) : (
             <Donut
               size={112}
@@ -303,7 +303,7 @@ export function ThreadsPanel({
         title="Файлы: обсуждений против незакрытых"
         subtitle="Точки справа-сверху — файлы с накопленным долгом обсуждений"
         table={
-          <table className="w-full text-[13px]">
+          <table className="w-full text-[14px]">
             <thead>
               <tr className="text-left text-[12px] text-faint">
                 <th className="pb-1.5 font-medium">Файл</th>
@@ -359,7 +359,7 @@ export function ThreadsPanel({
                 setLimit(40)
               }}
               placeholder="Поиск по тексту, автору, файлу…"
-              className="h-8 text-[13px]"
+              className="h-8 text-[14px]"
             />
           </div>
         </div>
@@ -374,7 +374,7 @@ export function ThreadsPanel({
             >
               <Avatar src={thread.authorImg} name={thread.author} size={24} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[13.5px] text-ink">
+                <p className="truncate text-[14px] text-ink">
                   <span className="font-medium">{thread.author}</span>{' '}
                   <span className="text-muted">{thread.message || '(без текста)'}</span>
                 </p>
@@ -407,7 +407,7 @@ export function ThreadsPanel({
             <button
               type="button"
               onClick={() => setLimit((value) => value + 40)}
-              className="h-8 rounded-control px-3 text-[13px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
+              className="h-8 rounded-control px-3 text-[12px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
             >
               Показать ещё
             </button>

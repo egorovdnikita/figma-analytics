@@ -56,11 +56,11 @@ export function FigmaSidebar<T extends string>({
         <button
           type="button"
           onClick={onOpenPalette}
-          className="flex h-10 w-full items-center gap-2 whitespace-nowrap rounded-control bg-surface px-3 text-[13px] text-muted transition-colors hover:text-ink"
+          className="flex h-10 w-full items-center gap-2 whitespace-nowrap rounded-control bg-surface px-3 text-[12px] text-muted transition-colors hover:text-ink"
         >
           <AppIcon name="Search" size={16} className="shrink-0" />
           Поиск
-          <kbd className="ml-auto shrink-0 rounded-chip bg-[var(--sunken)] px-1.5 py-0.5 text-[11px]">⌘K</kbd>
+          <kbd className="ml-auto shrink-0 rounded-chip bg-[var(--sunken)] px-1.5 py-0.5 text-[12px]">⌘K</kbd>
         </button>
       </div>
 
@@ -79,7 +79,7 @@ export function FigmaSidebar<T extends string>({
                     type="button"
                     onClick={() => onSection(item.value)}
                     className={cn(
-                      'flex h-9 w-full items-center gap-2.5 rounded-control px-2 text-[13px] font-medium transition-colors',
+                      'flex h-9 w-full items-center gap-2.5 rounded-control px-2 text-[14px] font-medium transition-colors',
                       section === item.value && selectedFileKey === null
                         ? 'bg-[var(--sunken)] text-ink'
                         : 'text-faint hover:bg-[var(--sunken)] hover:text-ink',
@@ -104,7 +104,7 @@ export function FigmaSidebar<T extends string>({
                     type="button"
                     onClick={() => onSelectFile(file.key, file.name)}
                     className={cn(
-                      'flex h-8 min-w-0 flex-1 items-center gap-1.5 px-2 text-left text-[13px] transition-colors',
+                      'flex h-8 min-w-0 flex-1 items-center gap-1.5 px-2 text-left text-[14px] transition-colors',
                       selectedFileKey === file.key ? 'text-ink' : 'text-muted',
                     )}
                     title={file.name}
@@ -145,7 +145,7 @@ export function FigmaSidebar<T extends string>({
               value={filter}
               onChange={(event) => setFilter(event.target.value)}
               placeholder="Фильтр по дереву…"
-              className="h-9 bg-[var(--sunken)] text-[13px]"
+              className="h-9 bg-[var(--sunken)] text-[14px]"
             />
           </div>
 
@@ -153,7 +153,7 @@ export function FigmaSidebar<T extends string>({
             <button
               type="button"
               onClick={() => setModalOpen(true)}
-              className="mt-1 w-full rounded-control px-3 py-4 text-[13px] leading-relaxed text-muted hover:bg-[var(--sunken)] hover:text-ink"
+              className="mt-1 w-full rounded-control px-3 py-4 text-[12px] leading-relaxed text-muted hover:bg-[var(--sunken)] hover:text-ink"
             >
               Команд пока нет.
               <br />
@@ -233,7 +233,7 @@ function TeamNode({
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="flex h-8 flex-1 items-center gap-1.5 px-1.5 text-[13px] font-medium text-ink"
+          className="flex h-8 flex-1 items-center gap-1.5 px-1.5 text-[14px] font-medium text-ink"
         >
           <AppIcon name={expanded ? 'ChevronDown' : 'ChevronRight'} size={14} className="text-faint" />
           <span className="truncate">{team.label || team.id}</span>
@@ -305,7 +305,7 @@ function ProjectNode({
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="flex h-8 w-full items-center gap-1.5 rounded-control px-1.5 text-[13px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
+        className="flex h-8 w-full items-center gap-1.5 rounded-control px-1.5 text-[12px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
       >
         <AppIcon name={expanded ? 'ChevronDown' : 'ChevronRight'} size={14} className="text-faint" />
         <span className="truncate">{project.name}</span>
@@ -326,7 +326,7 @@ function ProjectNode({
                 type="button"
                 onClick={() => onSelectFile(file.key, file.name)}
                 className={cn(
-                  'flex h-8 w-full items-center gap-1.5 rounded-control px-1.5 text-left text-[13px] transition-colors',
+                  'flex h-8 w-full items-center gap-1.5 rounded-control px-1.5 text-left text-[14px] transition-colors',
                   selectedFileKey === file.key
                     ? 'bg-[var(--sunken)] text-ink'
                     : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
