@@ -529,6 +529,7 @@ export function FigmaWorkspace({
             ) : (
               <LibraryPanel
                 teams={filters.teams.length === 0 ? teams : teams.filter((team) => filters.teams.includes(team.id))}
+                events={scopedEvents}
               />
             )}
           </main>

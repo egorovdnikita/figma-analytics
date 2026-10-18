@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ipc } from '@/lib/ipc'
-import type { FigmaLibrarySummary, FigmaTeamRef } from '@/types'
+import type { FigmaEvent, FigmaLibrarySummary, FigmaTeamRef } from '@/types'
 import { Avatar, Spinner } from '@/components/ui'
 import { AppIcon } from '@/components/AppIcon'
 import { ChartCard, Donut, EmptyBlock, HBars } from './charts'
 import { relativeTime } from './utils'
+import { versionMarks } from './analytics'
 
 const KIND_LABELS: Record<'component' | 'component_set' | 'style', string> = {
   component: 'Компонент',
@@ -12,7 +13,9 @@ const KIND_LABELS: Record<'component' | 'component_set' | 'style', string> = {
   style: 'Стиль',
 }
 
-export function LibraryPanel({ teams }: { teams: FigmaTeamRef[] }) {
+export function LibraryPanel({ teams, events }: { teams: FigmaTeamRef[]; events: FigmaEvent[] }) {
+  const publishing = useMemo(() => publicationCadence(events), [events])
+
   if (teams.length === 0) {
     return (
       <EmptyBlock
@@ -25,6 +28,50 @@ export function LibraryPanel({ teams }: { teams: FigmaTeamRef[] }) {
 
   return (
     <div className="space-y-3">
+      {publishing.total > 0 ? (
+        <ChartCard
+          title="Как часто публикуют компоненты"
+          subtitle="Отметки «Components published» в истории файлов — темп обновления дизайн-системы"
+          table={
+            <table className="w-full text-[14px]">
+              <tbody>
+                {publishing.byFile.slice(0, 12).map((file) => (
+                  <tr key={file.fileKey} className="border-t border-line">
+                    <td className="py-1.5 text-ink">{file.fileName}</td>
+                    <td className="py-1.5 pl-2 text-muted">{relativeTime(file.last)}</td>
+                    <td className="py-1.5 pl-2 text-right text-muted [font-variant-numeric:tabular-nums]">
+                      {file.count}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          }
+        >
+          <div className="mb-4 flex gap-8">
+            <div>
+              <p className="font-display display-md text-ink">{publishing.last30}</p>
+              <p className="mt-1 text-[12px] text-muted">за 30 дней</p>
+            </div>
+            <div>
+              <p className="font-display display-md text-ink">{publishing.byFile.length}</p>
+              <p className="mt-1 text-[12px] text-muted">файлов-библиотек</p>
+            </div>
+            <div>
+              <p className="font-display display-md text-ink">{publishing.total}</p>
+              <p className="mt-1 text-[12px] text-muted">за всю историю</p>
+            </div>
+          </div>
+          <HBars
+            items={publishing.byFile.slice(0, 6).map((file) => ({
+              label: file.fileName,
+              value: file.count,
+              hint: relativeTime(file.last),
+            }))}
+          />
+        </ChartCard>
+      ) : null}
+
       {teams
         // Библиотека публикуется на уровне команды: у отдельной папки своей
         // библиотеки нет, и запрос по её ID вернул бы 404.
@@ -184,4 +231,21 @@ function TeamLibrary({ team }: { team: FigmaTeamRef }) {
       </section>
     </div>
   )
+}
+
+function publicationCadence(events: FigmaEvent[]) {
+  const publishes = versionMarks(events).publishes
+  const since = Date.now() - 30 * 86_400_000
+  const files = new Map<string, { fileKey: string; fileName: string; count: number; last: string }>()
+  for (const mark of publishes) {
+    const file = files.get(mark.fileKey) ?? { fileKey: mark.fileKey, fileName: mark.fileName, count: 0, last: mark.ts }
+    file.count += 1
+    if (mark.ts > file.last) file.last = mark.ts
+    files.set(mark.fileKey, file)
+  }
+  return {
+    total: publishes.length,
+    last30: publishes.filter((mark) => new Date(mark.ts).getTime() >= since).length,
+    byFile: [...files.values()].sort((a, b) => b.last.localeCompare(a.last)),
+  }
 }

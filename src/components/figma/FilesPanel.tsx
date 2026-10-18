@@ -2,7 +2,15 @@ import { useMemo, useState } from 'react'
 import type { FigmaEvent, FigmaFileIndexEntry } from '@/types'
 import { Input } from '@/components/ui'
 import { AppIcon } from '@/components/AppIcon'
-import { Granularity, compareWindows, deltaPercent } from './analytics'
+import {
+  Granularity,
+  PREVIOUS_LABEL,
+  WINDOW_LABEL,
+  busFactor,
+  compareWindows,
+  deltaPercent,
+  versionMarks,
+} from './analytics'
 import { ChartCard, EmptyBlock, HBars } from './charts'
 import { daysSince, relativeTime } from './utils'
 import { cn } from '@/lib/cn'
@@ -70,6 +78,14 @@ export function FilesPanel({
 
   const stale = rows.filter((file) => file.lastModified && daysSince(file.lastModified) >= 30)
 
+  const handoffs = useMemo(() => versionMarks(current.events), [current.events])
+  const previousHandoffs = useMemo(
+    () => versionMarks(previous.events).handoffs.length,
+    [previous.events],
+  )
+  const cadence = useMemo(() => versionMarks(events).medianHandoffGapDays, [events])
+  const keepers = useMemo(() => busFactor(events), [events])
+
   if (files.length === 0) {
     return (
       <EmptyBlock
@@ -132,6 +148,84 @@ export function FilesPanel({
               .slice(0, 8)
               .map((file) => ({ label: file.name, value: file.openComments }))}
           />
+        </ChartCard>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <ChartCard
+          title="Передано в разработку"
+          subtitle={
+            cadence !== null
+              ? `Отметки «Ready for dev» · у файла в среднем раз в ${Math.round(cadence)} дн`
+              : 'Отметки «Ready for dev» из Dev Mode'
+          }
+          table={
+            <table className="w-full text-[14px]">
+              <tbody>
+                {handoffs.handoffsByFile.slice(0, 12).map((file) => (
+                  <tr key={file.fileKey} className="border-t border-line">
+                    <td className="py-1.5 text-ink">{file.fileName}</td>
+                    <td className="py-1.5 pl-2 text-right text-muted [font-variant-numeric:tabular-nums]">
+                      {file.count}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          }
+        >
+          <BigNumber
+            value={handoffs.handoffs.length}
+            caption={WINDOW_LABEL[granularity]}
+            delta={deltaPercent(handoffs.handoffs.length, previousHandoffs)}
+            deltaCaption={PREVIOUS_LABEL[granularity]}
+          />
+          {handoffs.handoffsByFile.length > 0 ? (
+            <HBars
+              color="var(--viz-3)"
+              items={handoffs.handoffsByFile.slice(0, 6).map((file) => ({ label: file.fileName, value: file.count }))}
+            />
+          ) : (
+            <p className="text-[12px] text-muted">За этот период файлы в разработку не передавали.</p>
+          )}
+        </ChartCard>
+
+        <ChartCard
+          title="Держится на одном человеке"
+          subtitle="Файлы, где один автор сделал 80%+ сохранений за 90 дней"
+          table={
+            <table className="w-full text-[14px]">
+              <tbody>
+                {keepers.atRisk.slice(0, 12).map((file) => (
+                  <tr key={file.fileKey} className="border-t border-line">
+                    <td className="py-1.5 text-ink">{file.fileName}</td>
+                    <td className="py-1.5 pl-2 text-muted">{file.keeper}</td>
+                    <td className="py-1.5 pl-2 text-right text-muted [font-variant-numeric:tabular-nums]">
+                      {Math.round(file.share * 100)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          }
+        >
+          <BigNumber
+            value={keepers.atRisk.length}
+            caption={
+              keepers.eligible > 0
+                ? `из ${keepers.eligible} активных файлов · ${Math.round((keepers.atRisk.length / keepers.eligible) * 100)}%`
+                : 'активных файлов пока нет'
+            }
+          />
+          {keepers.keepers.length > 0 ? (
+            <HBars
+              color="var(--viz-2)"
+              formatValue={(value) => `${value} ${value === 1 ? 'файл' : value < 5 ? 'файла' : 'файлов'}`}
+              items={keepers.keepers.slice(0, 6).map((person) => ({ label: person.handle, value: person.files }))}
+            />
+          ) : (
+            <p className="text-[12px] text-muted">Над каждым активным файлом работает больше одного человека.</p>
+          )}
         </ChartCard>
       </div>
 
@@ -250,5 +344,33 @@ function SortHeader({
         {active ? ' ↓' : ''}
       </button>
     </th>
+  )
+}
+
+/** Главная цифра карточки. Без неё рейтинг отвечает «где», но не «сколько». */
+function BigNumber({
+  value,
+  caption,
+  delta,
+  deltaCaption,
+}: {
+  value: number
+  caption: string
+  delta?: number | null
+  deltaCaption?: string
+}) {
+  return (
+    <div className="mb-4 flex items-end gap-3">
+      <p className="font-display display-md text-ink">{value.toLocaleString('ru')}</p>
+      <div className="pb-0.5">
+        <p className="text-[12px] text-muted">{caption}</p>
+        {delta !== undefined && delta !== null ? (
+          <p className={cn('text-[12px]', delta >= 0 ? 'text-[var(--viz-good)]' : 'text-[var(--viz-bad)]')}>
+            {delta >= 0 ? '+' : ''}
+            {Math.round(delta)}% {deltaCaption}
+          </p>
+        ) : null}
+      </div>
+    </div>
   )
 }

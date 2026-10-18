@@ -1309,3 +1309,209 @@ export function generateInsights(input: {
 
   return insights
 }
+
+/* ---------- зависимость файлов от одного человека ---------- */
+
+export interface FileKeeper {
+  fileKey: string
+  fileName: string
+  projectName: string
+  /** Сохранений за окно. */
+  saves: number
+  keeper: string
+  keeperImg: string
+  /** Доля сохранений главного автора, 0..1. */
+  share: number
+  contributors: number
+}
+
+export interface BusFactorReport {
+  /** Файлы, где работы хватило для вывода, — остальные слишком тихие. */
+  eligible: number
+  atRisk: FileKeeper[]
+  /** Кто держит больше всего файлов в одиночку. */
+  keepers: { handle: string; img: string; files: number }[]
+}
+
+/**
+ * Какие файлы держатся на одном человеке.
+ *
+ * Считаем только сохранения: комментировать файл может кто угодно, а
+ * продолжить работу над ним — тот, кто его правил. Смотрим на недавнее окно:
+ * кто вёл файл три года назад, для сегодняшнего риска не важно. Тихие файлы
+ * (меньше minSaves сохранений) отбрасываем — по паре правок вывода не сделать.
+ */
+export function busFactor(
+  events: FigmaEvent[],
+  { days = 90, minSaves = 5, dominance = 0.8 }: { days?: number; minSaves?: number; dominance?: number } = {},
+): BusFactorReport {
+  const since = Date.now() - days * 86_400_000
+  const byFile = new Map<
+    string,
+    { fileName: string; projectName: string; total: number; people: Map<string, { count: number; img: string }> }
+  >()
+
+  for (const event of events) {
+    if (event.kind !== 'version' || !event.handle) continue
+    if (new Date(event.ts).getTime() < since) continue
+    let file = byFile.get(event.fileKey)
+    if (!file) {
+      file = { fileName: event.fileName, projectName: event.projectName, total: 0, people: new Map() }
+      byFile.set(event.fileKey, file)
+    }
+    file.total += 1
+    const person = file.people.get(event.handle) ?? { count: 0, img: event.img }
+    person.count += 1
+    file.people.set(event.handle, person)
+  }
+
+  let eligible = 0
+  const atRisk: FileKeeper[] = []
+  for (const [fileKey, file] of byFile) {
+    if (file.total < minSaves) continue
+    eligible += 1
+    let top: [string, { count: number; img: string }] | null = null
+    for (const entry of file.people) if (!top || entry[1].count > top[1].count) top = entry
+    if (!top) continue
+    const share = top[1].count / file.total
+    if (share < dominance) continue
+    atRisk.push({
+      fileKey,
+      fileName: file.fileName,
+      projectName: file.projectName,
+      saves: file.total,
+      keeper: top[0],
+      keeperImg: top[1].img,
+      share,
+      contributors: file.people.size,
+    })
+  }
+
+  atRisk.sort((a, b) => b.saves - a.saves)
+
+  const keeperMap = new Map<string, { handle: string; img: string; files: number }>()
+  for (const file of atRisk) {
+    const keeper = keeperMap.get(file.keeper) ?? { handle: file.keeper, img: file.keeperImg, files: 0 }
+    keeper.files += 1
+    keeperMap.set(file.keeper, keeper)
+  }
+
+  return {
+    eligible,
+    atRisk,
+    keepers: [...keeperMap.values()].sort((a, b) => b.files - a.files),
+  }
+}
+
+/* ---------- отметки в истории версий ---------- */
+
+/**
+ * Что означает название у сохранения.
+ *
+ * Людьми названы считаные версии: почти все названия ставит сама Figma, и
+ * именно они самые содержательные. «Ready for dev» появляется, когда раздел
+ * отмечают готовым в Dev Mode, — это передача в разработку. «Components
+ * published» — публикация библиотеки. Остальное системное («Offline sync»,
+ * «Auto checkpoint…») — шум, его не считаем.
+ */
+export type VersionMarkKind = 'handoff' | 'publish' | 'named'
+
+const SYSTEM_LABELS = [/^offline sync$/i, /^auto checkpoint/i, /^components unpublished$/i]
+
+export function classifyVersionLabel(label: string | undefined): VersionMarkKind | null {
+  const text = label?.trim()
+  if (!text) return null
+  if (/^ready for dev(elopment)?$/i.test(text) || /^готово к разработке$/i.test(text)) return 'handoff'
+  if (/^components? published$/i.test(text) || /^(styles?|library) published$/i.test(text)) return 'publish'
+  if (SYSTEM_LABELS.some((pattern) => pattern.test(text))) return null
+  return 'named'
+}
+
+export interface VersionMark {
+  kind: VersionMarkKind
+  ts: string
+  fileKey: string
+  fileName: string
+  projectName: string
+  handle: string
+  img: string
+  label: string
+  description?: string
+}
+
+export interface VersionMarksReport {
+  marks: VersionMark[]
+  handoffs: VersionMark[]
+  publishes: VersionMark[]
+  named: VersionMark[]
+  /** Передачи по файлам — где работа реально доходит до разработки. */
+  handoffsByFile: { fileKey: string; fileName: string; count: number; last: string }[]
+  handoffsByPerson: { handle: string; img: string; count: number }[]
+  /** Медиана дней между соседними передачами одного файла. Передачи в один
+   * день склеиваем: Dev Mode ставит отметку на каждый раздел, и пять разделов
+   * подряд — это одна передача, а не пять. */
+  medianHandoffGapDays: number | null
+}
+
+export function versionMarks(events: FigmaEvent[]): VersionMarksReport {
+  const marks: VersionMark[] = []
+  for (const event of events) {
+    if (event.kind !== 'version') continue
+    const kind = classifyVersionLabel(event.label)
+    if (!kind) continue
+    marks.push({
+      kind,
+      ts: event.ts,
+      fileKey: event.fileKey,
+      fileName: event.fileName,
+      projectName: event.projectName,
+      handle: event.handle,
+      img: event.img,
+      label: (event.label as string).trim(),
+      description: event.message?.trim() || undefined,
+    })
+  }
+  marks.sort((a, b) => b.ts.localeCompare(a.ts))
+
+  const handoffs = marks.filter((mark) => mark.kind === 'handoff')
+
+  const files = new Map<string, { fileKey: string; fileName: string; count: number; last: string; days: Set<string> }>()
+  const people = new Map<string, { handle: string; img: string; count: number }>()
+  for (const mark of handoffs) {
+    const file = files.get(mark.fileKey) ?? {
+      fileKey: mark.fileKey,
+      fileName: mark.fileName,
+      count: 0,
+      last: mark.ts,
+      days: new Set<string>(),
+    }
+    file.count += 1
+    if (mark.ts > file.last) file.last = mark.ts
+    file.days.add(mark.ts.slice(0, 10))
+    files.set(mark.fileKey, file)
+
+    const person = people.get(mark.handle) ?? { handle: mark.handle, img: mark.img, count: 0 }
+    person.count += 1
+    people.set(mark.handle, person)
+  }
+
+  const gaps: number[] = []
+  for (const file of files.values()) {
+    const days = [...file.days].sort()
+    for (let i = 1; i < days.length; i += 1) {
+      gaps.push((new Date(days[i]).getTime() - new Date(days[i - 1]).getTime()) / 86_400_000)
+    }
+  }
+
+  return {
+    marks,
+    handoffs,
+    publishes: marks.filter((mark) => mark.kind === 'publish'),
+    named: marks.filter((mark) => mark.kind === 'named'),
+    handoffsByFile: [...files.values()]
+      .map(({ days: _days, ...rest }) => rest)
+      .sort((a, b) => b.count - a.count),
+    handoffsByPerson: [...people.values()].sort((a, b) => b.count - a.count),
+    medianHandoffGapDays: percentile(gaps, 50),
+  }
+}
