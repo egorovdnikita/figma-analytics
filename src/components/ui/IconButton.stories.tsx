@@ -15,7 +15,7 @@ const meta = {
   },
   args: {
     label: 'Обновить',
-    children: <AppIcon name="RefreshCw" size={17} />,
+    children: <AppIcon name="RefreshCw" size={16} />,
   },
 } satisfies Meta<typeof IconButton>
 

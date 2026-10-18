@@ -4,11 +4,11 @@ export function RoundingPage() {
   return (
     <div>
       <p style={{ font: '400 13px/1.6 var(--font-body)', color: 'var(--muted)', marginBottom: 20 }}>
-        Figma Analytics | Tokens — коллекция <code>Rounding</code>: 11 семантических ступеней ×
-        3 режима плотности (<code>Low</code>/<code>Medium</code>/<code>Hight</code> — так они
-        названы в самом Figma-файле). Это отдельная шкала от собственных радиусов Figma Analytics
-        (<code>--radius-chip/control/card/full</code>, см. страницу «Обзор»): показана здесь
-        как есть, без переноса в приложение.
+        <code>Brand ・ Rounding</code> из дизайн-системы box-ui: 11 ступеней × 3 моды плотности
+        (<code>Low</code>/<code>Medium</code>/<code>High</code>). Приложение использует{' '}
+        <code>Medium</code>: <code>rounded-card</code> = <code>rounding/xl</code>,{' '}
+        <code>rounded-control</code> = <code>rounding/m</code>, <code>rounded-chip</code> ={' '}
+        <code>rounding/xs</code>.
       </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr 1fr 1fr', gap: 12, marginBottom: 8 }}>

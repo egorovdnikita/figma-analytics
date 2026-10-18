@@ -1,11 +1,8 @@
-// Figma Analytics | Tokens — коллекция Color (10 hue-режимов), сгенерировано из Figma-переменных.
-// Только пять токенов пространства "brand" реально зависят от режима — Figma Analytics использует
-// режим Violet (совпадает с --grass в src/index.css). Остальные 38 токенов инвариантны
-// по всем режимам, поэтому хранятся отдельно как статичная таблица.
+// Сгенерировано scripts/sync-design-tokens.mjs из egorovdnikita/box-ui@5309aef — ☯︎ Brand ・ Color.
+// Руками не править: перезапустите скрипт.
+// Приложение использует моду Deep: её значения сведены в --grass и соседей в src/index.css.
 
-export const BRAND_MODES = [
-  'Blue', 'Sky', 'Teal', 'Emerald', 'Orange', 'Amber', 'Violet', 'Purple', 'Cyan', 'Yellow',
-] as const
+export const BRAND_MODES = ["Deep","Bright","Monochrome"] as const
 export type BrandMode = (typeof BRAND_MODES)[number]
 
 export interface BrandColorToken {
@@ -15,66 +12,380 @@ export interface BrandColorToken {
 
 export const BRAND_COLOR_TOKENS: BrandColorToken[] = [
   {
-    name: 'colors/brand/primary',
-    byMode: { Blue: '#3b82f6', Sky: '#0ea5e9', Teal: '#22c55e', Emerald: '#10b981', Orange: '#f97316', Amber: '#f59e0b', Violet: '#8b5cf6', Purple: '#ad28ff', Cyan: '#ec4899', Yellow: '#f43f5e' },
+    "name": "color/solid/500",
+    "byMode": {
+      "Deep": "#6366f1",
+      "Bright": "#bef264",
+      "Monochrome": "#000000"
+    }
   },
   {
-    name: 'colors/brand/secondary',
-    byMode: { Blue: '#60a5fa', Sky: '#38bdf8', Teal: '#4ade80', Emerald: '#34d399', Orange: '#fb923c', Amber: '#fbbf24', Violet: '#a78bfa', Purple: '#b947ff', Cyan: '#f472b6', Yellow: '#fb7185' },
+    "name": "color/solid/450",
+    "byMode": {
+      "Deep": "#7279f5",
+      "Bright": "#cbf580",
+      "Monochrome": "#000000"
+    }
   },
   {
-    name: 'colors/brand/alpha-8',
-    byMode: { Blue: '#3b82f614', Sky: '#0ea5e914', Teal: '#22c55e14', Emerald: '#10b98114', Orange: '#f9731614', Amber: '#f59e0b14', Violet: '#8b5cf614', Purple: '#ad28ff14', Cyan: '#ec489914', Yellow: '#f43f5e14' },
+    "name": "color/alpha/8",
+    "byMode": {
+      "Deep": "#6366f114",
+      "Bright": "#84cc1614",
+      "Monochrome": "#00000014"
+    }
   },
   {
-    name: 'colors/brand/alpha-16',
-    byMode: { Blue: '#3b82f629', Sky: '#0ea5e929', Teal: '#22c55e29', Emerald: '#10b98129', Orange: '#f9731629', Amber: '#f59e0b29', Violet: '#8b5cf629', Purple: '#ad28ff29', Cyan: '#ec489929', Yellow: '#f43f5e29' },
+    "name": "color/alpha/16",
+    "byMode": {
+      "Deep": "#6366f129",
+      "Bright": "#84cc1629",
+      "Monochrome": "#00000029"
+    }
   },
   {
-    name: 'colors/brand/alpha-48',
-    byMode: { Blue: '#3b82f67a', Sky: '#0ea5e97a', Teal: '#22c55e7a', Emerald: '#10b9817a', Orange: '#f973167a', Amber: '#f59e0b7a', Violet: '#8b5cf67a', Purple: '#ad28ff7a', Cyan: '#ec48997a', Yellow: '#f43f5e7a' },
+    "name": "color/alpha/24",
+    "byMode": {
+      "Deep": "#6366f13d",
+      "Bright": "#84cc163d",
+      "Monochrome": "#0000003d"
+    }
   },
+  {
+    "name": "color/alpha/48",
+    "byMode": {
+      "Deep": "#6366f17a",
+      "Bright": "#84cc167a",
+      "Monochrome": "#0000007a"
+    }
+  },
+  {
+    "name": "color/solid/550",
+    "byMode": {
+      "Deep": "#5956eb",
+      "Bright": "#b1ec4d",
+      "Monochrome": "#000000"
+    }
+  },
+  {
+    "name": "color/contrast",
+    "byMode": {
+      "Deep": "#000000",
+      "Bright": "#000000",
+      "Monochrome": "#ffffff"
+    }
+  },
+  {
+    "name": "color/alpha/64",
+    "byMode": {
+      "Deep": "#6366f1a3",
+      "Bright": "#84cc16a3",
+      "Monochrome": "#000000a3"
+    }
+  },
+  {
+    "name": "color/alpha/80",
+    "byMode": {
+      "Deep": "#6366f1cc",
+      "Bright": "#84cc16cc",
+      "Monochrome": "#000000cc"
+    }
+  },
+  {
+    "name": "color/on-solid",
+    "byMode": {
+      "Deep": "#ffffff",
+      "Bright": "#262626",
+      "Monochrome": "#ffffff"
+    }
+  },
+  {
+    "name": "color/on-solid-muted",
+    "byMode": {
+      "Deep": "#ffffffe0",
+      "Bright": "#0000007a",
+      "Monochrome": "#ffffffe0"
+    }
+  },
+  {
+    "name": "color/inverse/solid/450",
+    "byMode": {
+      "Deep": "#7279f5",
+      "Bright": "#93d926",
+      "Monochrome": "#ffffff"
+    }
+  },
+  {
+    "name": "color/inverse/solid/500",
+    "byMode": {
+      "Deep": "#6366f1",
+      "Bright": "#84cc16",
+      "Monochrome": "#ffffff"
+    }
+  },
+  {
+    "name": "color/inverse/solid/550",
+    "byMode": {
+      "Deep": "#5956eb",
+      "Bright": "#75b712",
+      "Monochrome": "#ffffff"
+    }
+  },
+  {
+    "name": "color/inverse/alpha/8",
+    "byMode": {
+      "Deep": "#6366f114",
+      "Bright": "#84cc1614",
+      "Monochrome": "#ffffff14"
+    }
+  },
+  {
+    "name": "color/inverse/alpha/16",
+    "byMode": {
+      "Deep": "#6366f129",
+      "Bright": "#84cc1629",
+      "Monochrome": "#ffffff29"
+    }
+  },
+  {
+    "name": "color/inverse/alpha/48",
+    "byMode": {
+      "Deep": "#6366f17a",
+      "Bright": "#84cc167a",
+      "Monochrome": "#ffffff7a"
+    }
+  },
+  {
+    "name": "color/inverse/alpha/64",
+    "byMode": {
+      "Deep": "#6366f1a3",
+      "Bright": "#84cc16a3",
+      "Monochrome": "#ffffffa3"
+    }
+  },
+  {
+    "name": "color/inverse/alpha/80",
+    "byMode": {
+      "Deep": "#6366f1cc",
+      "Bright": "#84cc16cc",
+      "Monochrome": "#ffffffcc"
+    }
+  },
+  {
+    "name": "color/inverse/on-solid",
+    "byMode": {
+      "Deep": "#ffffff",
+      "Bright": "#262626",
+      "Monochrome": "#000000"
+    }
+  },
+  {
+    "name": "color/inverse/on-solid-muted",
+    "byMode": {
+      "Deep": "#ffffffe0",
+      "Bright": "#0000007a",
+      "Monochrome": "#0000007a"
+    }
+  },
+  {
+    "name": "color/solid/600",
+    "byMode": {
+      "Deep": "#4f46e5",
+      "Bright": "#3f6212",
+      "Monochrome": "#000000"
+    }
+  },
+  {
+    "name": "color/inverse/alpha/24",
+    "byMode": {
+      "Deep": "#6366f13d",
+      "Bright": "#84cc163d",
+      "Monochrome": "#ffffff3d"
+    }
+  },
+  {
+    "name": "color/control-contrast-alpha/24",
+    "byMode": {
+      "Deep": "#ffffff3d",
+      "Bright": "#00000029",
+      "Monochrome": "#ffffff3d"
+    }
+  },
+  {
+    "name": "color/inverse/control-contrast-alpha/24",
+    "byMode": {
+      "Deep": "#ffffff3d",
+      "Bright": "#00000029",
+      "Monochrome": "#0000003d"
+    }
+  },
+  {
+    "name": "color/control-contrast-alpha/32",
+    "byMode": {
+      "Deep": "#ffffff52",
+      "Bright": "#0000003d",
+      "Monochrome": "#ffffff52"
+    }
+  },
+  {
+    "name": "color/inverse/control-contrast-alpha/32",
+    "byMode": {
+      "Deep": "#ffffff52",
+      "Bright": "#0000003d",
+      "Monochrome": "#00000052"
+    }
+  },
+  {
+    "name": "color/control-contrast-alpha/48",
+    "byMode": {
+      "Deep": "#ffffff7a",
+      "Bright": "#00000052",
+      "Monochrome": "#ffffff7a"
+    }
+  },
+  {
+    "name": "color/inverse/control-contrast-alpha/48",
+    "byMode": {
+      "Deep": "#ffffff7a",
+      "Bright": "#00000052",
+      "Monochrome": "#0000007a"
+    }
+  },
+  {
+    "name": "color/control-contrast-alpha/64",
+    "byMode": {
+      "Deep": "#ffffffa3",
+      "Bright": "#000000a3",
+      "Monochrome": "#ffffffa3"
+    }
+  },
+  {
+    "name": "color/inverse/control-contrast-alpha/64",
+    "byMode": {
+      "Deep": "#ffffffa3",
+      "Bright": "#000000a3",
+      "Monochrome": "#000000a3"
+    }
+  },
+  {
+    "name": "color/control-contrast-alpha/80",
+    "byMode": {
+      "Deep": "#ffffffcc",
+      "Bright": "#000000cc",
+      "Monochrome": "#ffffffcc"
+    }
+  },
+  {
+    "name": "color/inverse/control-contrast-alpha/80",
+    "byMode": {
+      "Deep": "#ffffffcc",
+      "Bright": "#000000cc",
+      "Monochrome": "#000000cc"
+    }
+  },
+  {
+    "name": "color/control-content-on-solid",
+    "byMode": {
+      "Deep": "#4f46e5",
+      "Bright": "#ffffff",
+      "Monochrome": "#000000"
+    }
+  },
+  {
+    "name": "color/inverse/control-content-on-solid",
+    "byMode": {
+      "Deep": "#4f46e5",
+      "Bright": "#ffffff",
+      "Monochrome": "#ffffff"
+    }
+  },
+  {
+    "name": "color/static-fill-hover",
+    "byMode": {
+      "Deep": "#ffffff",
+      "Bright": "#333333",
+      "Monochrome": "#ffffff"
+    }
+  },
+  {
+    "name": "color/static-fill-active",
+    "byMode": {
+      "Deep": "#ffffff",
+      "Bright": "#494949",
+      "Monochrome": "#ffffff"
+    }
+  },
+  {
+    "name": "color/inverse/static-fill-hover",
+    "byMode": {
+      "Deep": "#ffffff",
+      "Bright": "#333333",
+      "Monochrome": "#333333"
+    }
+  },
+  {
+    "name": "color/inverse/static-fill-active",
+    "byMode": {
+      "Deep": "#ffffff",
+      "Bright": "#494949",
+      "Monochrome": "#494949"
+    }
+  },
+  {
+    "name": "color/static-content-hover",
+    "byMode": {
+      "Deep": "#5956eb",
+      "Bright": "#ffffff",
+      "Monochrome": "#000000"
+    }
+  },
+  {
+    "name": "color/static-content-active",
+    "byMode": {
+      "Deep": "#6366f1",
+      "Bright": "#ffffff",
+      "Monochrome": "#000000"
+    }
+  },
+  {
+    "name": "color/inverse/static-content-hover",
+    "byMode": {
+      "Deep": "#5956eb",
+      "Bright": "#ffffff",
+      "Monochrome": "#ffffff"
+    }
+  },
+  {
+    "name": "color/inverse/static-content-active",
+    "byMode": {
+      "Deep": "#6366f1",
+      "Bright": "#ffffff",
+      "Monochrome": "#ffffff"
+    }
+  },
+  {
+    "name": "color/control-contrast-alpha/16",
+    "byMode": {
+      "Deep": "#ffffff29",
+      "Bright": "#00000014",
+      "Monochrome": "#ffffff29"
+    }
+  },
+  {
+    "name": "color/inverse/control-contrast-alpha/16",
+    "byMode": {
+      "Deep": "#ffffff29",
+      "Bright": "#00000014",
+      "Monochrome": "#00000029"
+    }
+  }
 ]
 
 export interface StaticColorToken { name: string; hex: string }
 
 export const STATIC_COLOR_TOKENS: StaticColorToken[] = [
-  { name: 'colors/neutral/50', hex: '#fafafa' },
-  { name: 'colors/neutral/100', hex: '#f5f5f5' },
-  { name: 'colors/neutral/200', hex: '#e5e5e5' },
-  { name: 'colors/neutral/300', hex: '#d4d4d4' },
-  { name: 'colors/neutral/400', hex: '#a3a3a3' },
-  { name: 'colors/neutral/500', hex: '#737373' },
-  { name: 'colors/neutral/600', hex: '#525252' },
-  { name: 'colors/neutral/700', hex: '#404040' },
-  { name: 'colors/neutral/800', hex: '#262626' },
-  { name: 'colors/neutral/900', hex: '#171717' },
-  { name: 'colors/neutral/950', hex: '#0a0a0a' },
-  { name: 'colors/neutral/alpha-8', hex: '#73737314' },
-  { name: 'colors/neutral/alpha-16', hex: '#73737329' },
-  { name: 'colors/neutral/alpha-24', hex: '#7373733d' },
-  { name: 'colors/neutral/alpha-32', hex: '#73737352' },
-  { name: 'colors/neutral/alpha-48', hex: '#7373737a' },
-  { name: 'colors/informative/base', hex: '#3b82f6' },
-  { name: 'colors/informative/alpha-16', hex: '#3b82f629' },
-  { name: 'colors/informative/alpha-48', hex: '#3b82f67a' },
-  { name: 'colors/positive/base', hex: '#22c55e' },
-  { name: 'colors/positive/alpha-16', hex: '#22c55e29' },
-  { name: 'colors/positive/alpha-48', hex: '#22c55e7a' },
-  { name: 'colors/warning/base', hex: '#f59e0b' },
-  { name: 'colors/warning/alpha-16', hex: '#f59e0b29' },
-  { name: 'colors/warning/alpha-48', hex: '#f59e0b7a' },
-  { name: 'colors/negative/base', hex: '#ef4444' },
-  { name: 'colors/negative/alpha-16', hex: '#ef444429' },
-  { name: 'colors/negative/alpha-48', hex: '#ef44447a' },
-  { name: 'colors/white/base', hex: '#ffffff' },
-  { name: 'colors/white/alpha-16', hex: '#ffffff29' },
-  { name: 'colors/white/alpha-24', hex: '#ffffff3d' },
-  { name: 'colors/white/alpha-32', hex: '#ffffff52' },
-  { name: 'colors/white/alpha-48', hex: '#ffffff7a' },
-  { name: 'colors/white/alpha-88', hex: '#ffffffe0' },
-  { name: 'colors/black/base', hex: '#000000' },
-  { name: 'colors/black/alpha-16', hex: '#00000029' },
-  { name: 'colors/black/alpha-48', hex: '#0000007a' },
-  { name: 'colors/black/alpha-80', hex: '#000000cc' },
+  {
+    "name": "color/inverse/contrast",
+    "hex": "#000000"
+  }
 ]

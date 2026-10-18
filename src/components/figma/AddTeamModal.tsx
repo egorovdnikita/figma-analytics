@@ -135,7 +135,7 @@ export function AddTeamModal({
           <p
             className={cn(
               '-mt-2 text-[14px]',
-              canSubmit ? 'text-muted' : 'text-[var(--danger)]',
+              canSubmit ? 'text-muted' : 'text-[var(--danger-ink)]',
             )}
           >
             {canSubmit ? (
@@ -158,7 +158,7 @@ export function AddTeamModal({
         </Field>
 
         {error ? (
-          <p className="rounded-control bg-[var(--sunken)] px-3 py-2 text-[12px] text-[var(--danger)]">{error}</p>
+          <p className="rounded-control bg-[var(--sunken)] px-3 py-2 text-[12px] text-[var(--danger-ink)]">{error}</p>
         ) : null}
       </div>
     </Modal>

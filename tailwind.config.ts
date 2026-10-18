@@ -22,9 +22,11 @@ export default {
         danger: 'var(--danger)',
       },
       borderRadius: {
+        // Brand ・ Rounding, мода Medium: card = rounding/xl, control = rounding/m,
+        // chip = rounding/xs. Прежние 10px у чипа не было ни в одной моде.
         card: '24px',
         control: '16px',
-        chip: '10px',
+        chip: '8px',
       },
       fontFamily: {
         sans: ['var(--font-body)', 'Golos Text', '-apple-system', 'Segoe UI', 'system-ui', 'sans-serif'],

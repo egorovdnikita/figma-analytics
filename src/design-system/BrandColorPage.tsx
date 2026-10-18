@@ -14,15 +14,14 @@ export function BrandColorPage({ mode }: { mode: BrandMode }) {
   return (
     <div>
       <p style={{ font: '400 13px/1.6 var(--font-body)', color: 'var(--muted)', marginBottom: 20 }}>
-        Figma Analytics | Tokens — коллекция <code>Color</code>: 10 hue-режимов (переключатель выбора
-        акцентного цвета продукта). Реально по режиму меняются только 5 токенов пространства{' '}
-        <code>colors/brand/*</code> — Figma Analytics использует режим <code>Violet</code>, он совпадает
-        с <code>--grass</code> в <code>src/index.css</code>. Остальные 38 токенов ниже
-        (neutral/informative/positive/warning/negative/white/black) не зависят от режима.
+        <code>Brand ・ Color</code> из дизайн-системы box-ui: моды <code>Deep</code>,{' '}
+        <code>Bright</code> и <code>Monochrome</code>. Приложение использует <code>Deep</code> — её
+        значения сведены в <code>--grass</code> и соседние переменные в <code>src/index.css</code>.
+        Сверху — токены, которые меняются от моды, ниже — одинаковые во всех модах.
       </p>
 
       <h3 style={{ font: '700 14px/1.4 var(--font-body)', color: 'var(--ink)', marginBottom: 8 }}>
-        colors/brand/* — режим {mode}
+        Зависят от моды — {mode}
       </h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '4px 24px', marginBottom: 28 }}>
         {BRAND_COLOR_TOKENS.map((t) => (
@@ -31,7 +30,7 @@ export function BrandColorPage({ mode }: { mode: BrandMode }) {
       </div>
 
       <h3 style={{ font: '700 14px/1.4 var(--font-body)', color: 'var(--ink)', marginBottom: 8 }}>
-        Инвариантные токены (не зависят от режима)
+        Одинаковые во всех модах
       </h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '4px 24px' }}>
         {STATIC_COLOR_TOKENS.map((t) => (

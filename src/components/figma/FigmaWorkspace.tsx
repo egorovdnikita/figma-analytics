@@ -628,7 +628,7 @@ function EmptyState({
 }) {
   return (
     <EmptyBlock
-      icon={<AppIcon name="RefreshCw" size={22} />}
+      icon={<AppIcon name="RefreshCw" size={24} />}
       title={hasTeams ? 'Данных ещё нет' : 'Начните с команды'}
       description={
         hasTeams

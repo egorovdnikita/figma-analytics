@@ -136,7 +136,7 @@ export function ThreadsPanel({
   if (model.threads.length === 0) {
     return (
       <EmptyBlock
-        icon={<AppIcon name="MessageSquare" size={22} />}
+        icon={<AppIcon name="MessageSquare" size={24} />}
         title="Обсуждений нет"
         description="В выборке не нашлось ни одной ветки. Ослабьте фильтры или запустите синхронизацию."
       />
@@ -370,7 +370,7 @@ export function ThreadsPanel({
               key={thread.id}
               type="button"
               onClick={() => onOpenFile(thread.fileKey, thread.fileName)}
-              className="flex w-full items-start gap-2.5 rounded-control p-2 text-left hover:bg-[var(--sunken)]"
+              className="flex w-full items-start gap-2.5 rounded-control p-2 text-left hover:bg-[var(--ghost-hover)]"
             >
               <Avatar src={thread.authorImg} name={thread.author} size={24} />
               <div className="min-w-0 flex-1">
@@ -407,7 +407,7 @@ export function ThreadsPanel({
             <button
               type="button"
               onClick={() => setLimit((value) => value + 40)}
-              className="h-8 rounded-control px-3 text-[12px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
+              className="h-8 rounded-control px-3 text-[12px] text-muted hover:bg-[var(--ghost-hover)] hover:text-ink"
             >
               Показать ещё
             </button>

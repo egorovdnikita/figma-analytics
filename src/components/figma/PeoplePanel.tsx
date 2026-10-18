@@ -97,7 +97,7 @@ export function PeoplePanel({
   if (allTime.length === 0) {
     return (
       <EmptyBlock
-        icon={<AppIcon name="Users" size={22} />}
+        icon={<AppIcon name="Users" size={24} />}
         title="Участников не найдено"
         description="Запустите синхронизацию, чтобы собрать историю пространства."
       />
@@ -157,7 +157,7 @@ export function PeoplePanel({
                   key={person.handle}
                   className={cn(
                     'group flex items-center gap-3 rounded-control p-2 transition-colors',
-                    active === person.handle ? 'bg-[var(--sunken)]' : 'hover:bg-[var(--sunken)]',
+                    active === person.handle ? 'bg-[var(--sunken)]' : 'hover:bg-[var(--ghost-hover)]',
                   )}
                 >
                   <button
@@ -204,11 +204,11 @@ export function PeoplePanel({
                   <button
                     type="button"
                     onClick={() => void hide(person.handle)}
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-control text-faint opacity-0 hover:bg-[var(--line)] hover:text-ink group-hover:opacity-100"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-control text-faint opacity-0 hover:bg-[var(--soft-hover)] hover:text-ink group-hover:opacity-100"
                     aria-label={`Скрыть ${person.handle} из аналитики`}
                     title="Скрыть из аналитики — например, человека из другой команды"
                   >
-                    <CrossGlyph size={14} />
+                    <CrossGlyph size={16} />
                   </button>
                 </div>
               )
@@ -235,7 +235,7 @@ export function PeoplePanel({
                 <Avatar src={person.img} name={person.handle} size={16} />
                 {person.handle}
                 <span className="text-faint">· {person.events}</span>
-                <PlusGlyph size={13} />
+                <PlusGlyph size={16} />
               </button>
             ))}
           </div>

@@ -19,7 +19,8 @@
     "dist:win": "npm run build && electron-builder --win",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "storybook:coverage": "node scripts/check-storybook-coverage.mjs"
+    "storybook:coverage": "node scripts/check-storybook-coverage.mjs",
+    "tokens:sync": "node scripts/sync-design-tokens.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",

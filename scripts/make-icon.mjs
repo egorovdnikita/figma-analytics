@@ -1,6 +1,7 @@
 /**
  * Иконка приложения: белая macOS-плитка и глиф chart-2 (Bold) цветом
- * --box-palette-violet-solid-500 из дизайн-системы box-ui.
+ * --box-brand-solid-500 в моде Deep из дизайн-системы box-ui — тот же акцент,
+ * что у приложения (--grass в src/index.css).
  *
  * Рисуем SVG и растеризуем его Electron'ом — он здесь всё равно есть, а
  * сторонний конвертер SVG→PNG тянуть ради одной картинки незачем.
@@ -16,8 +17,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const SIZE = 1024
 const OUT = path.join(ROOT, 'build', 'icon.png')
 
-/** color/violet/solid/500 → --box-palette-violet-solid-500 */
-const VIOLET = '#8b5cf6'
+/** Brand ・ Color · color/solid/500, мода Deep → --box-brand-solid-500 */
+const ACCENT = '#6366f1'
 
 /** Глиф Solar «chart-2», стиль Bold, viewBox 24×24 (packages/icons в box-ui). */
 const GLYPH =
@@ -66,7 +67,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${S
   </defs>
   <path d="${squircle(SIZE / 2, SIZE / 2, TILE / 2)}" fill="#ffffff" filter="url(#tile-shadow)"/>
   <g transform="translate(${glyphX} ${glyphY}) scale(${glyphScale})">
-    <path d="${GLYPH}" fill="${VIOLET}"/>
+    <path d="${GLYPH}" fill="${ACCENT}"/>
   </g>
 </svg>`
 

@@ -12,25 +12,66 @@
   font-display: swap;
 }
 
+/*
+ * Токены — из box-ui (tokens/figma/*.txt): System ・ Theme, Brand ・ Color в моде
+ * Deep (значения моды Indigo), System ・ Status в моде Negative. Имена переменных
+ * остались прежними, чтобы не переписывать сотню мест разом; в комментарии у
+ * каждой — путь в Figma, по которому её сверять. Полупрозрачные ступени заданы
+ * как в Figma: нейтральная шкала на N%, а не готовый hex.
+ */
 :root {
-  /* background/base/primary, background/base/secondary (Figma Analytics | Tokens, Mode=Light) */
+  /* surface/base/fill/page · raised · layer-subtle */
   --canvas: #f5f5f5;
   --surface: #ffffff;
   --raised: #ffffff;
-  --sunken: #f6f6f3;
-  --line: #e7e7e2;
-  /* content/base/primary|secondary|tertiary */
+  --sunken: #f5f5f5;
+  /* surface/base/border/default · strong · subtle */
+  --line: rgb(115 115 115 / 0.16);
+  --line-strong: rgb(115 115 115 / 0.32);
+  --line-subtle: rgb(115 115 115 / 0.08);
+  /* surface/base/content/strong · muted · subtle */
   --ink: #171717;
   --muted: #737373;
   --faint: #a3a3a3;
-  /* colors/brand/primary|secondary (Color collection, mode=Violet) */
-  --grass: #8b5cf6;
-  --grass-ink: #4c1d95;
-  --grass-soft: #ede9fe;
-  --lilac: #a78bfa;
-  --lilac-soft: #f5f3ff;
-  --danger: #d0554f;
-  /* background/base/overlay (Mode=Light) */
+
+  /* interaction/accent/solid/fill/default · hover · active */
+  --grass: #6366f1;
+  --grass-hover: #7279f5;
+  --grass-active: #5956eb;
+  /* interaction/accent/soft/content/enabled — текст и иконки на мягком акценте */
+  --grass-ink: #4f46e5;
+  /* interaction/accent/soft/fill/default · hover */
+  --grass-soft: rgb(99 102 241 / 0.16);
+  --grass-soft-hover: rgb(99 102 241 / 0.24);
+  /* brand color/solid/450 · color/alpha/8 — вторичный акцент: фокус, ссылки */
+  --lilac: #7279f5;
+  --lilac-soft: rgb(99 102 241 / 0.08);
+
+  /* interaction/neutral/grayscale/soft/fill/default · hover · active */
+  --soft: rgb(115 115 115 / 0.08);
+  --soft-hover: rgb(115 115 115 / 0.16);
+  --soft-active: rgb(115 115 115 / 0.24);
+  /* interaction/ghost/fill/hover · active */
+  --ghost-hover: rgb(115 115 115 / 0.08);
+  --ghost-active: rgb(115 115 115 / 0.16);
+  /* interaction/neutral/grayscale/outline/border/default · hover */
+  --outline: rgb(115 115 115 / 0.24);
+  --outline-hover: rgb(115 115 115 / 0.32);
+  /* interaction/selection/neutral/fill/default — выбранный пункт сегмента */
+  --selection: #ffffff;
+
+  /* interaction/status/solid/fill/default · hover · active (Negative) */
+  --danger: #ef4444;
+  --danger-hover: #f35b5b;
+  --danger-active: #e53535;
+  /* status/content/on-surface/default — текст ошибки на поверхности. Заливке
+     и тексту в DS положены разные токены: #ef4444 мелким текстом на белом не
+     дотягивает до контраста 4.5:1. */
+  --danger-ink: #7f1d1d;
+  /* status/fill/soft */
+  --danger-soft: rgb(239 68 68 / 0.16);
+
+  /* surface/base/fill/overlay */
   --overlay: rgb(0 0 0 / 0.48);
   --shadow-card: 0 1px 2px rgb(22 23 26 / 0.04);
   --font-body: 'Inter Variable', 'Golos Text', -apple-system, 'Segoe UI', system-ui, sans-serif;
@@ -39,24 +80,42 @@
 }
 
 .dark {
-  /* background/base/primary, background/base/secondary (Mode=Dark) */
   --canvas: #0a0a0a;
   --surface: #171717;
-  --raised: #1e1e20;
-  --sunken: #121213;
-  --line: #272729;
-  /* content/base/primary|secondary|tertiary */
+  --raised: #171717;
+  /* В тёмной теме вложенный слой светлее карточки, а не темнее: так в DS. */
+  --sunken: #262626;
+  --line: rgb(115 115 115 / 0.16);
+  --line-strong: rgb(115 115 115 / 0.32);
+  --line-subtle: rgb(115 115 115 / 0.08);
   --ink: #fafafa;
   --muted: #a3a3a3;
   --faint: #737373;
-  /* colors/brand/primary|secondary (mode=Violet) */
-  --grass: #8b5cf6;
-  --grass-ink: #ede9fe;
-  --grass-soft: #2e1065;
-  --lilac: #a78bfa;
-  --lilac-soft: #211e31;
-  --danger: #cc5c6f;
-  /* background/base/overlay (Mode=Dark) */
+
+  --grass: #7279f5;
+  --grass-hover: #6366f1;
+  --grass-active: #5956eb;
+  --grass-ink: #7279f5;
+  --grass-soft: rgb(99 102 241 / 0.16);
+  --grass-soft-hover: rgb(99 102 241 / 0.24);
+  --lilac: #7279f5;
+  --lilac-soft: rgb(99 102 241 / 0.08);
+
+  --soft: rgb(115 115 115 / 0.16);
+  --soft-hover: rgb(115 115 115 / 0.24);
+  --soft-active: rgb(115 115 115 / 0.32);
+  --ghost-hover: rgb(115 115 115 / 0.16);
+  --ghost-active: rgb(115 115 115 / 0.24);
+  --outline: rgb(115 115 115 / 0.24);
+  --outline-hover: rgb(115 115 115 / 0.32);
+  --selection: #404040;
+
+  --danger: #f35b5b;
+  --danger-hover: #ef4444;
+  --danger-active: #e53535;
+  --danger-ink: #fca5a5;
+  --danger-soft: rgb(239 68 68 / 0.16);
+
   --overlay: rgb(0 0 0 / 0.8);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3);
   color-scheme: dark;

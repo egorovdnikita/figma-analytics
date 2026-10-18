@@ -113,7 +113,7 @@ export function SettingsPanel({
             </p>
           </div>
           <Button variant="ghost" size="sm" onClick={onDisconnect}>
-            <AppIcon name="LogOut" size={14} />
+            <AppIcon name="LogOut" size={16} />
             Отключить
           </Button>
         </div>
@@ -448,11 +448,11 @@ export function SettingsPanel({
 
         <div className="mt-4 flex flex-wrap gap-2">
           <Button variant="soft" size="sm" onClick={exportCsv} disabled={busy}>
-            <AppIcon name="ExternalLink" size={14} />
+            <AppIcon name="ExternalLink" size={16} />
             Выгрузить события в CSV
           </Button>
           <Button variant="ghost" size="sm" onClick={clearCache} disabled={busy}>
-            <AppIcon name="Trash2" size={14} />
+            <AppIcon name="Trash2" size={16} />
             Очистить кэш
           </Button>
         </div>

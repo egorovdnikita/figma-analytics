@@ -1,9 +1,10 @@
+import type { IconSize } from '@/components/AppIcon'
 import { useId } from 'react'
 
 /** Логотип Figma — всегда в фирменных цветах; неактивное состояние
  * управляется прозрачностью контейнера снаружи (см. IconRail), как и
  * остальные брендовые иконки рейла. */
-export function FigmaIcon({ size = 20, className }: { size?: number; className?: string }) {
+export function FigmaIcon({ size = 20, className }: { size?: IconSize; className?: string }) {
   const clipId = useId()
 
   return (

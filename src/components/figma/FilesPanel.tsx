@@ -89,7 +89,7 @@ export function FilesPanel({
   if (files.length === 0) {
     return (
       <EmptyBlock
-        icon={<AppIcon name="CalendarDays" size={22} />}
+        icon={<AppIcon name="CalendarDays" size={24} />}
         title="Файлов нет"
         description="Запустите синхронизацию, чтобы собрать пространство."
       />
@@ -260,7 +260,7 @@ export function FilesPanel({
               {rows.map((file) => (
                 <tr
                   key={file.fileKey}
-                  className="cursor-pointer border-t border-line hover:bg-[var(--sunken)]"
+                  className="cursor-pointer border-t border-line hover:bg-[var(--ghost-hover)]"
                   onClick={() => onOpenFile(file.fileKey, file.name)}
                 >
                   <td className="max-w-[240px] truncate py-2 text-ink" title={file.name}>
@@ -298,7 +298,7 @@ export function FilesPanel({
       {stale.length > 0 ? (
         <section className="rounded-card bg-surface p-4">
           <h3 className="mb-3 flex items-center gap-1.5 text-[14px] font-semibold text-ink">
-            <AppIcon name="CalendarOff" size={15} className="text-[var(--danger)]" />
+            <AppIcon name="CalendarOff" size={16} className="text-[var(--danger-ink)]" />
             Заброшенные файлы — 30+ дней без изменений ({stale.length})
           </h3>
           <div className="space-y-1">
@@ -307,7 +307,7 @@ export function FilesPanel({
                 key={file.fileKey}
                 type="button"
                 onClick={() => onOpenFile(file.fileKey, file.name)}
-                className="flex h-8 w-full items-center gap-2 rounded-control px-2 text-left text-[14px] text-ink hover:bg-[var(--sunken)]"
+                className="flex h-8 w-full items-center gap-2 rounded-control px-2 text-left text-[14px] text-ink hover:bg-[var(--ghost-hover)]"
               >
                 <span className="flex-1 truncate">{file.name}</span>
                 <span className="shrink-0 text-[12px] text-faint">

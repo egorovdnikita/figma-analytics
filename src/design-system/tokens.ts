@@ -1,8 +1,23 @@
 /**
- * Единственный источник правды для токенов — CSS-переменные в src/index.css
- * (светлая тема в :root, тёмная — в .dark). Этот файл дублирует значения
- * в виде данных для документации в Storybook и не используется в рантайме приложения.
+ * Данные для страницы «Обзор». Значения цветов не дублируются: они читаются из
+ * src/index.css, единственного источника правды для рантайма. Раньше здесь
+ * лежала копия, и после смены дизайн-системы она осталась с фиолетовым брендом
+ * и старыми серыми — страница показывала не то, чем красится приложение.
+ * Руками ведутся только описания и путь в Figma, по которому токен сверять.
  */
+import css from '../index.css?raw'
+
+function readBlock(selector: string): Record<string, string> {
+  const start = css.indexOf(`${selector} {`)
+  if (start === -1) return {}
+  const body = css.slice(start, css.indexOf('\n}', start))
+  const vars: Record<string, string> = {}
+  for (const match of body.matchAll(/(--[a-z0-9-]+):\s*([^;]+);/g)) vars[match[1]] = match[2].trim()
+  return vars
+}
+
+const light = readBlock(':root')
+const dark = readBlock('.dark')
 
 export interface ColorToken {
   name: string
@@ -12,25 +27,48 @@ export interface ColorToken {
   description: string
 }
 
-// Значения синхронизированы с Figma: Figma Analytics | Tokens (Mode: Light/Dark) для
-// canvas/surface/ink/muted/faint, Figma Analytics | Primitives → violet для grass/lilac.
-export const colorTokens: ColorToken[] = [
-  { name: 'canvas', cssVar: '--canvas', light: '#f5f5f5', dark: '#0a0a0a', description: 'Фон окна приложения, под карточками (background/base/primary)' },
-  { name: 'surface', cssVar: '--surface', light: '#ffffff', dark: '#171717', description: 'Фон карточек, модальных окон, полей ввода (background/base/secondary)' },
-  { name: 'raised', cssVar: '--raised', light: '#ffffff', dark: '#1e1e20', description: 'Приподнятые поверхности поверх surface (не из Figma-токенов, местный)' },
-  { name: 'sunken', cssVar: '--sunken', light: '#f6f6f3', dark: '#121213', description: 'Утопленные зоны: hover/pressed, вложенные блоки (не из Figma-токенов, местный)' },
-  { name: 'line', cssVar: '--line', light: '#e7e7e2', dark: '#272729', description: 'Границы, разделители (не из Figma-токенов, местный)' },
-  { name: 'ink', cssVar: '--ink', light: '#171717', dark: '#fafafa', description: 'Основной текст (content/base/primary)' },
-  { name: 'muted', cssVar: '--muted', light: '#737373', dark: '#a3a3a3', description: 'Вторичный текст, лейблы (content/base/secondary)' },
-  { name: 'faint', cssVar: '--faint', light: '#a3a3a3', dark: '#737373', description: 'Плейсхолдеры, приглушённые иконки (content/base/tertiary)' },
-  { name: 'grass', cssVar: '--grass', light: '#8b5cf6', dark: '#8b5cf6', description: 'Основной акцент (цвет иконки приложения): primary-кнопки, активные состояния (colors/brand/primary, mode=Violet)' },
-  { name: 'grass-ink', cssVar: '--grass-ink', light: '#4c1d95', dark: '#ede9fe', description: 'Текст поверх grass-soft (violet/900 · violet/100)' },
-  { name: 'grass-soft', cssVar: '--grass-soft', light: '#ede9fe', dark: '#2e1065', description: 'Мягкий фон акцента: активный пункт меню, чипы (violet/100 · violet/950)' },
-  { name: 'lilac', cssVar: '--lilac', light: '#a78bfa', dark: '#a78bfa', description: 'Вторичный акцент: фокус-кольцо, ссылки (colors/brand/secondary, violet/400)' },
-  { name: 'lilac-soft', cssVar: '--lilac-soft', light: '#f5f3ff', dark: '#211e31', description: 'Мягкий фон вторичного акцента (violet/50)' },
-  { name: 'danger', cssVar: '--danger', light: '#d0554f', dark: '#cc5c6f', description: 'Деструктивные действия, ошибки (не из Figma-токенов — сохранён свой приглушённый оттенок)' },
-  { name: 'overlay', cssVar: '--overlay', light: 'rgb(0 0 0 / 0.48)', dark: 'rgb(0 0 0 / 0.8)', description: 'Подложка под модальными окнами (background/base/overlay)' },
+const COLORS: { name: string; description: string }[] = [
+  { name: 'canvas', description: 'Фон окна под карточками · surface/base/fill/page' },
+  { name: 'surface', description: 'Карточки, модальные окна, поля ввода · surface/base/fill/raised' },
+  { name: 'raised', description: 'Приподнятые поверхности · surface/base/fill/raised' },
+  { name: 'sunken', description: 'Вложенный слой: дорожки, поля поиска · surface/base/fill/layer-subtle' },
+  { name: 'line', description: 'Границы и разделители · surface/base/border/default' },
+  { name: 'line-strong', description: 'Заметная граница · surface/base/border/strong' },
+  { name: 'line-subtle', description: 'Едва заметная граница · surface/base/border/subtle' },
+  { name: 'ink', description: 'Основной текст · surface/base/content/strong' },
+  { name: 'muted', description: 'Вторичный текст, подписи · surface/base/content/muted' },
+  { name: 'faint', description: 'Плейсхолдеры, приглушённые иконки · surface/base/content/subtle' },
+  { name: 'grass', description: 'Акцент: primary-кнопки, активное · interaction/accent/solid/fill/default (Deep)' },
+  { name: 'grass-hover', description: 'Акцент при наведении · interaction/accent/solid/fill/hover' },
+  { name: 'grass-active', description: 'Акцент при нажатии · interaction/accent/solid/fill/active' },
+  { name: 'grass-ink', description: 'Текст на мягком акценте · interaction/accent/soft/content/enabled' },
+  { name: 'grass-soft', description: 'Мягкий акцент · interaction/accent/soft/fill/default' },
+  { name: 'grass-soft-hover', description: 'Мягкий акцент при наведении · interaction/accent/soft/fill/hover' },
+  { name: 'lilac', description: 'Вторичный акцент: фокус, ссылки · brand color/solid/450' },
+  { name: 'lilac-soft', description: 'Фон вторичного акцента · brand color/alpha/8' },
+  { name: 'soft', description: 'Нейтральная мягкая кнопка · interaction/neutral/grayscale/soft/fill/default' },
+  { name: 'soft-hover', description: '…при наведении · interaction/neutral/grayscale/soft/fill/hover' },
+  { name: 'soft-active', description: '…при нажатии · interaction/neutral/grayscale/soft/fill/active' },
+  { name: 'ghost-hover', description: 'Наведение на строки и пункты · interaction/ghost/fill/hover' },
+  { name: 'ghost-active', description: 'Нажатие на строки и пункты · interaction/ghost/fill/active' },
+  { name: 'outline', description: 'Рамка outline-кнопки · interaction/neutral/grayscale/outline/border/default' },
+  { name: 'outline-hover', description: '…при наведении · interaction/neutral/grayscale/outline/border/hover' },
+  { name: 'selection', description: 'Выбранный пункт сегмента · interaction/selection/neutral/fill/default' },
+  { name: 'danger', description: 'Деструктивные кнопки · interaction/status/solid/fill/default (Negative)' },
+  { name: 'danger-hover', description: '…при наведении · interaction/status/solid/fill/hover' },
+  { name: 'danger-active', description: '…при нажатии · interaction/status/solid/fill/active' },
+  { name: 'danger-ink', description: 'Текст ошибки на поверхности · status/content/on-surface/default' },
+  { name: 'danger-soft', description: 'Мягкий фон ошибки · status/fill/soft' },
+  { name: 'overlay', description: 'Подложка под модальными окнами · surface/base/fill/overlay' },
 ]
+
+export const colorTokens: ColorToken[] = COLORS.map(({ name, description }) => ({
+  name,
+  cssVar: `--${name}`,
+  light: light[`--${name}`] ?? '',
+  dark: dark[`--${name}`] ?? light[`--${name}`] ?? '',
+  description,
+}))
 
 export interface RadiusToken {
   name: string
@@ -39,11 +77,12 @@ export interface RadiusToken {
   description: string
 }
 
+// Brand ・ Rounding, мода Medium (см. tailwind.config.ts).
 export const radiusTokens: RadiusToken[] = [
-  { name: 'chip', value: '10px', className: 'rounded-chip', description: 'Чипы, теги' },
-  { name: 'control', value: '16px', className: 'rounded-control', description: 'Инпуты, кнопки, IconButton, пункты навигации, трек Segmented' },
-  { name: 'card', value: '24px', className: 'rounded-card', description: 'Карточки, модальные окна, панели' },
-  { name: 'full', value: '9999px', className: 'rounded-full', description: 'Аватары, точки-индикаторы, переключатель Switch' },
+  { name: 'chip', value: '8px', className: 'rounded-chip', description: 'Чипы, теги · rounding/xs' },
+  { name: 'control', value: '16px', className: 'rounded-control', description: 'Инпуты, кнопки, пункты навигации, трек Segmented · rounding/m' },
+  { name: 'card', value: '24px', className: 'rounded-card', description: 'Карточки, модальные окна, панели · rounding/xl' },
+  { name: 'full', value: '9999px', className: 'rounded-full', description: 'Аватары, точки, переключатель Switch · rounding/full' },
 ]
 
 export interface ShadowToken {
@@ -67,17 +106,15 @@ export interface TypeScaleToken {
   usage: string
 }
 
-// Значения сверены с Figma: Figma Analytics | Primitives → Typography (font-size/*) и
-// Figma Analytics | Tokens → Typography (caption/body/heading/display). Используются только шаги,
-// присутствующие в примитивной шкале — 11/13/15/17/19/22/26 в приложении больше не встречаются.
+// Шаги из Primitives ・ Typography (font-size/*). Других кеглей в приложении нет.
 export const typeScale: TypeScaleToken[] = [
-  { size: 10, usage: 'Служебные пометки ("весь день")' },
+  { size: 10, usage: 'Служебные подписи заглавными, оси графиков (caption/m)' },
   { size: 12, usage: 'Подписи, чипы, вторичный текст, компактные кнопки (caption/l)' },
   { size: 14, usage: 'Базовый текст: поля, списки, кнопки всех размеров (body/m)' },
-  { size: 16, usage: 'Номера дней в сетке недели, крупные поля ввода (body/l)' },
+  { size: 16, usage: 'Крупные поля ввода, заголовки пустых состояний (body/l)' },
   { size: 20, usage: 'Заголовки модальных окон (heading/H5)' },
-  { size: 24, usage: 'Крупные акцентные числа, бренд-логотип (heading/H4)' },
-  { size: 28, usage: 'Заголовок диапазона дат в шапке, заголовки онбординга' },
+  { size: 24, usage: 'Имя в профиле, бренд-логотип (heading/H4)' },
+  { size: 28, usage: 'Заголовок раздела в шапке, заголовки онбординга' },
 ]
 
 export const fontFamily =

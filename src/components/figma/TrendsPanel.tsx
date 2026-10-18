@@ -76,7 +76,7 @@ export function TrendsPanel({
   if (events.length === 0) {
     return (
       <EmptyBlock
-        icon={<AppIcon name="ArrowRight" size={22} />}
+        icon={<AppIcon name="ArrowRight" size={24} />}
         title="Нет данных за период"
         description="Ослабьте фильтры или запустите синхронизацию."
       />

@@ -19,7 +19,7 @@ export function LibraryPanel({ teams, events }: { teams: FigmaTeamRef[]; events:
   if (teams.length === 0) {
     return (
       <EmptyBlock
-        icon={<AppIcon name="ShieldCheck" size={22} />}
+        icon={<AppIcon name="ShieldCheck" size={24} />}
         title="Библиотека недоступна"
         description="Добавьте команду, чтобы увидеть её опубликованную библиотеку."
       />

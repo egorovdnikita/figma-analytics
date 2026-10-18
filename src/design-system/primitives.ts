@@ -1,4 +1,5 @@
-// Figma Analytics | Primitives (Палитра) — сгенерировано из Figma-переменных, коллекция Color Palette.
+// Сгенерировано scripts/sync-design-tokens.mjs из egorovdnikita/box-ui@5309aef — ◉ Primitives ・ Color.
+// Руками не править: перезапустите скрипт.
 export interface PrimitiveStep { step: string; hex: string }
 export interface PrimitiveHue { name: string; solid: PrimitiveStep[]; alpha: PrimitiveStep[] }
 

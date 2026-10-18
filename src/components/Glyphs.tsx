@@ -1,10 +1,11 @@
+import type { IconSize } from '@/components/AppIcon'
 /**
  * Голые глифы без обводок и подложек. В наборе Solar «плюс» и «крестик»
  * существуют только в круге или квадрате (add-circle, close-circle), а в
  * интерфейсе они нужны как чистые штрихи — поэтому рисуем сами.
  */
 
-export function PlusGlyph({ size = 16, className }: { size?: number; className?: string }) {
+export function PlusGlyph({ size = 16, className }: { size?: IconSize; className?: string }) {
   return (
     <svg viewBox="0 0 16 16" width={size} height={size} className={className} aria-hidden>
       <path
@@ -18,7 +19,7 @@ export function PlusGlyph({ size = 16, className }: { size?: number; className?:
   )
 }
 
-export function CrossGlyph({ size = 16, className }: { size?: number; className?: string }) {
+export function CrossGlyph({ size = 16, className }: { size?: IconSize; className?: string }) {
   return (
     <svg viewBox="0 0 16 16" width={size} height={size} className={className} aria-hidden>
       <path
@@ -32,7 +33,7 @@ export function CrossGlyph({ size = 16, className }: { size?: number; className?
   )
 }
 
-export function CheckGlyph({ size = 16, className }: { size?: number; className?: string }) {
+export function CheckGlyph({ size = 16, className }: { size?: IconSize; className?: string }) {
   return (
     <svg viewBox="0 0 16 16" width={size} height={size} className={className} aria-hidden>
       <path

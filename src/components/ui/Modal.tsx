@@ -4,9 +4,9 @@ import { IconButton } from './Button'
 /** Solar не даёт крестик без обёртки (circle/square) — рисуем сами. */
 function CloseGlyph() {
   return (
-    <svg viewBox="0 0 18 18" className="h-[18px] w-[18px]" aria-hidden>
+    <svg viewBox="0 0 20 20" className="h-5 w-5" aria-hidden>
       <path
-        d="M4 4l10 10M14 4 4 14"
+        d="M5 5l10 10M15 5 5 15"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.75"

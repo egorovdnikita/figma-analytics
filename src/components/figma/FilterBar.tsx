@@ -267,7 +267,7 @@ export function FilterBar({
                       className="text-faint hover:text-ink"
                       aria-label={`Удалить набор ${item.name}`}
                     >
-                      <CrossGlyph size={12} />
+                      <CrossGlyph size={16} />
                     </button>
                   </span>
                 ))}

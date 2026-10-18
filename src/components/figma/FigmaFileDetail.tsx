@@ -44,7 +44,7 @@ export function FigmaFileDetail({
           />
         ) : (
           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-control bg-[var(--sunken)] text-faint">
-            <AppIcon name="AlignLeft" size={22} />
+            <AppIcon name="AlignLeft" size={24} />
           </div>
         )}
         <div className="min-w-0 flex-1">
@@ -64,7 +64,7 @@ export function FigmaFileDetail({
           size="sm"
           onClick={() => void ipc.openExternal(`https://www.figma.com/file/${fileKey}`)}
         >
-          <AppIcon name="ExternalLink" size={14} />
+          <AppIcon name="ExternalLink" size={16} />
           Открыть в Figma
         </Button>
       </header>
@@ -166,7 +166,7 @@ function VersionsTab({ fileKey }: { fileKey: string }) {
         const prev = items[index - 1]
         const daysBetween = prev ? humanDuration(version.created_at, prev.created_at) : null
         return (
-          <div key={version.id} className="flex items-center gap-3 rounded-control px-2 py-2 hover:bg-[var(--sunken)]">
+          <div key={version.id} className="flex items-center gap-3 rounded-control px-2 py-2 hover:bg-[var(--ghost-hover)]">
             <Avatar src={version.user.img_url} name={version.user.handle} size={28} />
             <div className="min-w-0 flex-1">
               <p className="truncate text-[14px] text-ink">

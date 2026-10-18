@@ -95,8 +95,8 @@ export function SyncStatus({
           onClick={() => setDetailsOpen(true)}
           disabled={!errorDetails}
           className={cn(
-            'max-w-[280px] truncate rounded-control px-2 py-1 text-[12px] text-[var(--danger)]',
-            errorDetails && 'hover:bg-[var(--sunken)]',
+            'max-w-[280px] truncate rounded-control px-2 py-1 text-[12px] text-[var(--danger-ink)]',
+            errorDetails && 'hover:bg-[var(--ghost-hover)]',
           )}
         >
           {error}

@@ -26,7 +26,7 @@ export function Segmented<T extends string>({
           className={cn(
             'h-8 rounded-[14px] px-3.5 text-[12px] font-medium transition-colors',
             value === option.value
-              ? 'bg-[var(--raised)] text-ink'
+              ? 'bg-[var(--selection)] text-ink'
               : 'text-muted hover:text-ink',
           )}
         >

@@ -44,13 +44,14 @@ const ICON_MAP = {
 
 export type IconName = keyof typeof ICON_MAP
 export const ICON_NAMES = Object.keys(ICON_MAP) as IconName[]
+/** Порядок и подписи — как моды `icon-style` в Brand ・ Icon дизайн-системы. */
 export const ICON_STYLES: { value: IconStyle; label: string }[] = [
-  { value: 'linear', label: 'Linear' },
-  { value: 'outline', label: 'Outline' },
   { value: 'bold', label: 'Bold' },
   { value: 'bold-duotone', label: 'Bold Duotone' },
   { value: 'broken', label: 'Broken' },
   { value: 'line-duotone', label: 'Line Duotone' },
+  { value: 'linear', label: 'Linear' },
+  { value: 'outline', label: 'Outline' },
 ]
 
 /** Иконки со стрелками — настраиваются отдельным стилем от остальных (см. ProfileView). */
@@ -85,6 +86,16 @@ export function IconStyleProvider({
   )
 }
 
+/**
+ * Размеры иконок — токены `size/base/*` дизайн-системы box-ui: min 16 · 2xs 20 ·
+ * xs 24 · s 28 · m 32 · l 36 · xl 40 · 2xl 44 · max 48. Тип не пускает другие
+ * числа: размер «между» токенами раньше расползался по приложению сам собой
+ * (14, 15, 22 — в двух десятках мест), а так его не соберёт TypeScript.
+ */
+export type IconSize = 16 | 20 | 24 | 28 | 32 | 36 | 40 | 44 | 48
+
+export const ICON_SIZES: IconSize[] = [16, 20, 24, 28, 32, 36, 40, 44, 48]
+
 export function useIconStyle(name: IconName) {
   const styles = useContext(IconStyleContext)
   return ARROW_ICON_NAMES.has(name) ? styles.arrows : styles.general
@@ -97,7 +108,7 @@ export function AppIcon({
   color,
 }: {
   name: IconName
-  size?: number
+  size?: IconSize
   className?: string
   color?: string
 }) {

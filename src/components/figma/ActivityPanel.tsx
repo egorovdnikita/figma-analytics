@@ -89,7 +89,7 @@ export function ActivityPanel({
               <button
                 type="button"
                 onClick={() => onOpenFile(event.fileKey, event.fileName)}
-                className="flex w-full items-start gap-2.5 rounded-control p-2 text-left hover:bg-[var(--sunken)]"
+                className="flex w-full items-start gap-2.5 rounded-control p-2 text-left hover:bg-[var(--ghost-hover)]"
               >
                 <span
                   className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
@@ -128,7 +128,7 @@ export function ActivityPanel({
             <button
               type="button"
               onClick={() => setLimit((v) => v + PAGE)}
-              className="h-8 rounded-control px-3 text-[12px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
+              className="h-8 rounded-control px-3 text-[12px] text-muted hover:bg-[var(--ghost-hover)] hover:text-ink"
             >
               Показать ещё {Math.min(PAGE, filtered.length - visible.length)}
             </button>

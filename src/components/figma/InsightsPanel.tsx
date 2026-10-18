@@ -108,7 +108,7 @@ export function InsightsPanel({
   if (events.length === 0) {
     return (
       <EmptyBlock
-        icon={<AppIcon name="Bell" size={22} />}
+        icon={<AppIcon name="Bell" size={24} />}
         title="Выводов пока нет"
         description="В текущей выборке недостаточно событий. Ослабьте фильтры или запустите синхронизацию."
       />
@@ -213,7 +213,7 @@ export function InsightsPanel({
                   key={row.fileKey}
                   type="button"
                   onClick={() => onOpenFile(row.fileKey, row.name)}
-                  className="flex h-7 w-full items-center gap-2 rounded-control px-2 text-left text-[14px] text-ink hover:bg-[var(--sunken)]"
+                  className="flex h-7 w-full items-center gap-2 rounded-control px-2 text-left text-[14px] text-ink hover:bg-[var(--ghost-hover)]"
                 >
                   <span className="flex-1 truncate">{row.name}</span>
                   <span className="shrink-0 text-[12px] text-faint">{row.days} дн.</span>
@@ -380,7 +380,7 @@ function InsightCard({ insight }: { insight: Insight }) {
         style={{ background: 'var(--surface)', color: tone.fg }}
         aria-hidden
       >
-        <AppIcon name={tone.icon} size={14} />
+        <AppIcon name={tone.icon} size={16} />
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">

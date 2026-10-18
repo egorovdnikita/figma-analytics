@@ -51,7 +51,7 @@ export const СИконкой: Story = {
   args: {
     children: (
       <>
-        <AppIcon name="Plus" size={18} />
+        <AppIcon name="Plus" size={20} />
         Создать событие
       </>
     ),

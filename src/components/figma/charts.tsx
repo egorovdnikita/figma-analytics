@@ -94,7 +94,7 @@ export function ChartCard({
             <button
               type="button"
               onClick={() => setShowTable((v) => !v)}
-              className="h-7 rounded-chip px-2.5 text-[12px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
+              className="h-7 rounded-chip px-2.5 text-[12px] text-muted hover:bg-[var(--ghost-hover)] hover:text-ink"
               aria-pressed={showTable}
             >
               {showTable ? 'График' : 'Таблица'}

@@ -9,7 +9,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Figma Analytics | Tokens — коллекция Color, 10 hue-режимов. Figma Analytics использует Violet.',
+        component: 'Brand ・ Color дизайн-системы box-ui: моды Deep, Bright, Monochrome. Приложение использует Deep.',
       },
     },
   },
@@ -17,7 +17,7 @@ const meta = {
     mode: { control: 'select', options: BRAND_MODES },
   },
   args: {
-    mode: 'Violet',
+    mode: 'Deep',
   },
 } satisfies Meta<typeof BrandColorPage>
 

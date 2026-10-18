@@ -16,7 +16,7 @@ export function Checkbox({
     <button
       type="button"
       onClick={onChange}
-      className="group flex w-full items-center gap-2.5 rounded-full px-2 py-1.5 text-left transition-colors hover:bg-[var(--sunken)]"
+      className="group flex w-full items-center gap-2.5 rounded-full px-2 py-1.5 text-left transition-colors hover:bg-[var(--ghost-hover)]"
     >
       <span
         className={cn(

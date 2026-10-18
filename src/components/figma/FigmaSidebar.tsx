@@ -82,7 +82,7 @@ export function FigmaSidebar<T extends string>({
                       'flex h-9 w-full items-center gap-2.5 rounded-control px-2 text-[14px] font-medium transition-colors',
                       section === item.value && selectedFileKey === null
                         ? 'bg-[var(--sunken)] text-ink'
-                        : 'text-faint hover:bg-[var(--sunken)] hover:text-ink',
+                        : 'text-faint hover:bg-[var(--ghost-hover)] hover:text-ink',
                     )}
                   >
                     <AppIcon name={item.icon} size={16} />
@@ -99,7 +99,7 @@ export function FigmaSidebar<T extends string>({
             <h3 className="mb-1 pl-2 text-[12px] font-semibold text-faint">Закреплённые</h3>
             <div className="space-y-0.5">
               {pinned.map((file) => (
-                <div key={file.key} className="group flex items-center rounded-control hover:bg-[var(--sunken)]">
+                <div key={file.key} className="group flex items-center rounded-control hover:bg-[var(--ghost-hover)]">
                   <button
                     type="button"
                     onClick={() => onSelectFile(file.key, file.name)}
@@ -118,7 +118,7 @@ export function FigmaSidebar<T extends string>({
                     aria-label="Открепить"
                     title="Открепить"
                   >
-                    <CrossGlyph size={13} />
+                    <CrossGlyph size={16} />
                   </button>
                 </div>
               ))}
@@ -132,7 +132,7 @@ export function FigmaSidebar<T extends string>({
             <button
               type="button"
               onClick={() => setModalOpen(true)}
-              className="flex h-7 w-7 items-center justify-center rounded-control text-muted hover:bg-[var(--sunken)] hover:text-ink"
+              className="flex h-7 w-7 items-center justify-center rounded-control text-muted hover:bg-[var(--ghost-hover)] hover:text-ink"
               aria-label="Добавить команду"
               title="Добавить команду"
             >
@@ -153,7 +153,7 @@ export function FigmaSidebar<T extends string>({
             <button
               type="button"
               onClick={() => setModalOpen(true)}
-              className="mt-1 w-full rounded-control px-3 py-4 text-[12px] leading-relaxed text-muted hover:bg-[var(--sunken)] hover:text-ink"
+              className="mt-1 w-full rounded-control px-3 py-4 text-[12px] leading-relaxed text-muted hover:bg-[var(--ghost-hover)] hover:text-ink"
             >
               Команд пока нет.
               <br />
@@ -229,23 +229,23 @@ function TeamNode({
 
   return (
     <div>
-      <div className="group flex items-center rounded-control hover:bg-[var(--sunken)]">
+      <div className="group flex items-center rounded-control hover:bg-[var(--ghost-hover)]">
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
           className="flex h-8 flex-1 items-center gap-1.5 px-1.5 text-[14px] font-medium text-ink"
         >
-          <AppIcon name={expanded ? 'ChevronDown' : 'ChevronRight'} size={14} className="text-faint" />
+          <AppIcon name={expanded ? 'ChevronDown' : 'ChevronRight'} size={16} className="text-faint" />
           <span className="truncate">{team.label || team.id}</span>
         </button>
         <button
           type="button"
           onClick={onRemoved}
-          className="mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-control text-faint opacity-0 hover:bg-[var(--line)] hover:text-ink group-hover:opacity-100"
+          className="mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-control text-faint opacity-0 hover:bg-[var(--soft-hover)] hover:text-ink group-hover:opacity-100"
           aria-label={team.kind === 'project' ? 'Убрать папку' : 'Убрать команду'}
           title="Убрать из списка"
         >
-          <CrossGlyph size={14} />
+          <CrossGlyph size={16} />
         </button>
       </div>
 
@@ -305,9 +305,9 @@ function ProjectNode({
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="flex h-8 w-full items-center gap-1.5 rounded-control px-1.5 text-[12px] text-muted hover:bg-[var(--sunken)] hover:text-ink"
+        className="flex h-8 w-full items-center gap-1.5 rounded-control px-1.5 text-[12px] text-muted hover:bg-[var(--ghost-hover)] hover:text-ink"
       >
-        <AppIcon name={expanded ? 'ChevronDown' : 'ChevronRight'} size={14} className="text-faint" />
+        <AppIcon name={expanded ? 'ChevronDown' : 'ChevronRight'} size={16} className="text-faint" />
         <span className="truncate">{project.name}</span>
       </button>
 
@@ -329,7 +329,7 @@ function ProjectNode({
                   'flex h-8 w-full items-center gap-1.5 rounded-control px-1.5 text-left text-[14px] transition-colors',
                   selectedFileKey === file.key
                     ? 'bg-[var(--sunken)] text-ink'
-                    : 'text-muted hover:bg-[var(--sunken)] hover:text-ink',
+                    : 'text-muted hover:bg-[var(--ghost-hover)] hover:text-ink',
                 )}
                 title={file.name}
               >

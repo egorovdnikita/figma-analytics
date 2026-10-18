@@ -1,10 +1,11 @@
+import type { IconSize } from '@/components/AppIcon'
 /** Фирменные многоцветные иконки рейла (Calendar/Mail/Drive/Tasks) — в отличие от
  * остального набора (AppIcon/Solar) эти не перекрашиваются через currentColor:
  * активное и неактивное состояние отличаются только прозрачностью контейнера
  * (см. IconRail — неактивные получают opacity-40). */
 
 interface BrandIconProps {
-  size?: number
+  size?: IconSize
   className?: string
 }
 

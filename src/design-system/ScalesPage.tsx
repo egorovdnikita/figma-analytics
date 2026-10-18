@@ -3,7 +3,6 @@ import {
   FONT_WEIGHT_SCALE,
   LETTER_SPACING_SCALE,
   LINE_HEIGHT_SCALE,
-  OPACITY_SCALE,
   PARAGRAPH_SPACING_SCALE,
   ROUNDING_SCALE,
   SIZE_SCALE,
@@ -75,25 +74,6 @@ export function ScalesPage() {
         {SIZE_SCALE.map((v) => (
           <BarRow key={v} value={v} max={96} />
         ))}
-      </Section>
-
-      <Section title="Opacity" description="29 значений в процентах (2–96).">
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {OPACITY_SCALE.map((v) => (
-            <div key={v} style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 6,
-                  background: `color-mix(in srgb, var(--lilac) ${v}%, transparent)`,
-                  border: '1px solid var(--line)',
-                }}
-              />
-              <div style={{ font: '400 10px/1.4 monospace', color: 'var(--faint)', marginTop: 2 }}>{v}</div>
-            </div>
-          ))}
-        </div>
       </Section>
 
       <Section title="Typography — font-weight" description="9 ступеней, из них компоненты приложения используют medium (500) и semibold (600).">
