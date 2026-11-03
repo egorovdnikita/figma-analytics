@@ -9,3 +9,10 @@ release.noindex
 
 *storybook.log
 storybook-static
+
+# Общий стандарт репозиториев
+.env*
+!.env.example
+.playwright-mcp
+.vercel
+.wrangler

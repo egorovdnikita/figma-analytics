@@ -26,7 +26,7 @@ mac:
   darkModeSupport: true
   # Без Apple Developer ID сборка не подписывается настоящим сертификатом.
   # afterPack.cjs ad-hoc подписывает .app, чтобы arm64-сборка не считалась «повреждённой» —
-  # см. README, раздел «Первый запуск».
+  # см. docs/install.md, раздел «Сборка установщиков».
   identity: null
   gatekeeperAssess: false
 
