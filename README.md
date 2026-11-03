@@ -2,7 +2,7 @@
 
 Десктопное приложение для macOS и Windows: аналитика рабочего пространства Figma по истории сохранений и обсуждениям — без своего сервера, данные лежат в локальном кэше.
 
-[Storybook](https://egorovdnikita.github.io/figma-analytics/)
+**→ [Открыть Storybook](https://egorovdnikita.github.io/figma-analytics/)**
 
 ## Что умеет
 
@@ -17,7 +17,7 @@
 
 ## Запуск
 
-Нужны: Node.js 20+ и npm.
+Нужен Node 20+ и npm.
 
 ```bash
 npm install
@@ -28,7 +28,7 @@ npm run dev
 
 ## Стек
 
-Electron 31 · React 18 · TypeScript · Vite · Tailwind CSS v3 · Box UI
+Electron · React · TypeScript · Vite · Tailwind
 
 ## Устройство
 
@@ -56,4 +56,4 @@ Renderer не видит токены: все обращения к API идут
 
 ## Лицензия
 
-MIT.
+[MIT](LICENSE).
