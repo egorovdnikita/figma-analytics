@@ -187,7 +187,7 @@ def outer_frame():
 
 # ---------- монтаж ----------
 
-def compose(folder, out, keys_only=False, quality=82, fps_out=None):
+def compose(folder, out, keys_only=False, quality=92, fps_out=None, lossless=True):
     import imageio_ffmpeg
     folder = Path(folder)
     meta = json.loads((folder / "frames.json").read_text())
@@ -219,8 +219,9 @@ def compose(folder, out, keys_only=False, quality=82, fps_out=None):
     encoder = None if keys_only else subprocess.Popen([
         imageio_ffmpeg.get_ffmpeg_exe(), "-y", "-v", "error", "-f", "rawvideo",
         "-pix_fmt", "rgba", "-s", f"{OUT_W}x{OUT_H}", "-r", str(fps_out), "-i", "-",
-        "-c:v", "libwebp_anim", "-lossless", "0", "-quality", str(quality), "-compression_level", "6",
-        "-preset", "text", "-loop", "0", str(out)
+        "-c:v", "libwebp_anim", "-lossless", "1" if lossless else "0", "-quality", str(quality),
+        "-compression_level", "4" if lossless else "6", *([] if lossless else ["-preset", "text"]),
+        "-loop", "0", str(out)
     ], stdin=subprocess.PIPE)
     first = last = None
     try:
@@ -268,9 +269,11 @@ if __name__ == "__main__":
     parser.add_argument("folder")
     parser.add_argument("--out")
     parser.add_argument("--keys-only", action="store_true")
-    parser.add_argument("--quality", type=int, default=82)
-    # 30 к/с: при 60 к/с тот же ролик весит 21 МБ даже на качестве 70, текст при этом мыльнее.
-    parser.add_argument("--fps", type=int, default=30, help="частота итогового ролика: 30 или 60 (как записано)")
+    # Как у Agent Pulse: без потерь, 60 к/с. Сжатие с потерями даёт блочный шум и «призраки»
+    # прошлых кадров на тёмном фоне — заметно на тексте.
+    parser.add_argument("--quality", type=int, default=92)
+    parser.add_argument("--lossy", action="store_true", help="WebP с потерями: меньше файл, хуже текст")
+    parser.add_argument("--fps", type=int, default=60, help="частота итогового ролика: 60 (как записано) или 30")
     args = parser.parse_args()
     out = args.out or str(Path(args.folder) / "figma-analytics-demo.webp")
-    compose(args.folder, None if args.keys_only else out, args.keys_only, args.quality, args.fps)
+    compose(args.folder, None if args.keys_only else out, args.keys_only, args.quality, args.fps, not args.lossy)

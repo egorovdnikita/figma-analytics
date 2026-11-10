@@ -1,8 +1,8 @@
 # Промо-ролик для README
 
-Зацикленный WebP `docs/assets/figma-analytics-demo.webp` — запись настоящего renderer приложения (`dist/` после сборки) в Playwright Chromium. Main-процесс подменён `mock-api.js`: вымышленные команды, люди и файлы, почты на `example.com`, сети и токенов нет.
+Зацикленный WebP `docs/assets/figma-analytics-demo-v2.webp` — запись настоящего renderer приложения (`dist/` после сборки) в Playwright Chromium. Main-процесс подменён `mock-api.js`: вымышленные команды, люди и файлы, почты на `example.com`, сети и токенов нет.
 
-Стиль как у промо Agent Pulse: фон GitHub Dark `#0d1117`, обводка `#3d444d`, скругление 20 pt, курсора нет — клики показаны кольцами в центрах настоящих кнопок, камера по кривой V4. 1600 × 880, 29 с, 30 кадров/с (запись идёт с шагом 1/60 с, `--fps 60` даёт полную частоту), WebP с потерями, качество 82 — около 13 МБ.
+Стиль как у промо Agent Pulse: фон GitHub Dark `#0d1117`, обводка `#3d444d`, скругление 20 pt, курсора нет — клики показаны кольцами в центрах настоящих кнопок, камера по кривой V4. 1600 × 880, 29 с, 60 кадров/с, WebP без потерь — около 57 МБ. Сжатие с потерями (`--lossy`, `--fps 30`) уменьшает файл до 13 МБ, но даёт блочный шум и следы прошлых кадров на тёмном фоне.
 
 ## Как воспроизвести
 
@@ -12,10 +12,10 @@ python3 -m venv "$TMPDIR/fa-promo-env"
 "$TMPDIR/fa-promo-env/bin/pip" install pillow imageio-ffmpeg playwright
 "$TMPDIR/fa-promo-env/bin/python" -m playwright install chromium
 "$TMPDIR/fa-promo-env/bin/python" scripts/promo/record.py "$TMPDIR/fa-promo"
-"$TMPDIR/fa-promo-env/bin/python" scripts/promo/compose.py "$TMPDIR/fa-promo" --out docs/assets/figma-analytics-demo.webp
+"$TMPDIR/fa-promo-env/bin/python" scripts/promo/compose.py "$TMPDIR/fa-promo" --out docs/assets/figma-analytics-demo-v2.webp
 ```
 
-`record.py` пишет кадры в папку вне репозитория, `compose.py` монтирует ролик и кладёт контрольные кадры с шагом 0,5 с в `ПАПКА/keys/`. `--keys-only` — только контрольные кадры без кодирования, `--quality` — качество WebP (по умолчанию 82), `--fps` — 30 или 60.
+`record.py` пишет кадры в папку вне репозитория, `compose.py` монтирует ролик и кладёт контрольные кадры с шагом 0,5 с в `ПАПКА/keys/`. `--keys-only` — только контрольные кадры без кодирования, `--quality` — параметр WebP (по умолчанию 92), `--lossy` — сжатие с потерями, `--fps` — 60 или 30. При замене ролика давайте файлу новое имя (`-v3`): GitHub кэширует картинки README.
 
 Если на машине параллельно идут другие записи, их `pkill` по имени скрипта может снять ваш процесс — тогда запускайте копию скрипта под другим именем. `record.py` сам повторяет запись, если браузер закрылся.
 
