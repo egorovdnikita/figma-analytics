@@ -36,7 +36,7 @@ export function FigmaConnect({ onConnected }: { onConnected: (user: FigmaUser) =
 
         <h1 className="text-[28px] font-bold leading-tight text-ink">Подключите Figma</h1>
         <p className="mt-2 text-[14px] leading-relaxed text-muted">
-          Figma Analytics покажет проекты, файлы, историю версий и обсуждения вашего пространства Figma.
+          figma-analytics покажет проекты, файлы, историю версий и обсуждения вашего пространства Figma.
           Нужен personal access token — он хранится только на этом компьютере в зашифрованном
           виде. Ввести его нужно один раз: обновления приложения его не сбрасывают.
         </p>

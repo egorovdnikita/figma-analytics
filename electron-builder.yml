@@ -1,5 +1,5 @@
 appId: com.figmaanalytics.desktop
-productName: Figma Analytics
+productName: figma-analytics
 copyright: © 2026 Nikita Egorov
 directories:
   # Суффикс .noindex — чтобы Spotlight не индексировал промежуточные .app
@@ -31,7 +31,7 @@ mac:
   gatekeeperAssess: false
 
 dmg:
-  title: Figma Analytics ${version}
+  title: figma-analytics ${version}
   contents:
     - x: 140
       y: 190
@@ -51,7 +51,7 @@ nsis:
   perMachine: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
-  shortcutName: Figma Analytics
+  shortcutName: figma-analytics
 
 linux:
   category: Office

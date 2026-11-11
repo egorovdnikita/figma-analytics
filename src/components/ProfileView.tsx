@@ -155,7 +155,7 @@ export function ProfileView() {
 
         <Card title="О приложении">
           <div className="grid gap-2 sm:grid-cols-2">
-            <Meta label="Figma Analytics" value={appInfo?.version ?? '—'} />
+            <Meta label="figma-analytics" value={appInfo?.version ?? '—'} />
             <Meta label="Платформа" value={`${appInfo?.platform ?? ''} ${appInfo?.arch ?? ''}`} />
             <Meta label="Electron / Chromium" value={`${appInfo?.electron ?? ''} / ${appInfo?.chrome ?? ''}`} />
             <Meta
@@ -190,7 +190,7 @@ export function ProfileView() {
         }
       >
         <p className="pb-4 text-[14px] leading-relaxed text-muted">
-          Figma Analytics удалит сохранённые токены и отзовёт разрешение на стороне Google.
+          figma-analytics удалит сохранённые токены и отзовёт разрешение на стороне Google.
           Аккаунт и его данные останутся без изменений — приложение просто перестанет вас узнавать,
           и для входа понадобится подключить Google заново.
         </p>

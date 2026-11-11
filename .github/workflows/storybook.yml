@@ -26,6 +26,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - run: npm test
       - run: npm run storybook:coverage
       - run: npm run build-storybook
       - if: github.event_name == 'push' && github.ref == 'refs/heads/main'

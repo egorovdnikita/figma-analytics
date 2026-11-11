@@ -7,7 +7,7 @@ import { AppIcon } from '@/components/AppIcon'
 function Brand() {
   return (
     <div className="mb-8">
-      <span className="text-[24px] font-semibold tracking-tight text-ink">Figma Analytics</span>
+      <span className="text-[24px] font-semibold tracking-tight text-ink">figma-analytics</span>
     </div>
   )
 }
@@ -46,7 +46,7 @@ export function SetupScreen() {
         подключите свой OAuth-клиент
       </h1>
       <p className="mt-2 text-[14px] leading-relaxed text-muted">
-        Figma Analytics работает напрямую с вашим аккаунтом Google — без промежуточного сервера. Нужны
+        figma-analytics работает напрямую с вашим аккаунтом Google — без промежуточного сервера. Нужны
         Client&nbsp;ID и Client&nbsp;Secret десктопного OAuth-клиента. Они хранятся только на этом
         компьютере.
       </p>
@@ -101,7 +101,7 @@ export function SignInScreen() {
     <Layout>
       <Brand />
       <h1 className="text-[28px] font-bold leading-tight text-ink">
-        вход в Figma Analytics
+        вход в figma-analytics
       </h1>
       <p className="mt-3 text-[14px] leading-relaxed text-muted">
         Аккаунт Google нужен только для входа и карточки профиля. Приложение не читает ни

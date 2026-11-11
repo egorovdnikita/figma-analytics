@@ -104,15 +104,15 @@ function buildMenu() {
     ...(isMac
       ? ([
           {
-            label: 'Figma Analytics',
+            label: 'figma-analytics',
             submenu: [
-              { role: 'about', label: 'О Figma Analytics' },
+              { role: 'about', label: 'О figma-analytics' },
               { type: 'separator' },
-              { role: 'hide', label: 'Скрыть Figma Analytics' },
+              { role: 'hide', label: 'Скрыть figma-analytics' },
               { role: 'hideOthers', label: 'Скрыть остальные' },
               { role: 'unhide', label: 'Показать все' },
               { type: 'separator' },
-              { role: 'quit', label: 'Выйти из Figma Analytics' },
+              { role: 'quit', label: 'Выйти из figma-analytics' },
             ],
           },
         ] as Electron.MenuItemConstructorOptions[])

@@ -77,7 +77,7 @@ export function removeTeam(id: string): FigmaTeamRef[] {
 export function pruneCache(teams: FigmaTeamRef[] = getFigmaTeams()) {
   const allowed = new Set(teams.map((team) => team.id))
   const cache = readFigmaCache()
-  const keptProjects = new Set<string>()
+  const keptProjects = new Set(teams.filter((team) => team.kind === 'project').map((team) => team.id))
   let removed = 0
 
   for (const [teamId, projects] of Object.entries(cache.projectsByTeam)) {

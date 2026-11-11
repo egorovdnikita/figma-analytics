@@ -34,7 +34,7 @@ const base64url = (buf: Buffer) =>
   buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 
 const RESULT_PAGE = (title: string, text: string) => `<!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><title>Figma Analytics</title>
+<html lang="ru"><head><meta charset="utf-8"><title>figma-analytics</title>
 <style>
   body{margin:0;height:100vh;display:grid;place-items:center;background:#f0f0ee;
        font:16px/1.5 -apple-system,Segoe UI,system-ui,sans-serif;color:#16171a}
@@ -126,12 +126,12 @@ function startServer(expectedState: string): Promise<{ port: number; waiter: Pro
       const state = url.searchParams.get('state')
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
       if (error || !code || state !== expectedState) {
-        res.end(RESULT_PAGE('Не удалось войти', 'Вернитесь в Figma Analytics и попробуйте ещё раз.'))
+        res.end(RESULT_PAGE('Не удалось войти', 'Вернитесь в figma-analytics и попробуйте ещё раз.'))
         finish()
         rejectCode(new AuthError(error ?? 'INVALID_STATE', 'Некорректный ответ Google'))
         return
       }
-      res.end(RESULT_PAGE('Готово', 'Аккаунт подключён. Можно вернуться в Figma Analytics.'))
+      res.end(RESULT_PAGE('Готово', 'Аккаунт подключён. Можно вернуться в figma-analytics.'))
       finish()
       resolveCode(code)
     })
@@ -181,8 +181,11 @@ export async function getAccessToken(force = false): Promise<string> {
   })
   const data = (await res.json()) as Record<string, unknown>
   if (!res.ok) {
-    clearTokens()
-    throw new AuthError('REAUTH_REQUIRED', String(data.error_description ?? data.error ?? ''))
+    if (data.error === 'invalid_grant') {
+      clearTokens()
+      throw new AuthError('REAUTH_REQUIRED', String(data.error_description ?? data.error))
+    }
+    throw new AuthError('TOKEN_REFRESH_FAILED', String(data.error_description ?? data.error ?? res.status))
   }
 
   const next: OAuthTokens = {

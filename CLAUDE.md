@@ -1,4 +1,4 @@
-# Figma Analytics
+# figma-analytics
 
 Десктопное приложение на Electron для macOS и Windows: аналитика рабочего пространства Figma по истории сохранений и комментариям. Своего сервера нет — данные выкачиваются через Figma REST API по personal access token и лежат в локальном кэше. Вход через Google — только профиль (`openid`, `email`, `profile`).
 
@@ -19,7 +19,7 @@ npm run storybook:coverage  # у каждого компонента ui/ ест�
 npm run update:mac          # собрать и поставить поверх /Applications
 ```
 
-Тестов нет: проверка — `npm run build` и `npm run storybook:coverage`. Google OAuth берёт `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` из `.env` при сборке (шаблон — `.env.example`); без них приложение спросит их при первом запуске.
+Регрессионные проверки аудита — `npm test`; типы и сборка — `npm run build`, покрытие историями — `npm run storybook:coverage`. Google OAuth берёт `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` из `.env` при сборке (шаблон — `.env.example`); без них приложение спросит их при первом запуске.
 
 ## Структура
 

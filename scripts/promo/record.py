@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Запись промо: настоящий renderer Figma Analytics в Chromium, кадр за кадром.
+"""Запись промо: настоящий renderer figma-analytics в Chromium, кадр за кадром.
 
     python scripts/promo/record.py ПАПКА
 

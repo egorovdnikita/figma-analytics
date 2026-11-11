@@ -26,6 +26,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: figma-analytics-${{ matrix.os }}
+          if-no-files-found: error
           path: |
-            release/*.dmg
-            release/*.exe
+            release.noindex/*.dmg
+            release.noindex/*.exe

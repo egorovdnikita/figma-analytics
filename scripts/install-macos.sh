@@ -14,7 +14,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP_NAME="Figma Analytics"
+APP_NAME="figma-analytics"
 TARGET="/Applications/$APP_NAME.app"
 OUT="$ROOT/release.noindex"
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
@@ -38,6 +38,19 @@ for _ in $(seq 1 20); do
 done
 pkill -f "$TARGET/Contents/MacOS/" 2>/dev/null || true
 
+# Переносим установленный бандл прежнего имени, не оставляя вторую копию.
+LEGACY_TARGET="/Applications/Figma Analytics.app"
+if [ -d "$LEGACY_TARGET" ]; then
+  osascript -e 'quit app "Figma Analytics"' 2>/dev/null || true
+  if [ ! -e "$TARGET" ]; then
+    "$LSREGISTER" -u "$LEGACY_TARGET" 2>/dev/null || true
+    mv "$LEGACY_TARGET" "$TARGET"
+  else
+    echo "Найдены оба бандла: $TARGET и $LEGACY_TARGET. Уберите старую копию перед установкой." >&2
+    exit 1
+  fi
+fi
+
 echo "→ обновляю содержимое на месте"
 mkdir -p "$TARGET"
 # --delete убирает файлы, которых в новой сборке больше нет; сам каталог
@@ -49,7 +62,7 @@ xattr -cr "$TARGET"
 codesign --force --deep --sign - "$TARGET" 2>/dev/null
 
 echo "→ чищу лишние регистрации"
-# Промежуточные бандлы из папки сборки — те же «Figma Analytics», и пока они
+# Промежуточные бандлы из папки сборки — те же «figma-analytics», и пока они
 # числятся в базе, система показывает их наравне с установленным.
 for stale in "$OUT/mac-arm64/$APP_NAME.app" "$OUT/mac/$APP_NAME.app"; do
   [ -d "$stale" ] && "$LSREGISTER" -u "$stale" 2>/dev/null || true
